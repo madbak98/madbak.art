@@ -40,8 +40,8 @@ const projects = [
     image: 'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
     images: [
       'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbu-GpbAAIfHv8?format=jpg&name=small',
+      'https://pbs.twimg.com/media/HEbu-GRXYAAx0a0?format=jpg&name=small',
     ],
   },
   {
