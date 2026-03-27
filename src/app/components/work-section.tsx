@@ -76,7 +76,7 @@ const projects = [
     title: 'KING JAMES',
     category: 'Poster',
     year: '2023',
-    image: 'https://withered-field-589.linkyhost.com',
+    image: 'https://pbs.twimg.com/media/HEbvc4tbAAQIAdM?format=jpg&name=medium',
     images: [
       'https://withered-field-589.linkyhost.com',
       'https://pbs.twimg.com/media/GT_QPtuX0AAEdB9?format=jpg&name=medium',
