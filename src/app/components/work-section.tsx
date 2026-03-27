@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useRef, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
+import ProjectModal from '../components/project-modal';
 
 const projects = [
   {
@@ -9,20 +10,35 @@ const projects = [
     category: 'Character Series',
     year: '2024',
     image: 'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
+    images: [
+      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
+    ],
   },
   {
     id: 2,
     title: 'PINK ARMY',
     category: 'AI Influencer',
     year: '2022',
-    image: 'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium'
+    image: 'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+    images: [
+      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+    ],
   },
   {
     id: 3,
     title: 'ETHEREAL BEINGS',
     category: 'Cover Art',
     year: '2025',
-    image: 'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium'
+    image: 'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+    images: [
+      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+    ],
   },
   {
     id: 4,
@@ -30,6 +46,11 @@ const projects = [
     category: 'Concept Design',
     year: '2023',
     image: 'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
+    images: [
+      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
+    ],
   },
   {
     id: 5,
@@ -37,6 +58,11 @@ const projects = [
     category: 'Pixel Art',
     year: '2021',
     image: 'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
+    images: [
+      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
+    ],
   },
   {
     id: 6,
@@ -44,10 +70,25 @@ const projects = [
     category: 'Poster',
     year: '2023',
     image: 'https://withered-field-589.linkyhost.com',
+    images: [
+      'https://withered-field-589.linkyhost.com',
+      'https://withered-field-589.linkyhost.com',
+      'https://withered-field-589.linkyhost.com',
+    ],
   },
 ];
 
-function ProjectCard({ project, index }: { project: typeof projects[0]; index: number }) {
+type Project = (typeof projects)[0];
+
+function ProjectCard({
+  project,
+  index,
+  onOpen,
+}: {
+  project: Project;
+  index: number;
+  onOpen: (project: Project) => void;
+}) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -61,35 +102,32 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
       className="relative group cursor-pointer overflow-hidden"
       style={{ aspectRatio: '3/4' }}
     >
-      {/* Image */}
       <motion.div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ 
+        style={{
           backgroundImage: `url(${project.image})`,
         }}
-        animate={{ 
+        animate={{
           scale: isHovered ? 1.1 : 1,
         }}
         transition={{ duration: 0.6 }}
       />
 
-      {/* Gradient Overlay */}
-      <div 
+      <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to top, rgba(10, 10, 10, 0.95) 0%, transparent 50%, rgba(10, 10, 10, 0.7) 100%)',
+          background:
+            'linear-gradient(to top, rgba(10, 10, 10, 0.95) 0%, transparent 50%, rgba(10, 10, 10, 0.7) 100%)',
         }}
       />
 
-      {/* Content */}
       <div className="absolute inset-0 p-6 flex flex-col justify-between">
-        {/* Top - Year */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : -20 }}
           transition={{ duration: 0.3 }}
         >
-          <span 
+          <span
             className="text-xs tracking-[0.2em] uppercase"
             style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
           >
@@ -97,7 +135,6 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
           </span>
         </motion.div>
 
-        {/* Bottom - Info */}
         <div>
           <motion.div
             animate={{ y: isHovered ? -10 : 0 }}
@@ -105,7 +142,7 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
           >
             <h3
               className="mb-2"
-              style={{ 
+              style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
                 fontWeight: 800,
@@ -115,9 +152,9 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
             >
               {project.title}
             </h3>
-            <p 
+            <p
               className="text-xs tracking-[0.15em] uppercase mb-4"
-              style={{ 
+              style={{
                 fontFamily: 'var(--font-body)',
                 color: 'rgba(245, 245, 245, 0.7)',
               }}
@@ -126,26 +163,32 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
             </p>
           </motion.div>
 
-          {/* View Project Link */}
-          <motion.div
+          <motion.button
+            type="button"
+            onClick={() => onOpen(project)}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             className="flex items-center gap-2"
-            style={{ color: '#E62525' }}
+            style={{
+              color: '#E62525',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+            }}
           >
-            <span 
+            <span
               className="text-xs tracking-[0.15em] uppercase"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               View Project
             </span>
             <ExternalLink size={14} />
-          </motion.div>
+          </motion.button>
         </div>
       </div>
 
-      {/* Red border on hover */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{ border: '2px solid #E62525' }}
@@ -159,6 +202,9 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
 
 export function WorkSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
@@ -166,20 +212,29 @@ export function WorkSection() {
 
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.5]);
 
+  const openProject = (project: Project) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
+
+  const closeProject = () => {
+    setIsModalOpen(false);
+    setSelectedProject(null);
+  };
+
   return (
-    <section 
+    <section
       id="work"
       ref={ref}
       className="relative min-h-screen py-32 px-4"
     >
-      <motion.div 
+      <motion.div
         style={{ opacity }}
         className="max-w-7xl mx-auto z-10"
       >
-        {/* Header */}
         <div className="mb-20">
           <div className="mb-6">
-            <span 
+            <span
               className="text-xs tracking-[0.3em] uppercase"
               style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
             >
@@ -187,7 +242,7 @@ export function WorkSection() {
             </span>
           </div>
           <h2
-            style={{ 
+            style={{
               fontFamily: 'var(--font-heading)',
               fontSize: 'clamp(2.5rem, 8vw, 5rem)',
               fontWeight: 800,
@@ -199,13 +254,23 @@ export function WorkSection() {
           </h2>
         </div>
 
-        {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              onOpen={openProject}
+            />
           ))}
         </div>
       </motion.div>
+
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={closeProject}
+        project={selectedProject}
+      />
     </section>
   );
 }
