@@ -24,12 +24,12 @@ const projects = [
     year: '2022',
     image: 'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
     images: [
-      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbpBc_WoAA3sMS?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbpBdfbQAAYGwJ?format=jpg&name=900x900',
       'https://pbs.twimg.com/media/HEbs0geasAMhgwg?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbs0gAXMAAXnsK?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbpBc_WoAA3sMS?format=jpg&name=medium',
       'https://pbs.twimg.com/media/HEbs0f9WUAA1yAT?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbs0gAXMAAXnsK?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbpBdfbQAAYGwJ?format=jpg&name=900x900',
     ],
   },
   {
