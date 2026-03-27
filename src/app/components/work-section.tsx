@@ -73,7 +73,7 @@ const projects = [
   },
   {
     id: 6,
-    title: 'KING JAMES',
+    title: 'BACKTALK',
     category: 'Poster',
     year: '2023',
     image: 'https://pbs.twimg.com/media/HEbvc4tbAAQIAdM?format=jpg&name=medium',
