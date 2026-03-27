@@ -7,12 +7,14 @@ const projects = [
     id: 1,
     title: 'YOUNG MI',
     category: 'Character Series',
-    year: '2024',
+    year: '2022',
     image: 'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
     images: [
+      'https://pbs.twimg.com/media/GUkhZdYXMAAW-54?format=jpg&name=small',
       'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GUkhZdaXwAAdhCY?format=jpg&name=small',
+      'https://pbs.twimg.com/media/GVyCuqXXMAAj73g?format=jpg&name=small',
+      'https://pbs.twimg.com/media/GWak2uBXAAELrGP?format=jpg&name=medium',
     ],
   },
   {
@@ -25,6 +27,9 @@ const projects = [
       'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
       'https://pbs.twimg.com/media/HEbpBc_WoAA3sMS?format=jpg&name=medium',
       'https://pbs.twimg.com/media/HEbpBdfbQAAYGwJ?format=jpg&name=900x900',
+      'https://pbs.twimg.com/media/HEbs0geasAMhgwg?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbs0gAXMAAXnsK?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/HEbs0f9WUAA1yAT?format=jpg&name=medium',
     ],
   },
   {
@@ -74,8 +79,8 @@ const projects = [
     image: 'https://withered-field-589.linkyhost.com',
     images: [
       'https://withered-field-589.linkyhost.com',
-      'https://withered-field-589.linkyhost.com',
-      'https://withered-field-589.linkyhost.com',
+      'https://pbs.twimg.com/media/GT_QPtuX0AAEdB9?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GStY8XGX0AAdgpR?format=jpg&name=medium',
     ],
   },
 ];
