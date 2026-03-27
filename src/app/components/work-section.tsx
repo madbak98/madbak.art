@@ -61,9 +61,9 @@ const projects = [
     year: '2021',
     image: 'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
     images: [
-      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GQCNpfGWkAAuj_t?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GQCOgSqWYAA_rP5?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GQCaGcdXoAAxOBQ?format=jpg&name=medium',
     ],
   },
   {
