@@ -47,8 +47,11 @@ const projects = [
     image: 'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
     images: [
       'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
+      'https://pbs.twimg.com/media/GbZR4wrbQAAAtSn?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GbZStxTbAAAydlE?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GbZR4wpaIAA3Ino?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GbZStxQawAA56hR?format=jpg&name=medium',
+      'https://pbs.twimg.com/media/GbZR4wtbgAA92kW?format=jpg&name=medium',
     ],
   },
   {
