@@ -16,38 +16,54 @@ type Wall = {
   height: number;
 };
 
+type Trap = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 const ARENA_WIDTH = 900;
 const ARENA_HEIGHT = 520;
-const PLAYER_SIZE = 26;
-const PLAYER_SPEED = 4.2;
-const INTERACTION_DISTANCE = 78;
+const PLAYER_SIZE = 24;
+const PLAYER_SPEED = 4;
+const INTERACTION_DISTANCE = 82;
+const START_POSITION = { x: 36, y: 460 };
 
 const portals: Portal[] = [
-  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 100, y: 60 },
-  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 820, y: 100 },
-  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 800, y: 450 },
+  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 90, y: 90 },
+  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 770, y: 90 },
+  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 760, y: 430 },
 ];
 
 const walls: Wall[] = [
-  { x: 0, y: 200, width: 200, height: 18 },
-  { x: 200, y: 0, width: 18, height: 200 },
+  // upper-left zone
+  { x: 110, y: 0, width: 18, height: 240 },
+  { x: 0, y: 220, width: 240, height: 18 },
 
-  { x: 150, y: 300, width: 18, height: 200 },
-  { x: 150, y: 300, width: 200, height: 18 },
+  // center maze
+  { x: 330, y: 80, width: 18, height: 300 },
+  { x: 330, y: 80, width: 260, height: 18 },
 
-  { x: 350, y: 200, width: 18, height: 200 },
-  { x: 350, y: 200, width: 200, height: 18 },
+  { x: 590, y: 80, width: 18, height: 210 },
+  { x: 420, y: 210, width: 170, height: 18 },
 
-  { x: 550, y: 100, width: 18, height: 200 },
-  { x: 400, y: 100, width: 150, height: 18 },
+  { x: 420, y: 210, width: 18, height: 170 },
+  { x: 200, y: 400, width: 238, height: 18 },
 
-  { x: 600, y: 300, width: 200, height: 18 },
-  { x: 780, y: 150, width: 18, height: 200 },
+  // right-side zone
+  { x: 660, y: 320, width: 220, height: 18 },
+  { x: 880, y: 140, width: 18, height: 200 },
 
-  { x: 250, y: 400, width: 120, height: 18 },
-  { x: 500, y: 350, width: 120, height: 18 },
+  // internal blockers
+  { x: 510, y: 270, width: 18, height: 110 },
+  { x: 600, y: 410, width: 130, height: 18 },
+];
 
-  { x: 450, y: 250, width: 18, height: 100 },
+const traps: Trap[] = [
+  { x: 260, y: 455, width: 110, height: 16 },
+  { x: 470, y: 130, width: 90, height: 16 },
+  { x: 705, y: 240, width: 16, height: 90 },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -58,27 +74,48 @@ function distance(ax: number, ay: number, bx: number, by: number) {
   return Math.hypot(ax - bx, ay - by);
 }
 
+function isCollidingRect(
+  x: number,
+  y: number,
+  size: number,
+  rect: { x: number; y: number; width: number; height: number }
+) {
+  return (
+    x < rect.x + rect.width &&
+    x + size > rect.x &&
+    y < rect.y + rect.height &&
+    y + size > rect.y
+  );
+}
+
 function isCollidingWithWalls(x: number, y: number, size: number) {
-  return walls.some((wall) => {
-    return (
-      x < wall.x + wall.width &&
-      x + size > wall.x &&
-      y < wall.y + wall.height &&
-      y + size > wall.y
-    );
-  });
+  return walls.some((wall) => isCollidingRect(x, y, size, wall));
+}
+
+function isCollidingWithTraps(x: number, y: number, size: number) {
+  return traps.some((trap) => isCollidingRect(x, y, size, trap));
 }
 
 export function GameSection() {
   const [started, setStarted] = useState(false);
-  const [player, setPlayer] = useState({ x: 40, y: 460 });
+  const [player, setPlayer] = useState(START_POSITION);
   const [nearPortalId, setNearPortalId] = useState<string | null>(null);
+  const [flashTrap, setFlashTrap] = useState(false);
   const pressedKeys = useRef<Set<string>>(new Set());
+  const mobileKeys = useRef<Set<string>>(new Set());
 
   const activePortal = useMemo(
     () => portals.find((p) => p.id === nearPortalId) ?? null,
     [nearPortalId]
   );
+
+  const interactWithPortal = () => {
+    if (!activePortal) return;
+    document.getElementById(activePortal.targetId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
   useEffect(() => {
     if (!started) return;
@@ -86,11 +123,8 @@ export function GameSection() {
     const onKeyDown = (e: KeyboardEvent) => {
       pressedKeys.current.add(e.key.toLowerCase());
 
-      if (e.key.toLowerCase() === 'e' && activePortal) {
-        document.getElementById(activePortal.targetId)?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+      if (e.key.toLowerCase() === 'e') {
+        interactWithPortal();
       }
     };
 
@@ -105,13 +139,18 @@ export function GameSection() {
 
     const tick = () => {
       setPlayer((prev) => {
+        const allKeys = new Set([
+          ...Array.from(pressedKeys.current),
+          ...Array.from(mobileKeys.current),
+        ]);
+
         let dx = 0;
         let dy = 0;
 
-        if (pressedKeys.current.has('arrowup') || pressedKeys.current.has('w')) dy -= 1;
-        if (pressedKeys.current.has('arrowdown') || pressedKeys.current.has('s')) dy += 1;
-        if (pressedKeys.current.has('arrowleft') || pressedKeys.current.has('a')) dx -= 1;
-        if (pressedKeys.current.has('arrowright') || pressedKeys.current.has('d')) dx += 1;
+        if (allKeys.has('arrowup') || allKeys.has('w')) dy -= 1;
+        if (allKeys.has('arrowdown') || allKeys.has('s')) dy += 1;
+        if (allKeys.has('arrowleft') || allKeys.has('a')) dx -= 1;
+        if (allKeys.has('arrowright') || allKeys.has('d')) dx += 1;
 
         if (dx !== 0 && dy !== 0) {
           dx *= 0.7071;
@@ -130,6 +169,13 @@ export function GameSection() {
 
         if (!isCollidingWithWalls(nextX, attemptedY, PLAYER_SIZE)) {
           nextY = attemptedY;
+        }
+
+        if (isCollidingWithTraps(nextX, nextY, PLAYER_SIZE)) {
+          setFlashTrap(true);
+          setTimeout(() => setFlashTrap(false), 220);
+          setNearPortalId(null);
+          return START_POSITION;
         }
 
         let closest: Portal | null = null;
@@ -170,6 +216,28 @@ export function GameSection() {
     };
   }, [started, activePortal]);
 
+  const setMobileKey = (key: string, isPressed: boolean) => {
+    if (isPressed) {
+      mobileKeys.current.add(key);
+    } else {
+      mobileKeys.current.delete(key);
+    }
+  };
+
+  const bindPressEvents = (key: string) => ({
+    onMouseDown: () => setMobileKey(key, true),
+    onMouseUp: () => setMobileKey(key, false),
+    onMouseLeave: () => setMobileKey(key, false),
+    onTouchStart: (e: React.TouchEvent) => {
+      e.preventDefault();
+      setMobileKey(key, true);
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      e.preventDefault();
+      setMobileKey(key, false);
+    },
+  });
+
   return (
     <section
       id="game"
@@ -206,7 +274,7 @@ export function GameSection() {
               color: 'rgba(245, 245, 245, 0.6)',
             }}
           >
-            Move through the maze, find the right path, and press E to jump into a section.
+            Move through the maze, avoid traps, and reach a portal to jump into a section.
           </p>
         </div>
 
@@ -216,10 +284,14 @@ export function GameSection() {
             width: '100%',
             maxWidth: `${ARENA_WIDTH}px`,
             height: `${ARENA_HEIGHT}px`,
-            border: '2px solid rgba(230, 37, 37, 0.5)',
+            border: flashTrap
+              ? '2px solid rgba(255, 70, 70, 0.95)'
+              : '2px solid rgba(230, 37, 37, 0.5)',
             background:
               'radial-gradient(circle at center, rgba(230,37,37,0.08) 0%, rgba(10,10,10,1) 70%)',
-            boxShadow: '0 0 40px rgba(230, 37, 37, 0.12)',
+            boxShadow: flashTrap
+              ? '0 0 45px rgba(255, 0, 0, 0.28)'
+              : '0 0 40px rgba(230, 37, 37, 0.12)',
           }}
         >
           <div
@@ -243,7 +315,7 @@ export function GameSection() {
 
           {walls.map((wall, index) => (
             <div
-              key={index}
+              key={`wall-${index}`}
               className="absolute"
               style={{
                 left: wall.x,
@@ -253,6 +325,30 @@ export function GameSection() {
                 background: 'rgba(230,37,37,0.14)',
                 border: '1px solid rgba(230,37,37,0.45)',
                 boxShadow: '0 0 12px rgba(230,37,37,0.18)',
+              }}
+            />
+          ))}
+
+          {traps.map((trap, index) => (
+            <motion.div
+              key={`trap-${index}`}
+              className="absolute"
+              style={{
+                left: trap.x,
+                top: trap.y,
+                width: trap.width,
+                height: trap.height,
+                background: 'rgba(255, 0, 0, 0.16)',
+                border: '1px solid rgba(255, 0, 0, 0.85)',
+                boxShadow: '0 0 12px rgba(255, 0, 0, 0.35)',
+              }}
+              animate={{
+                opacity: [0.45, 0.9, 0.45],
+              }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: 'easeInOut',
               }}
             />
           ))}
@@ -318,10 +414,11 @@ export function GameSection() {
             }}
             animate={{
               rotate: nearPortalId ? 0 : [0, -6, 6, 0],
+              scale: flashTrap ? [1, 1.18, 1] : 1,
             }}
             transition={{
-              duration: 0.6,
-              repeat: nearPortalId ? 0 : Infinity,
+              duration: 0.35,
+              repeat: nearPortalId || flashTrap ? 0 : Infinity,
               ease: 'easeInOut',
             }}
           />
@@ -346,18 +443,28 @@ export function GameSection() {
                 </h3>
 
                 <p
-                  className="mb-6 text-xs tracking-[0.18em] uppercase"
+                  className="mb-3 text-xs tracking-[0.18em] uppercase"
                   style={{
                     fontFamily: 'var(--font-body)',
                     color: 'rgba(245, 245, 245, 0.65)',
                   }}
                 >
-                  Use WASD or Arrow Keys
+                  Desktop: WASD / Arrows + E
+                </p>
+
+                <p
+                  className="mb-6 text-xs tracking-[0.18em] uppercase"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    color: 'rgba(245, 245, 245, 0.45)',
+                  }}
+                >
+                  Mobile: Use touch controls + GO
                 </p>
 
                 <button
                   onClick={() => {
-                    setPlayer({ x: 40, y: 460 });
+                    setPlayer(START_POSITION);
                     setNearPortalId(null);
                     setStarted(true);
                   }}
@@ -385,7 +492,7 @@ export function GameSection() {
             </div>
           )}
 
-          <div className="absolute left-4 bottom-4">
+          <div className="absolute left-4 bottom-4 hidden md:block">
             <div
               className="px-4 py-3"
               style={{
@@ -433,11 +540,89 @@ export function GameSection() {
                   className="mt-1 text-xs tracking-[0.2em] uppercase"
                   style={{ fontFamily: 'var(--font-mono)', color: '#F5F5F5' }}
                 >
-                  Press E for {activePortal.label}
+                  Desktop: E / Mobile: GO
                 </p>
               </div>
             </motion.div>
           )}
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-4 md:hidden">
+          <button
+            type="button"
+            onClick={interactWithPortal}
+            className="px-8 py-3"
+            style={{
+              border: '2px solid #E62525',
+              background: activePortal ? 'rgba(230,37,37,0.18)' : 'transparent',
+              color: '#F5F5F5',
+              fontFamily: 'var(--font-body)',
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+            }}
+          >
+            GO
+          </button>
+
+          <div className="grid grid-cols-3 gap-3 w-[220px] select-none">
+            <div />
+            <button
+              type="button"
+              {...bindPressEvents('arrowup')}
+              className="h-14"
+              style={{
+                border: '1px solid rgba(230,37,37,0.5)',
+                background: 'rgba(10,10,10,0.75)',
+                color: '#F5F5F5',
+                fontSize: '1.25rem',
+              }}
+            >
+              ↑
+            </button>
+            <div />
+
+            <button
+              type="button"
+              {...bindPressEvents('arrowleft')}
+              className="h-14"
+              style={{
+                border: '1px solid rgba(230,37,37,0.5)',
+                background: 'rgba(10,10,10,0.75)',
+                color: '#F5F5F5',
+                fontSize: '1.25rem',
+              }}
+            >
+              ←
+            </button>
+
+            <button
+              type="button"
+              {...bindPressEvents('arrowdown')}
+              className="h-14"
+              style={{
+                border: '1px solid rgba(230,37,37,0.5)',
+                background: 'rgba(10,10,10,0.75)',
+                color: '#F5F5F5',
+                fontSize: '1.25rem',
+              }}
+            >
+              ↓
+            </button>
+
+            <button
+              type="button"
+              {...bindPressEvents('arrowright')}
+              className="h-14"
+              style={{
+                border: '1px solid rgba(230,37,37,0.5)',
+                background: 'rgba(10,10,10,0.75)',
+                color: '#F5F5F5',
+                fontSize: '1.25rem',
+              }}
+            >
+              →
+            </button>
+          </div>
         </div>
       </div>
     </section>
