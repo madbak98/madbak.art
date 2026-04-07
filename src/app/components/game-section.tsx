@@ -23,17 +23,17 @@ type Trap = {
   height: number;
 };
 
-const MAZE_WIDTH = 360;
-const MAZE_HEIGHT = 520;
+const MAZE_W = 360;
+const MAZE_H = 520;
 const PLAYER_SIZE = 12;
 const PLAYER_SPEED = 2.4;
 const INTERACTION_DISTANCE = 26;
-const START_POSITION = { x: 18, y: 482 };
+const START_POS = { x: 18, y: 486 };
 
 const portals: Portal[] = [
-  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 56, y: 82 },
-  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 272, y: 84 },
-  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 244, y: 392 },
+  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 54, y: 68 },
+  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 270, y: 70 },
+  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 244, y: 396 },
 ];
 
 const walls: Wall[] = [
@@ -43,53 +43,80 @@ const walls: Wall[] = [
   { x: 348, y: 0, width: 12, height: 520 },
   { x: 0, y: 508, width: 360, height: 12 },
 
-  // left side
-  { x: 60, y: 24, width: 12, height: 120 },
-  { x: 60, y: 132, width: 92, height: 12 },
+  // top maze
+  { x: 36, y: 24, width: 12, height: 84 },
+  { x: 48, y: 96, width: 60, height: 12 },
 
-  { x: 84, y: 214, width: 12, height: 138 },
-  { x: 24, y: 340, width: 72, height: 12 },
+  { x: 96, y: 36, width: 12, height: 120 },
+  { x: 96, y: 36, width: 48, height: 12 },
 
-  { x: 132, y: 84, width: 12, height: 82 },
-  { x: 132, y: 84, width: 72, height: 12 },
+  { x: 144, y: 36, width: 12, height: 72 },
+  { x: 144, y: 96, width: 84, height: 12 },
 
-  // center block
-  { x: 204, y: 60, width: 12, height: 152 },
-  { x: 144, y: 60, width: 72, height: 12 },
+  { x: 216, y: 24, width: 12, height: 84 },
+  { x: 216, y: 24, width: 60, height: 12 },
 
-  { x: 144, y: 200, width: 12, height: 120 },
-  { x: 144, y: 308, width: 84, height: 12 },
+  { x: 264, y: 24, width: 12, height: 48 },
+  { x: 264, y: 60, width: 48, height: 12 },
 
-  { x: 228, y: 200, width: 12, height: 120 },
-  { x: 228, y: 200, width: 72, height: 12 },
+  { x: 312, y: 24, width: 12, height: 120 },
 
-  { x: 288, y: 120, width: 12, height: 92 },
-  { x: 252, y: 120, width: 48, height: 12 },
+  // upper middle
+  { x: 36, y: 144, width: 12, height: 72 },
+  { x: 24, y: 204, width: 24, height: 12 },
 
-  // lower center
-  { x: 180, y: 356, width: 12, height: 92 },
-  { x: 120, y: 436, width: 72, height: 12 },
+  { x: 72, y: 144, width: 12, height: 120 },
+  { x: 72, y: 144, width: 84, height: 12 },
 
-  { x: 228, y: 356, width: 72, height: 12 },
-  { x: 288, y: 356, width: 12, height: 92 },
+  { x: 156, y: 144, width: 12, height: 60 },
+  { x: 156, y: 192, width: 72, height: 12 },
 
-  // right side
-  { x: 300, y: 60, width: 12, height: 104 },
-  { x: 300, y: 152, width: 36, height: 12 },
+  { x: 216, y: 132, width: 12, height: 84 },
+  { x: 216, y: 132, width: 84, height: 12 },
 
-  { x: 300, y: 252, width: 12, height: 56 },
-  { x: 264, y: 296, width: 48, height: 12 },
+  { x: 288, y: 144, width: 12, height: 72 },
+  { x: 252, y: 204, width: 48, height: 12 },
+
+  // center
+  { x: 108, y: 240, width: 12, height: 84 },
+  { x: 108, y: 240, width: 72, height: 12 },
+
+  { x: 180, y: 240, width: 12, height: 120 },
+  { x: 180, y: 348, width: 72, height: 12 },
+
+  { x: 252, y: 240, width: 12, height: 72 },
+  { x: 216, y: 300, width: 48, height: 12 },
+
+  // lower middle
+  { x: 36, y: 300, width: 12, height: 96 },
+  { x: 48, y: 384, width: 60, height: 12 },
+
+  { x: 96, y: 336, width: 12, height: 96 },
+  { x: 96, y: 336, width: 72, height: 12 },
+
+  { x: 168, y: 384, width: 12, height: 72 },
+  { x: 168, y: 444, width: 60, height: 12 },
+
+  { x: 228, y: 384, width: 12, height: 72 },
+  { x: 228, y: 384, width: 72, height: 12 },
+
+  { x: 288, y: 336, width: 12, height: 120 },
 
   // bottom accents
-  { x: 48, y: 460, width: 72, height: 12 },
-  { x: 144, y: 472, width: 84, height: 12 },
-  { x: 264, y: 472, width: 60, height: 12 },
+  { x: 36, y: 468, width: 72, height: 12 },
+  { x: 132, y: 468, width: 84, height: 12 },
+  { x: 252, y: 468, width: 60, height: 12 },
+
+  // small blockers for classic feel
+  { x: 186, y: 96, width: 30, height: 8 },
+  { x: 138, y: 300, width: 30, height: 8 },
+  { x: 222, y: 444, width: 24, height: 8 },
 ];
 
 const traps: Trap[] = [
-  { x: 156, y: 308, width: 36, height: 8 },
-  { x: 264, y: 152, width: 24, height: 8 },
-  { x: 180, y: 472, width: 24, height: 8 },
+  { x: 186, y: 96, width: 22, height: 8 },
+  { x: 140, y: 300, width: 22, height: 8 },
+  { x: 222, y: 444, width: 18, height: 8 },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -123,7 +150,7 @@ export function GameSection() {
   );
 
   const [started, setStarted] = useState(false);
-  const [player, setPlayer] = useState(START_POSITION);
+  const [player, setPlayer] = useState(START_POS);
   const [nearPortalId, setNearPortalId] = useState<string | null>(null);
   const [showGameOver, setShowGameOver] = useState(false);
   const [flashTrap, setFlashTrap] = useState(false);
@@ -144,9 +171,7 @@ export function GameSection() {
 
   useEffect(() => {
     return () => {
-      if (resetTimeoutRef.current) {
-        window.clearTimeout(resetTimeoutRef.current);
-      }
+      if (resetTimeoutRef.current) window.clearTimeout(resetTimeoutRef.current);
     };
   }, []);
 
@@ -159,8 +184,8 @@ export function GameSection() {
     ? Math.min(viewportWidth - 32, 360)
     : 430;
 
-  const scale = renderWidth / MAZE_WIDTH;
-  const renderHeight = MAZE_HEIGHT * scale;
+  const scale = renderWidth / MAZE_W;
+  const renderHeight = MAZE_H * scale;
 
   const activePortal = useMemo(
     () => portals.find((p) => p.id === nearPortalId) ?? null,
@@ -180,9 +205,7 @@ export function GameSection() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       pressedKeys.current.add(e.key.toLowerCase());
-      if (e.key.toLowerCase() === 'e') {
-        interactWithPortal();
-      }
+      if (e.key.toLowerCase() === 'e') interactWithPortal();
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
@@ -219,8 +242,8 @@ export function GameSection() {
         let nextX = prev.x;
         let nextY = prev.y;
 
-        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, MAZE_WIDTH - PLAYER_SIZE);
-        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, MAZE_HEIGHT - PLAYER_SIZE);
+        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, MAZE_W - PLAYER_SIZE);
+        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, MAZE_H - PLAYER_SIZE);
 
         const hitsWallX = walls.some((wall) =>
           isCollidingRect(attemptedX, prev.y, PLAYER_SIZE, wall)
@@ -246,7 +269,7 @@ export function GameSection() {
           }
 
           resetTimeoutRef.current = window.setTimeout(() => {
-            setPlayer(START_POSITION);
+            setPlayer(START_POS);
             setShowGameOver(false);
             setFlashTrap(false);
           }, 1100);
@@ -364,8 +387,8 @@ export function GameSection() {
           <div
             className="absolute left-0 top-0 origin-top-left overflow-hidden"
             style={{
-              width: `${MAZE_WIDTH}px`,
-              height: `${MAZE_HEIGHT}px`,
+              width: `${MAZE_W}px`,
+              height: `${MAZE_H}px`,
               transform: `scale(${scale})`,
               border: flashTrap
                 ? '2px solid rgba(255, 70, 70, 0.95)'
@@ -530,7 +553,7 @@ export function GameSection() {
 
                   <button
                     onClick={() => {
-                      setPlayer(START_POSITION);
+                      setPlayer(START_POS);
                       setNearPortalId(null);
                       setStarted(true);
                     }}
