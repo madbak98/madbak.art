@@ -14,7 +14,6 @@ type Wall = {
   y: number;
   width: number;
   height: number;
-  kind?: 'main' | 'sub';
 };
 
 type Trap = {
@@ -24,162 +23,103 @@ type Trap = {
   height: number;
 };
 
-type InfoBox = {
-  x: number;
-  y: number;
-};
+const MAZE_WIDTH = 360;
+const MAZE_HEIGHT = 520;
+const PLAYER_SIZE = 12;
+const PLAYER_SPEED = 2.4;
+const INTERACTION_DISTANCE = 26;
+const START_POSITION = { x: 18, y: 482 };
 
-type GameConfig = {
-  width: number;
-  height: number;
-  playerSize: number;
-  playerSpeed: number;
-  interactionDistance: number;
-  portalSize: number;
-  startPosition: { x: number; y: number };
-  portals: Portal[];
-  walls: Wall[];
-  traps: Trap[];
-  infoBox: InfoBox;
-};
+const portals: Portal[] = [
+  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 78, y: 72 },
+  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 286, y: 74 },
+  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 258, y: 408 },
+];
 
-function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
-  if (mode === 'mobile') {
-    return {
-      width: 340,
-      height: 250,
-      playerSize: 14,
-      playerSpeed: 2.4,
-      interactionDistance: 42,
-      portalSize: 46,
-      startPosition: { x: 14, y: 216 },
-      infoBox: { x: 10, y: 10 },
-      portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 18, y: 18 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 274, y: 18 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 246, y: 182 },
-      ],
-      walls: [
-        // left district
-        { x: 66, y: 0, width: 10, height: 118, kind: 'main' },
-        { x: 0, y: 102, width: 110, height: 10, kind: 'main' },
+const walls: Wall[] = [
+  // outer frame
+  { x: 0, y: 0, width: 360, height: 12 },
+  { x: 0, y: 0, width: 12, height: 520 },
+  { x: 348, y: 0, width: 12, height: 520 },
+  { x: 0, y: 508, width: 360, height: 12 },
 
-        // central shrine
-        { x: 138, y: 34, width: 10, height: 154, kind: 'main' },
-        { x: 138, y: 34, width: 126, height: 10, kind: 'main' },
-        { x: 254, y: 34, width: 10, height: 102, kind: 'main' },
-        { x: 188, y: 126, width: 76, height: 10, kind: 'main' },
-        { x: 188, y: 126, width: 10, height: 70, kind: 'main' },
+  // top band
+  { x: 36, y: 24, width: 12, height: 82 },
+  { x: 48, y: 94, width: 58, height: 12 },
+  { x: 94, y: 36, width: 12, height: 116 },
+  { x: 94, y: 36, width: 48, height: 12 },
+  { x: 142, y: 36, width: 12, height: 70 },
+  { x: 142, y: 94, width: 54, height: 12 },
+  { x: 184, y: 24, width: 12, height: 82 },
+  { x: 184, y: 24, width: 70, height: 12 },
+  { x: 242, y: 24, width: 12, height: 44 },
+  { x: 242, y: 56, width: 46, height: 12 },
+  { x: 288, y: 24, width: 12, height: 94 },
+  { x: 300, y: 106, width: 24, height: 12 },
+  { x: 324, y: 24, width: 12, height: 128 },
 
-        // lower spine
-        { x: 86, y: 186, width: 128, height: 10, kind: 'main' },
+  // upper middle
+  { x: 36, y: 140, width: 12, height: 70 },
+  { x: 24, y: 198, width: 24, height: 12 },
+  { x: 70, y: 140, width: 12, height: 118 },
+  { x: 70, y: 140, width: 54, height: 12 },
+  { x: 124, y: 140, width: 12, height: 58 },
+  { x: 124, y: 186, width: 60, height: 12 },
+  { x: 172, y: 128, width: 12, height: 70 },
+  { x: 172, y: 128, width: 82, height: 12 },
+  { x: 242, y: 128, width: 12, height: 106 },
+  { x: 242, y: 222, width: 44, height: 12 },
+  { x: 286, y: 152, width: 12, height: 82 },
+  { x: 312, y: 140, width: 12, height: 106 },
 
-        // right district
-        { x: 270, y: 146, width: 58, height: 10, kind: 'main' },
+  // center shrine
+  { x: 94, y: 234, width: 12, height: 90 },
+  { x: 94, y: 234, width: 58, height: 12 },
+  { x: 140, y: 246, width: 12, height: 116 },
+  { x: 140, y: 350, width: 58, height: 12 },
+  { x: 198, y: 246, width: 12, height: 70 },
+  { x: 198, y: 246, width: 70, height: 12 },
+  { x: 256, y: 246, width: 12, height: 58 },
+  { x: 222, y: 292, width: 46, height: 12 },
 
-        // fake path hints
-        { x: 208, y: 60, width: 28, height: 8, kind: 'sub' },
-        { x: 164, y: 164, width: 48, height: 8, kind: 'sub' },
-      ],
-      traps: [
-        { x: 116, y: 214, width: 40, height: 8 },
-        { x: 214, y: 60, width: 18, height: 8 },
-      ],
-    };
-  }
+  // lower mid
+  { x: 36, y: 292, width: 12, height: 82 },
+  { x: 24, y: 362, width: 24, height: 12 },
+  { x: 70, y: 280, width: 12, height: 118 },
+  { x: 24, y: 398, width: 58, height: 12 },
+  { x: 106, y: 386, width: 58, height: 12 },
+  { x: 164, y: 386, width: 12, height: 46 },
+  { x: 164, y: 420, width: 34, height: 12 },
+  { x: 198, y: 340, width: 12, height: 92 },
+  { x: 198, y: 340, width: 58, height: 12 },
+  { x: 244, y: 352, width: 12, height: 58 },
+  { x: 244, y: 398, width: 58, height: 12 },
+  { x: 302, y: 328, width: 12, height: 82 },
 
-  if (mode === 'tablet') {
-    return {
-      width: 760,
-      height: 430,
-      playerSize: 18,
-      playerSpeed: 3.1,
-      interactionDistance: 62,
-      portalSize: 58,
-      startPosition: { x: 20, y: 388 },
-      infoBox: { x: 14, y: 14 },
-      portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 74, y: 60 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 628, y: 60 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 598, y: 336 },
-      ],
-      walls: [
-        { x: 102, y: 0, width: 14, height: 190, kind: 'main' },
-        { x: 0, y: 176, width: 212, height: 14, kind: 'main' },
+  // bottom band
+  { x: 36, y: 444, width: 58, height: 12 },
+  { x: 94, y: 444, width: 12, height: 52 },
+  { x: 118, y: 444, width: 12, height: 64 },
+  { x: 130, y: 496, width: 58, height: 12 },
+  { x: 188, y: 456, width: 12, height: 52 },
+  { x: 200, y: 456, width: 52, height: 12 },
+  { x: 252, y: 432, width: 12, height: 76 },
+  { x: 276, y: 432, width: 12, height: 46 },
+  { x: 288, y: 466, width: 48, height: 12 },
+];
 
-        { x: 286, y: 54, width: 14, height: 286, kind: 'main' },
-        { x: 286, y: 54, width: 240, height: 14, kind: 'main' },
-        { x: 512, y: 54, width: 14, height: 188, kind: 'main' },
-        { x: 376, y: 176, width: 150, height: 14, kind: 'main' },
-        { x: 376, y: 176, width: 14, height: 136, kind: 'main' },
+const traps: Trap[] = [
+  { x: 152, y: 94, width: 26, height: 8 },
+  { x: 228, y: 292, width: 20, height: 8 },
+  { x: 166, y: 420, width: 20, height: 8 },
+];
 
-        { x: 156, y: 328, width: 236, height: 14, kind: 'main' },
-        { x: 560, y: 284, width: 176, height: 14, kind: 'main' },
-
-        { x: 450, y: 96, width: 56, height: 10, kind: 'sub' },
-        { x: 474, y: 236, width: 14, height: 76, kind: 'sub' },
-        { x: 222, y: 370, width: 82, height: 10, kind: 'sub' },
-      ],
-      traps: [
-        { x: 224, y: 372, width: 72, height: 10 },
-        { x: 454, y: 96, width: 42, height: 10 },
-        { x: 612, y: 236, width: 10, height: 62 },
-      ],
-    };
-  }
-
-  return {
-    width: 920,
-    height: 520,
-    playerSize: 22,
-    playerSpeed: 3.8,
-    interactionDistance: 78,
-    portalSize: 66,
-    startPosition: { x: 24, y: 474 },
-    infoBox: { x: 18, y: 18 },
-    portals: [
-      { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 86, y: 72 },
-      { id: 'work-portal', label: 'WORK', targetId: 'work', x: 770, y: 74 },
-      { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 728, y: 414 },
-    ],
-    walls: [
-      // left district
-      { x: 116, y: 0, width: 18, height: 230, kind: 'main' },
-      { x: 0, y: 214, width: 258, height: 18, kind: 'main' },
-
-      // central shrine / spine
-      { x: 344, y: 72, width: 18, height: 312, kind: 'main' },
-      { x: 344, y: 72, width: 286, height: 18, kind: 'main' },
-      { x: 612, y: 72, width: 18, height: 212, kind: 'main' },
-      { x: 448, y: 206, width: 182, height: 18, kind: 'main' },
-      { x: 448, y: 206, width: 18, height: 166, kind: 'main' },
-
-      // lower spine
-      { x: 198, y: 402, width: 276, height: 18, kind: 'main' },
-
-      // right district
-      { x: 686, y: 320, width: 210, height: 18, kind: 'main' },
-
-      // hints / fake branches
-      { x: 536, y: 118, width: 72, height: 12, kind: 'sub' },
-      { x: 560, y: 262, width: 18, height: 104, kind: 'sub' },
-      { x: 246, y: 448, width: 112, height: 12, kind: 'sub' },
-      { x: 496, y: 272, width: 60, height: 12, kind: 'sub' },
-    ],
-    traps: [
-      { x: 258, y: 458, width: 86, height: 12 },
-      { x: 540, y: 118, width: 48, height: 12 },
-      { x: 754, y: 244, width: 12, height: 78 },
-    ],
-  };
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function distance(ax: number, ay: number, bx: number, by: number) {
   return Math.hypot(ax - bx, ay - by);
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
 }
 
 function isCollidingRect(
@@ -198,38 +138,21 @@ function isCollidingRect(
 
 export function GameSection() {
   const [viewportWidth, setViewportWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1400
+    typeof window !== 'undefined' ? window.innerWidth : 1200
   );
   const [viewportHeight, setViewportHeight] = useState(
     typeof window !== 'undefined' ? window.innerHeight : 900
   );
 
   const [started, setStarted] = useState(false);
-  const [flashTrap, setFlashTrap] = useState(false);
-  const [showGameOver, setShowGameOver] = useState(false);
+  const [player, setPlayer] = useState(START_POSITION);
   const [nearPortalId, setNearPortalId] = useState<string | null>(null);
+  const [showGameOver, setShowGameOver] = useState(false);
+  const [flashTrap, setFlashTrap] = useState(false);
 
   const pressedKeys = useRef<Set<string>>(new Set());
   const mobileKeys = useRef<Set<string>>(new Set());
   const resetTimeoutRef = useRef<number | null>(null);
-
-  const isMobile = viewportWidth <= 767;
-  const isTablet = viewportWidth > 767 && viewportWidth <= 1366;
-  const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
-
-  const mode: 'mobile' | 'tablet' | 'desktop' = isMobile
-    ? 'mobile'
-    : isTablet
-    ? 'tablet'
-    : 'desktop';
-
-  const config = useMemo(() => getGameConfig(mode), [mode]);
-  const [player, setPlayer] = useState(config.startPosition);
-
-  useEffect(() => {
-    setPlayer(config.startPosition);
-    setNearPortalId(null);
-  }, [config.startPosition.x, config.startPosition.y]);
 
   useEffect(() => {
     const onResize = () => {
@@ -247,9 +170,21 @@ export function GameSection() {
     };
   }, []);
 
+  const isMobile = viewportWidth <= 767;
+  const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
+
+  const renderWidth = isLandscapeMobile
+    ? Math.min(viewportWidth - 32, 240)
+    : isMobile
+    ? Math.min(viewportWidth - 32, 360)
+    : 430;
+
+  const scale = renderWidth / MAZE_WIDTH;
+  const renderHeight = MAZE_HEIGHT * scale;
+
   const activePortal = useMemo(
-    () => config.portals.find((p) => p.id === nearPortalId) ?? null,
-    [nearPortalId, config.portals]
+    () => portals.find((p) => p.id === nearPortalId) ?? null,
+    [nearPortalId]
   );
 
   const interactWithPortal = () => {
@@ -302,34 +237,26 @@ export function GameSection() {
         let nextX = prev.x;
         let nextY = prev.y;
 
-        const attemptedX = clamp(
-          prev.x + dx * config.playerSpeed,
-          0,
-          config.width - config.playerSize
-        );
-        const attemptedY = clamp(
-          prev.y + dy * config.playerSpeed,
-          0,
-          config.height - config.playerSize
-        );
+        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, MAZE_WIDTH - PLAYER_SIZE);
+        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, MAZE_HEIGHT - PLAYER_SIZE);
 
-        const hitsWallX = config.walls.some((wall) =>
-          isCollidingRect(attemptedX, prev.y, config.playerSize, wall)
+        const hitsWallX = walls.some((wall) =>
+          isCollidingRect(attemptedX, prev.y, PLAYER_SIZE, wall)
         );
-        const hitsWallY = config.walls.some((wall) =>
-          isCollidingRect(nextX, attemptedY, config.playerSize, wall)
+        const hitsWallY = walls.some((wall) =>
+          isCollidingRect(nextX, attemptedY, PLAYER_SIZE, wall)
         );
 
         if (!hitsWallX) nextX = attemptedX;
         if (!hitsWallY) nextY = attemptedY;
 
-        const hitTrap = config.traps.some((trap) =>
-          isCollidingRect(nextX, nextY, config.playerSize, trap)
+        const hitTrap = traps.some((trap) =>
+          isCollidingRect(nextX, nextY, PLAYER_SIZE, trap)
         );
 
         if (hitTrap) {
-          setFlashTrap(true);
           setShowGameOver(true);
+          setFlashTrap(true);
           setNearPortalId(null);
 
           if (resetTimeoutRef.current) {
@@ -337,9 +264,9 @@ export function GameSection() {
           }
 
           resetTimeoutRef.current = window.setTimeout(() => {
-            setPlayer(config.startPosition);
-            setFlashTrap(false);
+            setPlayer(START_POSITION);
             setShowGameOver(false);
+            setFlashTrap(false);
           }, 1100);
 
           return prev;
@@ -348,12 +275,12 @@ export function GameSection() {
         let closest: Portal | null = null;
         let closestDist = Infinity;
 
-        for (const portal of config.portals) {
+        for (const portal of portals) {
           const d = distance(
-            nextX + config.playerSize / 2,
-            nextY + config.playerSize / 2,
-            portal.x + config.portalSize / 2,
-            portal.y + config.portalSize / 2
+            nextX + PLAYER_SIZE / 2,
+            nextY + PLAYER_SIZE / 2,
+            portal.x + 33,
+            portal.y + 33
           );
 
           if (d < closestDist) {
@@ -362,7 +289,7 @@ export function GameSection() {
           }
         }
 
-        if (closest && closestDist <= config.interactionDistance) {
+        if (closest && closestDist <= INTERACTION_DISTANCE) {
           setNearPortalId(closest.id);
         } else {
           setNearPortalId(null);
@@ -381,7 +308,7 @@ export function GameSection() {
       window.removeEventListener('keyup', onKeyUp);
       cancelAnimationFrame(frameId);
     };
-  }, [started, showGameOver, config, activePortal]);
+  }, [started, showGameOver, activePortal]);
 
   const setMobileKey = (key: string, isPressed: boolean) => {
     if (isPressed) mobileKeys.current.add(key);
@@ -402,30 +329,6 @@ export function GameSection() {
     },
   });
 
-  const arenaWidth = isLandscapeMobile
-    ? 'min(92vw, 560px)'
-    : isMobile
-    ? 'min(94vw, 360px)'
-    : isTablet
-    ? 'min(88vw, 760px)'
-    : `${config.width}px`;
-
-  const arenaHeight = isLandscapeMobile
-    ? 'min(36vh, 220px)'
-    : isMobile
-    ? '250px'
-    : isTablet
-    ? '430px'
-    : `${config.height}px`;
-
-  const titleSize = isLandscapeMobile
-    ? 'clamp(1.7rem, 6vw, 3.2rem)'
-    : isMobile
-    ? 'clamp(2rem, 9vw, 3.8rem)'
-    : isTablet
-    ? 'clamp(3.6rem, 8vw, 5rem)'
-    : 'clamp(2.5rem, 8vw, 5rem)';
-
   return (
     <section
       id="game"
@@ -438,7 +341,7 @@ export function GameSection() {
           <div className="mb-3">
             <span
               className="text-xs tracking-[0.3em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
+              style={{ fontFamily: 'var(--font-mono)', color: '#ff3b3b' }}
             >
               [00X] INTERACTIVE MODE
             </span>
@@ -448,7 +351,7 @@ export function GameSection() {
             className="mb-3"
             style={{
               fontFamily: 'var(--font-heading)',
-              fontSize: titleSize,
+              fontSize: isMobile ? 'clamp(2rem, 9vw, 3.8rem)' : 'clamp(2.5rem, 8vw, 5rem)',
               fontWeight: 800,
               letterSpacing: '-0.02em',
               color: '#F5F5F5',
@@ -462,29 +365,36 @@ export function GameSection() {
             className="mx-auto max-w-2xl text-[11px] sm:text-sm tracking-[0.12em] uppercase"
             style={{
               fontFamily: 'var(--font-body)',
-              color: 'rgba(245, 245, 245, 0.6)',
+              color: 'rgba(245,245,245,0.6)',
             }}
           >
-            Move through the maze, avoid traps, and reach a portal to jump into a section.
+            Explore a classic labyrinth, avoid traps, and reach a portal.
           </p>
         </div>
 
         <div
-          className="relative mx-auto overflow-hidden"
+          className="relative mx-auto"
           style={{
-            width: arenaWidth,
-            height: arenaHeight,
-            border: flashTrap
-              ? '2px solid rgba(255, 70, 70, 0.95)'
-              : '2px solid rgba(230, 37, 37, 0.5)',
-            background:
-              'radial-gradient(circle at center, rgba(230,37,37,0.08) 0%, rgba(10,10,10,1) 70%)',
-            boxShadow: flashTrap
-              ? '0 0 45px rgba(255, 0, 0, 0.28)'
-              : '0 0 40px rgba(230, 37, 37, 0.12)',
+            width: `${renderWidth}px`,
+            height: `${renderHeight}px`,
           }}
         >
-          <div className="absolute inset-0">
+          <div
+            className="absolute left-0 top-0 origin-top-left overflow-hidden"
+            style={{
+              width: `${MAZE_WIDTH}px`,
+              height: `${MAZE_HEIGHT}px`,
+              transform: `scale(${scale})`,
+              border: flashTrap
+                ? '2px solid rgba(255, 70, 70, 0.95)'
+                : '2px solid rgba(255, 56, 56, 0.55)',
+              background:
+                'radial-gradient(circle at center, rgba(255,56,56,0.08) 0%, rgba(10,10,10,1) 70%)',
+              boxShadow: flashTrap
+                ? '0 0 45px rgba(255,0,0,0.28)'
+                : '0 0 40px rgba(255,56,56,0.12)',
+            }}
+          >
             <div
               className="absolute inset-0"
               style={{
@@ -492,45 +402,27 @@ export function GameSection() {
                   linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
                   linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
                 `,
-                backgroundSize:
-                  mode === 'mobile' ? '20px 20px' : mode === 'tablet' ? '28px 28px' : '36px 36px',
+                backgroundSize: '24px 24px',
               }}
             />
 
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 46%, rgba(230,37,37,0.12), transparent 42%)',
-              }}
-            />
-
-            {config.walls.map((wall, index) => (
+            {walls.map((wall, index) => (
               <div
-                key={`wall-${index}`}
+                key={index}
                 className="absolute"
                 style={{
                   left: wall.x,
                   top: wall.y,
                   width: wall.width,
                   height: wall.height,
-                  background:
-                    wall.kind === 'sub'
-                      ? 'rgba(230,37,37,0.1)'
-                      : 'rgba(230,37,37,0.16)',
-                  border:
-                    wall.kind === 'sub'
-                      ? '1px solid rgba(230,37,37,0.55)'
-                      : '1px solid rgba(230,37,37,0.72)',
-                  boxShadow:
-                    wall.kind === 'sub'
-                      ? '0 0 10px rgba(230,37,37,0.14)'
-                      : '0 0 16px rgba(230,37,37,0.18)',
+                  background: 'rgba(255,56,56,0.15)',
+                  border: '1px solid rgba(255,56,56,0.72)',
+                  boxShadow: '0 0 12px rgba(255,56,56,0.18)',
                 }}
               />
             ))}
 
-            {config.traps.map((trap, index) => (
+            {traps.map((trap, index) => (
               <motion.div
                 key={`trap-${index}`}
                 className="absolute"
@@ -539,16 +431,16 @@ export function GameSection() {
                   top: trap.y,
                   width: trap.width,
                   height: trap.height,
-                  background: 'rgba(255, 0, 0, 0.14)',
-                  border: '1px solid rgba(255, 0, 0, 0.85)',
-                  boxShadow: '0 0 12px rgba(255, 0, 0, 0.25)',
+                  background: 'rgba(255,0,0,0.16)',
+                  border: '1px solid rgba(255,0,0,0.82)',
+                  boxShadow: '0 0 10px rgba(255,0,0,0.28)',
                 }}
                 animate={{ opacity: [0.35, 0.9, 0.35] }}
                 transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
               />
             ))}
 
-            {config.portals.map((portal) => {
+            {portals.map((portal) => {
               const isActive = nearPortalId === portal.id;
 
               return (
@@ -565,13 +457,13 @@ export function GameSection() {
                   style={{
                     left: portal.x,
                     top: portal.y,
-                    width: config.portalSize,
-                    height: config.portalSize,
+                    width: 66,
+                    height: 66,
                     borderRadius: 999,
-                    border: '2px solid #ff3838',
-                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.05)',
+                    border: '2px solid #ff3b3b',
+                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.06)',
                     boxShadow: isActive
-                      ? '0 0 28px rgba(255,56,56,0.45)'
+                      ? '0 0 28px rgba(255,56,56,0.42)'
                       : '0 0 16px rgba(255,56,56,0.22)',
                     color: '#F5F5F5',
                     cursor: 'pointer',
@@ -587,8 +479,7 @@ export function GameSection() {
                     className="uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize:
-                        mode === 'mobile' ? '8px' : mode === 'tablet' ? '9px' : '10px',
+                      fontSize: '10px',
                       letterSpacing: '0.2em',
                     }}
                   >
@@ -598,23 +489,32 @@ export function GameSection() {
               );
             })}
 
+            {started && (
+              <motion.div
+                className="absolute"
+                style={{
+                  left: player.x,
+                  top: player.y,
+                  width: PLAYER_SIZE,
+                  height: PLAYER_SIZE,
+                  borderRadius: 999,
+                  background: '#F5F5F5',
+                  boxShadow:
+                    '0 0 0 2px #0A0A0A, 0 0 14px rgba(245,245,245,0.42), 0 0 24px rgba(255,56,56,0.18)',
+                }}
+                animate={{ scale: flashTrap ? [1, 1.16, 1] : 1 }}
+                transition={{ duration: 0.24 }}
+              />
+            )}
+
             {!started && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px]">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center px-4"
-                >
+                <div className="text-center px-4">
                   <h3
                     className="mb-4"
                     style={{
                       fontFamily: 'var(--font-heading)',
-                      fontSize:
-                        mode === 'mobile'
-                          ? '1.2rem'
-                          : mode === 'tablet'
-                          ? '2rem'
-                          : '2.4rem',
+                      fontSize: isMobile ? '1.2rem' : '2rem',
                       fontWeight: 800,
                       color: '#F5F5F5',
                     }}
@@ -627,7 +527,7 @@ export function GameSection() {
                     style={{
                       fontFamily: 'var(--font-body)',
                       color: 'rgba(245,245,245,0.64)',
-                      fontSize: mode === 'mobile' ? '9px' : '11px',
+                      fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -639,7 +539,7 @@ export function GameSection() {
                     style={{
                       fontFamily: 'var(--font-body)',
                       color: 'rgba(245,245,245,0.42)',
-                      fontSize: mode === 'mobile' ? '9px' : '11px',
+                      fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -648,80 +548,53 @@ export function GameSection() {
 
                   <button
                     onClick={() => {
-                      setPlayer(config.startPosition);
+                      setPlayer(START_POSITION);
                       setNearPortalId(null);
                       setStarted(true);
                     }}
                     style={{
                       fontFamily: 'var(--font-body)',
-                      fontSize: mode === 'mobile' ? '0.75rem' : '0.9rem',
+                      fontSize: '0.85rem',
                       letterSpacing: '0.16em',
                       textTransform: 'uppercase',
-                      border: '2px solid #ff3838',
+                      border: '2px solid #ff3b3b',
                       color: '#F5F5F5',
                       background: 'transparent',
                       cursor: 'pointer',
-                      padding: mode === 'mobile' ? '10px 20px' : '12px 28px',
+                      padding: '12px 24px',
                     }}
                   >
                     GO
                   </button>
-                </motion.div>
+                </div>
               </div>
             )}
 
             {showGameOver && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/52 backdrop-blur-[2px] pointer-events-none">
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                  <div
-                    style={{
-                      fontFamily: '"Courier New", monospace',
-                      fontSize:
-                        mode === 'mobile'
-                          ? '1.4rem'
-                          : mode === 'tablet'
-                          ? '2.4rem'
-                          : '3rem',
-                      fontWeight: 800,
-                      letterSpacing: '0.22em',
-                      textTransform: 'uppercase',
-                      color: '#ff3b3b',
-                      textShadow:
-                        '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
-                    }}
-                  >
-                    Game Over
-                  </div>
-                </motion.div>
+                <div
+                  style={{
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: isMobile ? '1.4rem' : '2.6rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: '#ff3b3b',
+                    textShadow:
+                      '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
+                  }}
+                >
+                  Game Over
+                </div>
               </div>
             )}
 
-            {started && (
-              <motion.div
-                className="absolute"
-                style={{
-                  left: player.x,
-                  top: player.y,
-                  width: config.playerSize,
-                  height: config.playerSize,
-                  borderRadius: 999,
-                  background: '#F5F5F5',
-                  boxShadow:
-                    '0 0 0 2px #0A0A0A, 0 0 14px rgba(245,245,245,0.42), 0 0 24px rgba(255,56,56,0.18)',
-                }}
-                animate={{
-                  scale: flashTrap ? [1, 1.16, 1] : 1,
-                }}
-                transition={{ duration: 0.24 }}
-              />
-            )}
-
-            {mode !== 'mobile' && (
+            {!isMobile && (
               <div
                 className="absolute"
                 style={{
-                  left: config.infoBox.x,
-                  top: config.infoBox.y,
+                  left: 14,
+                  top: 14,
                 }}
               >
                 <div
@@ -737,7 +610,7 @@ export function GameSection() {
                     style={{
                       fontFamily: 'var(--font-mono)',
                       color: 'rgba(245,245,245,0.56)',
-                      fontSize: mode === 'tablet' ? '9px' : '10px',
+                      fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -748,7 +621,7 @@ export function GameSection() {
                     style={{
                       fontFamily: 'var(--font-mono)',
                       color: '#ff4a4a',
-                      fontSize: mode === 'tablet' ? '9px' : '10px',
+                      fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -757,46 +630,10 @@ export function GameSection() {
                 </div>
               </div>
             )}
-
-            {activePortal && started && !showGameOver && (
-              <div className="absolute right-4 bottom-4">
-                <div
-                  className="px-4 py-3"
-                  style={{
-                    border: '1px solid rgba(255,56,56,0.34)',
-                    background: 'rgba(10,10,10,0.78)',
-                    boxShadow: '0 0 20px rgba(255,56,56,0.12)',
-                  }}
-                >
-                  <p
-                    className="uppercase"
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      color: 'rgba(245,245,245,0.56)',
-                      fontSize: mode === 'mobile' ? '8px' : '10px',
-                      letterSpacing: '0.18em',
-                    }}
-                  >
-                    Portal Detected
-                  </p>
-                  <p
-                    className="mt-1 uppercase"
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      color: '#F5F5F5',
-                      fontSize: mode === 'mobile' ? '9px' : '11px',
-                      letterSpacing: '0.18em',
-                    }}
-                  >
-                    Desktop: E / Mobile: GO
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {mode === 'mobile' && (
+        {isMobile && (
           <div className={`mt-4 flex flex-col items-center ${isLandscapeMobile ? 'gap-3' : 'gap-4'}`}>
             <button
               type="button"
