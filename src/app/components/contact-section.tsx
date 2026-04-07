@@ -18,7 +18,8 @@ export function ContactSection() {
   const y = useTransform(scrollYProgress, [0, 0.3, 1], [100, 0, 0]);
 
   return (
-    <section 
+    <section
+      id="about"
       ref={ref}
       className="relative min-h-screen flex items-center justify-center py-32 px-4"
     >
