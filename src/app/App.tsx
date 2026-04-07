@@ -1,3 +1,4 @@
+import { GameSection } from './components/game-section';
 import { GridBackground } from './components/grid-background';
 import { HeroSection } from './components/hero-section';
 import { AboutSection } from './components/about-section';
@@ -20,6 +21,7 @@ export default function App() {
       {/* Main Content */}
       <main className="relative z-10">
         <HeroSection />
+        <GameSection />
         <AboutSection />
         <WorkSection />
         <NFTSection />
