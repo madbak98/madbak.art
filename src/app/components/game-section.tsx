@@ -9,6 +9,13 @@ type Portal = {
   y: number;
 };
 
+type Wall = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 const ARENA_WIDTH = 900;
 const ARENA_HEIGHT = 520;
 const PLAYER_SIZE = 26;
@@ -21,12 +28,37 @@ const portals: Portal[] = [
   { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 430, y: 390 },
 ];
 
+const walls: Wall[] = [
+  { x: 210, y: 40, width: 18, height: 170 },
+  { x: 210, y: 260, width: 18, height: 190 },
+
+  { x: 360, y: 120, width: 180, height: 18 },
+  { x: 360, y: 120, width: 18, height: 120 },
+
+  { x: 520, y: 220, width: 18, height: 170 },
+  { x: 620, y: 60, width: 18, height: 170 },
+
+  { x: 680, y: 300, width: 120, height: 18 },
+  { x: 300, y: 340, width: 160, height: 18 },
+];
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
 function distance(ax: number, ay: number, bx: number, by: number) {
   return Math.hypot(ax - bx, ay - by);
+}
+
+function isCollidingWithWalls(x: number, y: number, size: number) {
+  return walls.some((wall) => {
+    return (
+      x < wall.x + wall.width &&
+      x + size > wall.x &&
+      y < wall.y + wall.height &&
+      y + size > wall.y
+    );
+  });
 }
 
 export function GameSection() {
@@ -78,8 +110,19 @@ export function GameSection() {
           dy *= 0.7071;
         }
 
-        const nextX = clamp(prev.x + dx * PLAYER_SPEED, 0, ARENA_WIDTH - PLAYER_SIZE);
-        const nextY = clamp(prev.y + dy * PLAYER_SPEED, 0, ARENA_HEIGHT - PLAYER_SIZE);
+        let nextX = prev.x;
+        let nextY = prev.y;
+
+        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, ARENA_WIDTH - PLAYER_SIZE);
+        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, ARENA_HEIGHT - PLAYER_SIZE);
+
+        if (!isCollidingWithWalls(attemptedX, prev.y, PLAYER_SIZE)) {
+          nextX = attemptedX;
+        }
+
+        if (!isCollidingWithWalls(nextX, attemptedY, PLAYER_SIZE)) {
+          nextY = attemptedY;
+        }
 
         let closest: Portal | null = null;
         let closestDist = Infinity;
@@ -155,7 +198,7 @@ export function GameSection() {
               color: 'rgba(245, 245, 245, 0.6)',
             }}
           >
-            Move through the scene, approach a portal, and press E to jump into a section.
+            Move through the maze, find the right path, and press E to jump into a section.
           </p>
         </div>
 
@@ -189,6 +232,22 @@ export function GameSection() {
                 'linear-gradient(to bottom, rgba(230,37,37,0.08), transparent 20%, transparent 80%, rgba(230,37,37,0.08))',
             }}
           />
+
+          {walls.map((wall, index) => (
+            <div
+              key={index}
+              className="absolute"
+              style={{
+                left: wall.x,
+                top: wall.y,
+                width: wall.width,
+                height: wall.height,
+                background: 'rgba(230,37,37,0.14)',
+                border: '1px solid rgba(230,37,37,0.45)',
+                boxShadow: '0 0 12px rgba(230,37,37,0.18)',
+              }}
+            />
+          ))}
 
           {portals.map((portal) => {
             const isActive = nearPortalId === portal.id;
