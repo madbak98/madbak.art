@@ -30,45 +30,48 @@ type GameConfig = {
   playerSpeed: number;
   interactionDistance: number;
   startPosition: { x: number; y: number };
+  portalSize: number;
+  infoBox: { x: number; y: number };
   portals: Portal[];
   walls: Wall[];
   traps: Trap[];
-  portalSize: number;
-  infoBox: { x: number; y: number };
 };
 
 function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
   if (mode === 'mobile') {
     return {
-      width: 320,
-      height: 220,
+      width: 340,
+      height: 240,
       playerSize: 14,
-      playerSpeed: 2.8,
-      interactionDistance: 46,
-      startPosition: { x: 12, y: 188 },
-      portalSize: 48,
-      infoBox: { x: 10, y: 168 },
+      playerSpeed: 2.6,
+      interactionDistance: 48,
+      startPosition: { x: 12, y: 204 },
+      portalSize: 46,
+      infoBox: { x: 10, y: 186 },
       portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 22, y: 18 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 248, y: 18 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 226, y: 164 },
+        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 18, y: 16 },
+        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 272, y: 18 },
+        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 246, y: 174 },
       ],
       walls: [
-        { x: 60, y: 0, width: 10, height: 95 },
-        { x: 0, y: 95, width: 110, height: 10 },
+        { x: 58, y: 0, width: 10, height: 112 },
+        { x: 0, y: 98, width: 104, height: 10 },
 
-        { x: 120, y: 35, width: 10, height: 130 },
-        { x: 120, y: 35, width: 95, height: 10 },
+        { x: 122, y: 32, width: 10, height: 138 },
+        { x: 122, y: 32, width: 112, height: 10 },
 
-        { x: 205, y: 35, width: 10, height: 85 },
-        { x: 150, y: 115, width: 65, height: 10 },
+        { x: 224, y: 32, width: 10, height: 92 },
+        { x: 160, y: 114, width: 74, height: 10 },
 
-        { x: 80, y: 165, width: 110, height: 10 },
-        { x: 248, y: 104, width: 58, height: 10 },
+        { x: 78, y: 174, width: 118, height: 10 },
+        { x: 268, y: 112, width: 60, height: 10 },
+
+        { x: 200, y: 54, width: 26, height: 8 },
+        { x: 166, y: 144, width: 44, height: 8 },
       ],
       traps: [
-        { x: 98, y: 185, width: 38, height: 8 },
-        { x: 182, y: 60, width: 24, height: 8 },
+        { x: 102, y: 198, width: 42, height: 8 },
+        { x: 188, y: 58, width: 24, height: 8 },
       ],
     };
   }
@@ -77,40 +80,46 @@ function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
     return {
       width: 760,
       height: 430,
-      playerSize: 20,
-      playerSpeed: 3.5,
-      interactionDistance: 68,
-      startPosition: { x: 26, y: 384 },
-      portalSize: 62,
-      infoBox: { x: 16, y: 356 },
+      playerSize: 18,
+      playerSpeed: 3.2,
+      interactionDistance: 66,
+      startPosition: { x: 20, y: 386 },
+      portalSize: 58,
+      infoBox: { x: 18, y: 358 },
       portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 84, y: 72 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 636, y: 72 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 624, y: 344 },
+        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 72, y: 68 },
+        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 628, y: 70 },
+        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 600, y: 334 },
       ],
       walls: [
-        { x: 96, y: 0, width: 14, height: 190 },
-        { x: 0, y: 178, width: 204, height: 14 },
+        // left chamber
+        { x: 92, y: 0, width: 14, height: 190 },
+        { x: 0, y: 178, width: 210, height: 14 },
 
-        { x: 276, y: 62, width: 14, height: 250 },
-        { x: 276, y: 62, width: 218, height: 14 },
+        // central shrine
+        { x: 278, y: 52, width: 14, height: 286 },
+        { x: 278, y: 52, width: 238, height: 14 },
+        { x: 502, y: 52, width: 14, height: 182 },
+        { x: 372, y: 176, width: 144, height: 14 },
+        { x: 372, y: 176, width: 14, height: 136 },
 
-        { x: 494, y: 62, width: 14, height: 180 },
-        { x: 360, y: 176, width: 148, height: 14 },
+        // bottom spine
+        { x: 154, y: 328, width: 232, height: 14 },
 
-        { x: 360, y: 176, width: 14, height: 136 },
-        { x: 166, y: 330, width: 208, height: 14 },
+        // right district
+        { x: 560, y: 284, width: 176, height: 14 },
+        { x: 736, y: 118, width: 14, height: 180 },
 
-        { x: 560, y: 274, width: 178, height: 14 },
-        { x: 738, y: 120, width: 14, height: 168 },
-
-        { x: 430, y: 224, width: 14, height: 86 },
-        { x: 510, y: 338, width: 96, height: 14 },
+        // micro blockers
+        { x: 458, y: 238, width: 14, height: 90 },
+        { x: 520, y: 340, width: 92, height: 12 },
+        { x: 438, y: 102, width: 56, height: 10 },
+        { x: 206, y: 364, width: 84, height: 10 },
       ],
       traps: [
-        { x: 212, y: 372, width: 78, height: 12 },
-        { x: 402, y: 108, width: 64, height: 12 },
-        { x: 584, y: 198, width: 12, height: 72 },
+        { x: 210, y: 370, width: 74, height: 10 },
+        { x: 432, y: 106, width: 50, height: 10 },
+        { x: 582, y: 214, width: 10, height: 64 },
       ],
     };
   }
@@ -118,40 +127,49 @@ function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
   return {
     width: 900,
     height: 520,
-    playerSize: 24,
-    playerSpeed: 4,
+    playerSize: 22,
+    playerSpeed: 3.8,
     interactionDistance: 82,
-    startPosition: { x: 36, y: 460 },
-    portalSize: 68,
-    infoBox: { x: 16, y: 442 },
+    startPosition: { x: 26, y: 470 },
+    portalSize: 66,
+    infoBox: { x: 18, y: 444 },
     portals: [
-      { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 90, y: 90 },
-      { id: 'work-portal', label: 'WORK', targetId: 'work', x: 770, y: 90 },
-      { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 760, y: 430 },
+      { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 82, y: 84 },
+      { id: 'work-portal', label: 'WORK', targetId: 'work', x: 760, y: 86 },
+      { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 724, y: 414 },
     ],
     walls: [
-      { x: 110, y: 0, width: 18, height: 240 },
-      { x: 0, y: 220, width: 240, height: 18 },
+      // left chamber
+      { x: 104, y: 0, width: 18, height: 236 },
+      { x: 0, y: 222, width: 250, height: 18 },
 
-      { x: 330, y: 80, width: 18, height: 300 },
-      { x: 330, y: 80, width: 260, height: 18 },
+      // central shrine outer
+      { x: 330, y: 70, width: 18, height: 320 },
+      { x: 330, y: 70, width: 276, height: 18 },
+      { x: 588, y: 70, width: 18, height: 220 },
 
-      { x: 590, y: 80, width: 18, height: 210 },
-      { x: 420, y: 210, width: 170, height: 18 },
+      // shrine inner
+      { x: 430, y: 202, width: 176, height: 18 },
+      { x: 430, y: 202, width: 18, height: 168 },
 
-      { x: 420, y: 210, width: 18, height: 170 },
-      { x: 200, y: 400, width: 238, height: 18 },
+      // bottom spine
+      { x: 184, y: 398, width: 264, height: 18 },
 
-      { x: 660, y: 320, width: 220, height: 18 },
-      { x: 880, y: 140, width: 18, height: 200 },
+      // right district
+      { x: 662, y: 324, width: 220, height: 18 },
+      { x: 882, y: 136, width: 18, height: 206 },
 
-      { x: 510, y: 270, width: 18, height: 110 },
-      { x: 600, y: 410, width: 130, height: 18 },
+      // blockers / fake paths
+      { x: 530, y: 274, width: 18, height: 114 },
+      { x: 610, y: 410, width: 128, height: 16 },
+      { x: 520, y: 118, width: 70, height: 12 },
+      { x: 244, y: 444, width: 114, height: 12 },
+      { x: 472, y: 250, width: 56, height: 12 },
     ],
     traps: [
-      { x: 260, y: 455, width: 110, height: 16 },
-      { x: 470, y: 130, width: 90, height: 16 },
-      { x: 705, y: 240, width: 16, height: 90 },
+      { x: 250, y: 456, width: 96, height: 12 },
+      { x: 516, y: 122, width: 52, height: 12 },
+      { x: 692, y: 238, width: 12, height: 84 },
     ],
   };
 }
@@ -206,7 +224,6 @@ export function GameSection() {
     : 'desktop';
 
   const config = useMemo(() => getGameConfig(mode), [mode]);
-
   const [player, setPlayer] = useState(config.startPosition);
 
   useEffect(() => {
@@ -679,7 +696,11 @@ export function GameSection() {
 
             {showGameOver && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/52 backdrop-blur-[2px] pointer-events-none">
-                <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} className="text-center px-6">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center px-6"
+                >
                   <div
                     style={{
                       fontFamily: '"Courier New", monospace',
@@ -693,7 +714,8 @@ export function GameSection() {
                       letterSpacing: '0.22em',
                       textTransform: 'uppercase',
                       color: '#ff3b3b',
-                      textShadow: '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
+                      textShadow:
+                        '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
                     }}
                   >
                     Game Over
