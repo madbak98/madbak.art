@@ -21,66 +21,152 @@ type ShotEffect = {
   id: number;
 };
 
-const ARENA_W = 900;
-const ARENA_H = 520;
+const DESKTOP_W = 900;
+const DESKTOP_H = 520;
 
-const targets: MovingTarget[] = [
-  {
-    id: 'about-target',
-    label: 'ABOUT',
-    targetId: 'about',
-    baseX: 170,
-    baseY: 140,
-    size: 64,
-    pattern: 'horizontal',
-    speed: 1.9,
-    rangeX: 90,
-    rangeY: 0,
-  },
-  {
-    id: 'work-target',
-    label: 'WORK',
-    targetId: 'work',
-    baseX: 650,
-    baseY: 155,
-    size: 64,
-    pattern: 'wave',
-    speed: 2.5,
-    rangeX: 90,
-    rangeY: 30,
-  },
-  {
-    id: 'contact-target',
-    label: 'CONTACT',
-    targetId: 'contact',
-    baseX: 480,
-    baseY: 360,
-    size: 64,
-    pattern: 'orbit',
-    speed: 2.1,
-    rangeX: 46,
-    rangeY: 46,
-  },
-];
+function getTargetLayout(mode: 'mobile' | 'tablet' | 'desktop'): MovingTarget[] {
+  if (mode === 'mobile') {
+    return [
+      {
+        id: 'about-target',
+        label: 'ABOUT',
+        targetId: 'about',
+        baseX: 90,
+        baseY: 120,
+        size: 54,
+        pattern: 'horizontal',
+        speed: 1.8,
+        rangeX: 42,
+        rangeY: 0,
+      },
+      {
+        id: 'work-target',
+        label: 'WORK',
+        targetId: 'work',
+        baseX: 250,
+        baseY: 130,
+        size: 54,
+        pattern: 'wave',
+        speed: 2.1,
+        rangeX: 34,
+        rangeY: 18,
+      },
+      {
+        id: 'contact-target',
+        label: 'CONTACT',
+        targetId: 'contact',
+        baseX: 180,
+        baseY: 340,
+        size: 54,
+        pattern: 'orbit',
+        speed: 1.8,
+        rangeX: 26,
+        rangeY: 26,
+      },
+    ];
+  }
 
-function getTargetPosition(target: MovingTarget, time: number) {
+  if (mode === 'tablet') {
+    return [
+      {
+        id: 'about-target',
+        label: 'ABOUT',
+        targetId: 'about',
+        baseX: 160,
+        baseY: 125,
+        size: 62,
+        pattern: 'horizontal',
+        speed: 2.0,
+        rangeX: 72,
+        rangeY: 0,
+      },
+      {
+        id: 'work-target',
+        label: 'WORK',
+        targetId: 'work',
+        baseX: 590,
+        baseY: 140,
+        size: 62,
+        pattern: 'wave',
+        speed: 2.35,
+        rangeX: 64,
+        rangeY: 26,
+      },
+      {
+        id: 'contact-target',
+        label: 'CONTACT',
+        targetId: 'contact',
+        baseX: 400,
+        baseY: 338,
+        size: 62,
+        pattern: 'orbit',
+        speed: 2.0,
+        rangeX: 34,
+        rangeY: 34,
+      },
+    ];
+  }
+
+  return [
+    {
+      id: 'about-target',
+      label: 'ABOUT',
+      targetId: 'about',
+      baseX: 170,
+      baseY: 140,
+      size: 66,
+      pattern: 'horizontal',
+      speed: 2.0,
+      rangeX: 92,
+      rangeY: 0,
+    },
+    {
+      id: 'work-target',
+      label: 'WORK',
+      targetId: 'work',
+      baseX: 650,
+      baseY: 150,
+      size: 66,
+      pattern: 'wave',
+      speed: 2.55,
+      rangeX: 92,
+      rangeY: 30,
+    },
+    {
+      id: 'contact-target',
+      label: 'CONTACT',
+      targetId: 'contact',
+      baseX: 470,
+      baseY: 360,
+      size: 66,
+      pattern: 'orbit',
+      speed: 2.15,
+      rangeX: 42,
+      rangeY: 42,
+    },
+  ];
+}
+
+function getTargetPosition(target: MovingTarget, time: number, difficultyMultiplier: number) {
+  const t = time * target.speed * difficultyMultiplier;
+
   switch (target.pattern) {
     case 'horizontal':
       return {
-        x: target.baseX + Math.sin(time * target.speed) * target.rangeX,
+        x: target.baseX + Math.sin(t) * target.rangeX,
         y: target.baseY,
       };
 
     case 'wave':
       return {
-        x: target.baseX + Math.sin(time * target.speed) * target.rangeX,
-        y: target.baseY + Math.cos(time * target.speed * 1.3) * target.rangeY,
+        x: target.baseX + Math.sin(t) * target.rangeX,
+        y: target.baseY + Math.cos(t * 1.25) * target.rangeY,
       };
 
     case 'orbit':
       return {
-        x: target.baseX + Math.cos(time * target.speed) * target.rangeX,
-        y: target.baseY + Math.sin(time * target.speed) * target.rangeY,
+        x: target.baseX + Math.cos(t) * target.rangeX,
+        y: target.baseY + Math.sin(t) * target.rangeY,
       };
 
     default:
@@ -104,8 +190,8 @@ function TargetIcon({
   size: number;
   active: boolean;
 }) {
-  const ring = active ? '#ff5a5a' : '#ff3b3b';
-  const faint = active ? 'rgba(255,90,90,0.2)' : 'rgba(255,59,59,0.12)';
+  const ring = active ? '#ffffff' : '#ff3b3b';
+  const faint = active ? 'rgba(255,255,255,0.12)' : 'rgba(255,59,59,0.08)';
 
   return (
     <div
@@ -116,7 +202,7 @@ function TargetIcon({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        filter: active ? 'drop-shadow(0 0 16px rgba(255,59,59,0.45))' : 'none',
+        filter: active ? 'drop-shadow(0 0 20px rgba(255,255,255,0.45))' : 'none',
       }}
     >
       <div
@@ -174,11 +260,11 @@ function TargetIcon({
           zIndex: 2,
           fontFamily: 'var(--font-mono)',
           fontSize: size < 56 ? '7px' : '8px',
-          letterSpacing: '0.18em',
+          letterSpacing: '0.16em',
           color: '#F5F5F5',
           textTransform: 'uppercase',
           textAlign: 'center',
-          textShadow: '0 0 8px rgba(0,0,0,0.8)',
+          textShadow: '0 0 8px rgba(0,0,0,0.85)',
           pointerEvents: 'none',
         }}
       >
@@ -200,11 +286,17 @@ export function GameSection() {
   const [time, setTime] = useState(0);
   const [shots, setShots] = useState<ShotEffect[]>([]);
   const [hitTargetId, setHitTargetId] = useState<string | null>(null);
-  const [crosshair, setCrosshair] = useState({ x: ARENA_W / 2, y: ARENA_H / 2 });
-  const [gameMessage, setGameMessage] = useState<string>('LOCK TARGETS');
+  const [crosshair, setCrosshair] = useState({ x: DESKTOP_W / 2, y: DESKTOP_H / 2 });
+  const [gameMessage, setGameMessage] = useState('LOCK TARGETS');
+  const [shake, setShake] = useState(false);
+  const [combo, setCombo] = useState(0);
+  const [score, setScore] = useState(0);
 
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const shotIdRef = useRef(1);
+  const comboTimeoutRef = useRef<number | null>(null);
+  const shootAudioRef = useRef<HTMLAudioElement | null>(null);
+  const hitAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const onResize = () => {
@@ -216,17 +308,47 @@ export function GameSection() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    shootAudioRef.current = new Audio('/sounds/shoot.mp3');
+    hitAudioRef.current = new Audio('/sounds/hit.mp3');
+
+    shootAudioRef.current.volume = 0.35;
+    hitAudioRef.current.volume = 0.45;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (comboTimeoutRef.current) {
+        window.clearTimeout(comboTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const isMobile = viewportWidth <= 767;
+  const isTablet = viewportWidth > 767 && viewportWidth <= 1366;
   const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
 
-  const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 32, 300)
+  const mode: 'mobile' | 'tablet' | 'desktop' = isMobile
+    ? 'mobile'
+    : isTablet
+    ? 'tablet'
+    : 'desktop';
+
+  const arenaWidth = isLandscapeMobile
+    ? Math.min(viewportWidth - 32, 280)
     : isMobile
     ? Math.min(viewportWidth - 32, 360)
+    : isTablet
+    ? 700
     : 760;
 
-  const scale = renderWidth / ARENA_W;
-  const renderHeight = ARENA_H * scale;
+  const arenaScale = arenaWidth / DESKTOP_W;
+  const arenaHeight = DESKTOP_H * arenaScale;
+
+  const baseTargets = useMemo(() => getTargetLayout(mode), [mode]);
+  const difficultyMultiplier = 1 + combo * 0.12;
 
   useEffect(() => {
     if (!started) return;
@@ -246,18 +368,48 @@ export function GameSection() {
   }, [started]);
 
   const positionedTargets = useMemo(() => {
-    return targets.map((target) => {
-      const pos = getTargetPosition(target, time);
+    return baseTargets.map((target) => {
+      const pos = getTargetPosition(target, time, difficultyMultiplier);
       return {
         ...target,
         x: pos.x,
         y: pos.y,
       };
     });
-  }, [time]);
+  }, [baseTargets, time, difficultyMultiplier]);
+
+  const playShootSound = () => {
+    try {
+      if (!shootAudioRef.current) return;
+      shootAudioRef.current.currentTime = 0;
+      void shootAudioRef.current.play();
+    } catch {}
+  };
+
+  const playHitSound = () => {
+    try {
+      if (!hitAudioRef.current) return;
+      hitAudioRef.current.currentTime = 0;
+      void hitAudioRef.current.play();
+    } catch {}
+  };
+
+  const triggerCombo = () => {
+    setCombo((prev) => prev + 1);
+
+    if (comboTimeoutRef.current) {
+      window.clearTimeout(comboTimeoutRef.current);
+    }
+
+    comboTimeoutRef.current = window.setTimeout(() => {
+      setCombo(0);
+    }, 1500);
+  };
 
   const shootAt = (x: number, y: number) => {
     if (!started) return;
+
+    playShootSound();
 
     let hit: (typeof positionedTargets)[number] | null = null;
 
@@ -266,7 +418,7 @@ export function GameSection() {
       const cy = target.y + target.size / 2;
       const d = distance(x, y, cx, cy);
 
-      if (d <= target.size * 0.42) {
+      if (d <= target.size * 0.4) {
         hit = target;
         break;
       }
@@ -283,11 +435,17 @@ export function GameSection() {
 
     window.setTimeout(() => {
       setShots((prev) => prev.filter((s) => s.id !== effect.id));
-    }, 350);
+    }, 380);
 
     if (hit) {
+      playHitSound();
       setHitTargetId(hit.id);
-      setGameMessage(`TARGET LOCKED: ${hit.label}`);
+      setGameMessage(`LOCKED: ${hit.label}`);
+      setShake(true);
+      setScore((prev) => prev + 100);
+      triggerCombo();
+
+      window.setTimeout(() => setShake(false), 180);
 
       window.setTimeout(() => {
         document.getElementById(hit!.targetId)?.scrollIntoView({
@@ -299,9 +457,10 @@ export function GameSection() {
       window.setTimeout(() => {
         setHitTargetId(null);
         setGameMessage('LOCK TARGETS');
-      }, 900);
+      }, 800);
     } else {
       setGameMessage('MISS');
+      setCombo(0);
       window.setTimeout(() => setGameMessage('LOCK TARGETS'), 350);
     }
   };
@@ -314,8 +473,8 @@ export function GameSection() {
     if (!arenaRef.current) return;
 
     const rect = arenaRef.current.getBoundingClientRect();
-    const localX = ((clientX - rect.left) / rect.width) * ARENA_W;
-    const localY = ((clientY - rect.top) / rect.height) * ARENA_H;
+    const localX = ((clientX - rect.left) / rect.width) * DESKTOP_W;
+    const localY = ((clientY - rect.top) / rect.height) * DESKTOP_H;
 
     setCrosshair({ x: localX, y: localY });
 
@@ -377,15 +536,15 @@ export function GameSection() {
               color: 'rgba(245,245,245,0.6)',
             }}
           >
-            Moving targets guard each section. Hit the right one to enter.
+            Hit the moving targets to jump through the site.
           </p>
         </div>
 
         <div
           className="relative mx-auto"
           style={{
-            width: `${renderWidth}px`,
-            height: `${renderHeight}px`,
+            width: `${arenaWidth}px`,
+            height: `${arenaHeight}px`,
           }}
         >
           <div
@@ -395,14 +554,15 @@ export function GameSection() {
             onClick={handleClick}
             onTouchStart={handleTouchStart}
             style={{
-              width: `${ARENA_W}px`,
-              height: `${ARENA_H}px`,
-              transform: `scale(${scale})`,
+              width: `${DESKTOP_W}px`,
+              height: `${DESKTOP_H}px`,
+              transform: `scale(${arenaScale}) ${shake ? 'translateX(-3px)' : ''}`,
               cursor: isMobile ? 'default' : 'crosshair',
               border: '2px solid rgba(255,56,56,0.55)',
               background:
                 'radial-gradient(circle at 50% 40%, rgba(255,56,56,0.08) 0%, rgba(10,10,10,1) 70%)',
               boxShadow: '0 0 40px rgba(255,56,56,0.12)',
+              touchAction: 'manipulation',
             }}
           >
             <div
@@ -420,7 +580,7 @@ export function GameSection() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.18) 58%, rgba(0,0,0,0.46) 100%)',
+                  'radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.12) 58%, rgba(0,0,0,0.44) 100%)',
               }}
             />
 
@@ -435,10 +595,10 @@ export function GameSection() {
                   height: target.size,
                 }}
                 animate={{
-                  scale: hitTargetId === target.id ? [1, 1.15, 1] : [1, 1.03, 1],
+                  scale: hitTargetId === target.id ? [1, 1.16, 1] : [1, 1.03, 1],
                 }}
                 transition={{
-                  duration: hitTargetId === target.id ? 0.35 : 1.8,
+                  duration: hitTargetId === target.id ? 0.35 : 1.6,
                   repeat: hitTargetId === target.id ? 0 : Infinity,
                   ease: 'easeInOut',
                 }}
@@ -455,61 +615,72 @@ export function GameSection() {
               <motion.div
                 key={shot.id}
                 initial={{ opacity: 1, scale: 0.5 }}
-                animate={{ opacity: 0, scale: shot.hit ? 2 : 1.5 }}
+                animate={{ opacity: 0, scale: shot.hit ? 2.2 : 1.6 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
                 className="absolute pointer-events-none"
                 style={{
-                  left: shot.x - 10,
-                  top: shot.y - 10,
-                  width: 20,
-                  height: 20,
+                  left: shot.x - 12,
+                  top: shot.y - 12,
+                  width: 24,
+                  height: 24,
                   borderRadius: '999px',
                   border: `2px solid ${shot.hit ? '#ffffff' : '#ff3b3b'}`,
                   boxShadow: shot.hit
-                    ? '0 0 18px rgba(255,255,255,0.55)'
-                    : '0 0 14px rgba(255,59,59,0.4)',
+                    ? '0 0 20px rgba(255,255,255,0.6)'
+                    : '0 0 16px rgba(255,59,59,0.42)',
                 }}
               />
             ))}
+
+            {hitTargetId && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(255,255,255,0.05)',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
 
             {!isMobile && started && (
               <div
                 className="absolute pointer-events-none"
                 style={{
-                  left: crosshair.x - 16,
-                  top: crosshair.y - 16,
-                  width: 32,
-                  height: 32,
+                  left: crosshair.x - 20,
+                  top: crosshair.y - 20,
+                  width: 40,
+                  height: 40,
                 }}
               >
                 <div
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    borderRadius: '999px',
-                    border: '1px solid rgba(255,255,255,0.75)',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: -4,
-                    bottom: -4,
-                    width: 1,
-                    transform: 'translateX(-50%)',
-                    background: 'rgba(255,255,255,0.85)',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(255,255,255,0.8)',
                   }}
                 />
                 <div
                   style={{
                     position: 'absolute',
                     top: '50%',
-                    left: -4,
-                    right: -4,
+                    left: 0,
+                    right: 0,
                     height: 1,
                     transform: 'translateY(-50%)',
-                    background: 'rgba(255,255,255,0.85)',
+                    background: 'rgba(255,255,255,0.9)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: 0,
+                    bottom: 0,
+                    width: 1,
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(255,255,255,0.9)',
                   }}
                 />
               </div>
@@ -551,7 +722,7 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Mobile: Tap the targets
+                    Mobile / iPad: Tap the moving targets
                   </p>
 
                   <button
@@ -559,6 +730,8 @@ export function GameSection() {
                       setStarted(true);
                       setHitTargetId(null);
                       setGameMessage('LOCK TARGETS');
+                      setCombo(0);
+                      setScore(0);
                     }}
                     style={{
                       fontFamily: 'var(--font-body)',
@@ -579,45 +752,65 @@ export function GameSection() {
             )}
 
             {started && (
-              <div
-                className="absolute"
-                style={{
-                  left: 14,
-                  top: 14,
-                }}
-              >
+              <>
                 <div
-                  className="px-4 py-3"
+                  className="absolute"
                   style={{
-                    border: '1px solid rgba(255,56,56,0.28)',
-                    background: 'rgba(10,10,10,0.62)',
-                    backdropFilter: 'blur(6px)',
+                    left: 14,
+                    top: 14,
                   }}
                 >
-                  <p
-                    className="uppercase"
+                  <div
+                    className="px-4 py-3"
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      color: 'rgba(245,245,245,0.56)',
-                      fontSize: '10px',
-                      letterSpacing: '0.18em',
+                      border: '1px solid rgba(255,56,56,0.28)',
+                      background: 'rgba(10,10,10,0.62)',
+                      backdropFilter: 'blur(6px)',
                     }}
                   >
-                    Mode: Live Fire
-                  </p>
-                  <p
-                    className="mt-1 uppercase"
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      color: hitTargetId ? '#ffffff' : '#ff4a4a',
-                      fontSize: '10px',
-                      letterSpacing: '0.18em',
-                    }}
-                  >
-                    {gameMessage}
-                  </p>
+                    <p
+                      className="uppercase"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        color: 'rgba(245,245,245,0.56)',
+                        fontSize: '10px',
+                        letterSpacing: '0.18em',
+                      }}
+                    >
+                      Score: {score}
+                    </p>
+                    <p
+                      className="mt-1 uppercase"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        color: hitTargetId ? '#ffffff' : '#ff4a4a',
+                        fontSize: '10px',
+                        letterSpacing: '0.18em',
+                      }}
+                    >
+                      {gameMessage}
+                    </p>
+                  </div>
                 </div>
-              </div>
+
+                {combo > 1 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 18,
+                      top: 18,
+                      color: '#ff3b3b',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '12px',
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase',
+                      textShadow: '0 0 12px rgba(255,59,59,0.35)',
+                    }}
+                  >
+                    Combo x{combo}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -633,7 +826,7 @@ export function GameSection() {
                 textTransform: 'uppercase',
               }}
             >
-              Tap the moving targets
+              Tap the moving target icons
             </p>
           </div>
         )}
