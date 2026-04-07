@@ -22,7 +22,7 @@ const projects = [
     title: 'PINK ARMY',
     category: 'AI Influencer',
     year: '2022',
-    image: 'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
+    image: 'https://github.com/madbak98/My-image/blob/main/07c36aee-e7ba-456f-bb91-bb238e60cbf1.png?raw=true',
     images: [
       'https://pbs.twimg.com/media/HEbs0geasAMhgwg?format=jpg&name=medium',
       'https://pbs.twimg.com/media/HEbpBc_WoAA3sMS?format=jpg&name=medium',
