@@ -1,12 +1,14 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-type Portal = {
+type Room = {
   id: string;
   label: string;
   targetId: string;
   x: number;
   y: number;
+  width: number;
+  height: number;
 };
 
 type Wall = {
@@ -23,100 +25,96 @@ type Trap = {
   height: number;
 };
 
-const MAZE_W = 360;
-const MAZE_H = 520;
+const PLAN_W = 360;
+const PLAN_H = 520;
 const PLAYER_SIZE = 12;
 const PLAYER_SPEED = 2.4;
-const INTERACTION_DISTANCE = 26;
-const START_POS = { x: 18, y: 486 };
+const INTERACTION_DISTANCE = 24;
+const START_POS = { x: 22, y: 474 };
 
-const portals: Portal[] = [
-  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 54, y: 68 },
-  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 270, y: 70 },
-  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 244, y: 396 },
+const rooms: Room[] = [
+  {
+    id: 'about-room',
+    label: 'ABOUT',
+    targetId: 'about',
+    x: 28,
+    y: 62,
+    width: 108,
+    height: 104,
+  },
+  {
+    id: 'work-room',
+    label: 'WORK',
+    targetId: 'work',
+    x: 226,
+    y: 48,
+    width: 106,
+    height: 118,
+  },
+  {
+    id: 'contact-room',
+    label: 'CONTACT',
+    targetId: 'contact',
+    x: 212,
+    y: 342,
+    width: 120,
+    height: 122,
+  },
 ];
 
 const walls: Wall[] = [
-  // outer frame
-  { x: 0, y: 0, width: 360, height: 12 },
-  { x: 0, y: 0, width: 12, height: 520 },
-  { x: 348, y: 0, width: 12, height: 520 },
-  { x: 0, y: 508, width: 360, height: 12 },
+  // outer shell
+  { x: 0, y: 0, width: 360, height: 10 },
+  { x: 0, y: 0, width: 10, height: 520 },
+  { x: 350, y: 0, width: 10, height: 520 },
+  { x: 0, y: 510, width: 360, height: 10 },
 
-  // top maze
-  { x: 36, y: 24, width: 12, height: 84 },
-  { x: 48, y: 96, width: 60, height: 12 },
+  // about room
+  { x: 28, y: 62, width: 108, height: 10 },
+  { x: 28, y: 62, width: 10, height: 104 },
+  { x: 126, y: 62, width: 10, height: 54 },
+  { x: 126, y: 132, width: 10, height: 34 },
+  { x: 28, y: 156, width: 108, height: 10 },
 
-  { x: 96, y: 36, width: 12, height: 120 },
-  { x: 96, y: 36, width: 48, height: 12 },
+  // work room
+  { x: 226, y: 48, width: 106, height: 10 },
+  { x: 226, y: 48, width: 10, height: 48 },
+  { x: 226, y: 112, width: 10, height: 54 },
+  { x: 322, y: 48, width: 10, height: 118 },
+  { x: 226, y: 156, width: 106, height: 10 },
 
-  { x: 144, y: 36, width: 12, height: 72 },
-  { x: 144, y: 96, width: 84, height: 12 },
+  // contact room
+  { x: 212, y: 342, width: 120, height: 10 },
+  { x: 212, y: 342, width: 10, height: 122 },
+  { x: 322, y: 342, width: 10, height: 56 },
+  { x: 322, y: 414, width: 10, height: 50 },
+  { x: 212, y: 454, width: 120, height: 10 },
 
-  { x: 216, y: 24, width: 12, height: 84 },
-  { x: 216, y: 24, width: 60, height: 12 },
+  // central corridor structure
+  { x: 84, y: 210, width: 10, height: 172 },
+  { x: 84, y: 372, width: 142, height: 10 },
 
-  { x: 264, y: 24, width: 12, height: 48 },
-  { x: 264, y: 60, width: 48, height: 12 },
+  { x: 172, y: 108, width: 10, height: 160 },
+  { x: 172, y: 108, width: 86, height: 10 },
 
-  { x: 312, y: 24, width: 12, height: 120 },
+  { x: 120, y: 268, width: 122, height: 10 },
+  { x: 232, y: 198, width: 10, height: 80 },
 
-  // upper middle
-  { x: 36, y: 144, width: 12, height: 72 },
-  { x: 24, y: 204, width: 24, height: 12 },
+  // bottom hall
+  { x: 36, y: 430, width: 128, height: 10 },
+  { x: 154, y: 430, width: 10, height: 56 },
 
-  { x: 72, y: 144, width: 12, height: 120 },
-  { x: 72, y: 144, width: 84, height: 12 },
-
-  { x: 156, y: 144, width: 12, height: 60 },
-  { x: 156, y: 192, width: 72, height: 12 },
-
-  { x: 216, y: 132, width: 12, height: 84 },
-  { x: 216, y: 132, width: 84, height: 12 },
-
-  { x: 288, y: 144, width: 12, height: 72 },
-  { x: 252, y: 204, width: 48, height: 12 },
-
-  // center
-  { x: 108, y: 240, width: 12, height: 84 },
-  { x: 108, y: 240, width: 72, height: 12 },
-
-  { x: 180, y: 240, width: 12, height: 120 },
-  { x: 180, y: 348, width: 72, height: 12 },
-
-  { x: 252, y: 240, width: 12, height: 72 },
-  { x: 216, y: 300, width: 48, height: 12 },
-
-  // lower middle
-  { x: 36, y: 300, width: 12, height: 96 },
-  { x: 48, y: 384, width: 60, height: 12 },
-
-  { x: 96, y: 336, width: 12, height: 96 },
-  { x: 96, y: 336, width: 72, height: 12 },
-
-  { x: 168, y: 384, width: 12, height: 72 },
-  { x: 168, y: 444, width: 60, height: 12 },
-
-  { x: 228, y: 384, width: 12, height: 72 },
-  { x: 228, y: 384, width: 72, height: 12 },
-
-  { x: 288, y: 336, width: 12, height: 120 },
-
-  // bottom accents
-  { x: 36, y: 468, width: 72, height: 12 },
-  { x: 132, y: 468, width: 84, height: 12 },
-  { x: 252, y: 468, width: 60, height: 12 },
-
-  // small blockers for classic feel
-  { x: 186, y: 96, width: 30, height: 8 },
-  { x: 138, y: 300, width: 30, height: 8 },
-  { x: 222, y: 444, width: 24, height: 8 },
+  // decorative small walls / furniture feel
+  { x: 52, y: 92, width: 38, height: 8 },
+  { x: 248, y: 84, width: 46, height: 8 },
+  { x: 244, y: 384, width: 54, height: 8 },
+  { x: 244, y: 412, width: 36, height: 8 },
 ];
 
 const traps: Trap[] = [
-  { x: 186, y: 96, width: 22, height: 8 },
-  { x: 140, y: 300, width: 22, height: 8 },
-  { x: 222, y: 444, width: 18, height: 8 },
+  { x: 186, y: 108, width: 24, height: 8 },
+  { x: 134, y: 268, width: 24, height: 8 },
+  { x: 256, y: 412, width: 22, height: 8 },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -151,7 +149,7 @@ export function GameSection() {
 
   const [started, setStarted] = useState(false);
   const [player, setPlayer] = useState(START_POS);
-  const [nearPortalId, setNearPortalId] = useState<string | null>(null);
+  const [nearRoomId, setNearRoomId] = useState<string | null>(null);
   const [showGameOver, setShowGameOver] = useState(false);
   const [flashTrap, setFlashTrap] = useState(false);
 
@@ -171,7 +169,9 @@ export function GameSection() {
 
   useEffect(() => {
     return () => {
-      if (resetTimeoutRef.current) window.clearTimeout(resetTimeoutRef.current);
+      if (resetTimeoutRef.current) {
+        window.clearTimeout(resetTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -179,22 +179,22 @@ export function GameSection() {
   const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
 
   const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 32, 240)
+    ? Math.min(viewportWidth - 32, 250)
     : isMobile
     ? Math.min(viewportWidth - 32, 360)
-    : 430;
+    : 460;
 
-  const scale = renderWidth / MAZE_W;
-  const renderHeight = MAZE_H * scale;
+  const scale = renderWidth / PLAN_W;
+  const renderHeight = PLAN_H * scale;
 
-  const activePortal = useMemo(
-    () => portals.find((p) => p.id === nearPortalId) ?? null,
-    [nearPortalId]
+  const activeRoom = useMemo(
+    () => rooms.find((room) => room.id === nearRoomId) ?? null,
+    [nearRoomId]
   );
 
-  const interactWithPortal = () => {
-    if (!activePortal) return;
-    document.getElementById(activePortal.targetId)?.scrollIntoView({
+  const interactWithRoom = () => {
+    if (!activeRoom) return;
+    document.getElementById(activeRoom.targetId)?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
@@ -205,7 +205,9 @@ export function GameSection() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       pressedKeys.current.add(e.key.toLowerCase());
-      if (e.key.toLowerCase() === 'e') interactWithPortal();
+      if (e.key.toLowerCase() === 'e') {
+        interactWithRoom();
+      }
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
@@ -242,8 +244,8 @@ export function GameSection() {
         let nextX = prev.x;
         let nextY = prev.y;
 
-        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, MAZE_W - PLAYER_SIZE);
-        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, MAZE_H - PLAYER_SIZE);
+        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, PLAN_W - PLAYER_SIZE);
+        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, PLAN_H - PLAYER_SIZE);
 
         const hitsWallX = walls.some((wall) =>
           isCollidingRect(attemptedX, prev.y, PLAYER_SIZE, wall)
@@ -262,7 +264,7 @@ export function GameSection() {
         if (hitTrap) {
           setShowGameOver(true);
           setFlashTrap(true);
-          setNearPortalId(null);
+          setNearRoomId(null);
 
           if (resetTimeoutRef.current) {
             window.clearTimeout(resetTimeoutRef.current);
@@ -277,27 +279,30 @@ export function GameSection() {
           return prev;
         }
 
-        let closest: Portal | null = null;
+        let closest: Room | null = null;
         let closestDist = Infinity;
 
-        for (const portal of portals) {
+        for (const room of rooms) {
+          const cx = room.x + room.width / 2;
+          const cy = room.y + room.height / 2;
+
           const d = distance(
             nextX + PLAYER_SIZE / 2,
             nextY + PLAYER_SIZE / 2,
-            portal.x + 33,
-            portal.y + 33
+            cx,
+            cy
           );
 
           if (d < closestDist) {
             closestDist = d;
-            closest = portal;
+            closest = room;
           }
         }
 
-        if (closest && closestDist <= INTERACTION_DISTANCE) {
-          setNearPortalId(closest.id);
+        if (closest && closestDist <= INTERACTION_DISTANCE + 24) {
+          setNearRoomId(closest.id);
         } else {
-          setNearPortalId(null);
+          setNearRoomId(null);
         }
 
         return { x: nextX, y: nextY };
@@ -313,7 +318,7 @@ export function GameSection() {
       window.removeEventListener('keyup', onKeyUp);
       cancelAnimationFrame(frameId);
     };
-  }, [started, showGameOver, activePortal]);
+  }, [started, showGameOver, activeRoom]);
 
   const setMobileKey = (key: string, isPressed: boolean) => {
     if (isPressed) mobileKeys.current.add(key);
@@ -363,7 +368,7 @@ export function GameSection() {
               lineHeight: 1,
             }}
           >
-            ENTER THE WORLD
+            ENTER THE HOUSE
           </h2>
 
           <p
@@ -373,7 +378,7 @@ export function GameSection() {
               color: 'rgba(245,245,245,0.6)',
             }}
           >
-            Explore a classic labyrinth, avoid traps, and reach a portal.
+            Walk through a floor plan and enter each room to explore the site.
           </p>
         </div>
 
@@ -387,8 +392,8 @@ export function GameSection() {
           <div
             className="absolute left-0 top-0 origin-top-left overflow-hidden"
             style={{
-              width: `${MAZE_W}px`,
-              height: `${MAZE_H}px`,
+              width: `${PLAN_W}px`,
+              height: `${PLAN_H}px`,
               transform: `scale(${scale})`,
               border: flashTrap
                 ? '2px solid rgba(255, 70, 70, 0.95)'
@@ -445,37 +450,37 @@ export function GameSection() {
               />
             ))}
 
-            {portals.map((portal) => {
-              const isActive = nearPortalId === portal.id;
+            {rooms.map((room) => {
+              const isActive = nearRoomId === room.id;
 
               return (
                 <motion.button
-                  key={portal.id}
+                  key={room.id}
                   type="button"
                   onClick={() => {
-                    document.getElementById(portal.targetId)?.scrollIntoView({
+                    document.getElementById(room.targetId)?.scrollIntoView({
                       behavior: 'smooth',
                       block: 'start',
                     });
                   }}
                   className="absolute flex items-center justify-center"
                   style={{
-                    left: portal.x,
-                    top: portal.y,
-                    width: 66,
-                    height: 66,
+                    left: room.x + room.width / 2 - 26,
+                    top: room.y + room.height / 2 - 26,
+                    width: 52,
+                    height: 52,
                     borderRadius: 999,
                     border: '2px solid #ff3b3b',
                     background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.06)',
                     boxShadow: isActive
-                      ? '0 0 28px rgba(255,56,56,0.42)'
-                      : '0 0 16px rgba(255,56,56,0.22)',
+                      ? '0 0 22px rgba(255,56,56,0.42)'
+                      : '0 0 14px rgba(255,56,56,0.18)',
                     color: '#F5F5F5',
                     cursor: 'pointer',
                   }}
-                  animate={{ scale: isActive ? 1.08 : [1, 1.03, 1] }}
+                  animate={{ scale: isActive ? 1.06 : [1, 1.02, 1] }}
                   transition={{
-                    duration: isActive ? 0.2 : 2.4,
+                    duration: isActive ? 0.2 : 2.2,
                     repeat: isActive ? 0 : Infinity,
                     ease: 'easeInOut',
                   }}
@@ -484,11 +489,11 @@ export function GameSection() {
                     className="uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '10px',
-                      letterSpacing: '0.2em',
+                      fontSize: '8px',
+                      letterSpacing: '0.16em',
                     }}
                   >
-                    {portal.label}
+                    {room.label}
                   </span>
                 </motion.button>
               );
@@ -524,7 +529,7 @@ export function GameSection() {
                       color: '#F5F5F5',
                     }}
                   >
-                    ENTER MAZE
+                    ENTER HOUSE
                   </h3>
 
                   <p
@@ -554,7 +559,7 @@ export function GameSection() {
                   <button
                     onClick={() => {
                       setPlayer(START_POS);
-                      setNearPortalId(null);
+                      setNearRoomId(null);
                       setStarted(true);
                     }}
                     style={{
@@ -642,11 +647,11 @@ export function GameSection() {
           <div className={`mt-4 flex flex-col items-center ${isLandscapeMobile ? 'gap-3' : 'gap-4'}`}>
             <button
               type="button"
-              onClick={interactWithPortal}
+              onClick={interactWithRoom}
               className={isLandscapeMobile ? 'px-6 py-2' : 'px-8 py-3'}
               style={{
                 border: '2px solid #ff3838',
-                background: activePortal ? 'rgba(255,56,56,0.14)' : 'transparent',
+                background: activeRoom ? 'rgba(255,56,56,0.14)' : 'transparent',
                 color: '#F5F5F5',
                 fontFamily: 'var(--font-body)',
                 letterSpacing: '0.16em',
