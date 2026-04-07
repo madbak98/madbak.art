@@ -23,23 +23,31 @@ const PLAYER_SPEED = 4.2;
 const INTERACTION_DISTANCE = 78;
 
 const portals: Portal[] = [
-  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 140, y: 110 },
-  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 700, y: 180 },
-  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 430, y: 390 },
+  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 100, y: 60 },
+  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 820, y: 100 },
+  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 800, y: 450 },
 ];
 
 const walls: Wall[] = [
-  { x: 210, y: 40, width: 18, height: 170 },
-  { x: 210, y: 260, width: 18, height: 190 },
+  { x: 0, y: 200, width: 200, height: 18 },
+  { x: 200, y: 0, width: 18, height: 200 },
 
-  { x: 360, y: 120, width: 180, height: 18 },
-  { x: 360, y: 120, width: 18, height: 120 },
+  { x: 150, y: 300, width: 18, height: 200 },
+  { x: 150, y: 300, width: 200, height: 18 },
 
-  { x: 520, y: 220, width: 18, height: 170 },
-  { x: 620, y: 60, width: 18, height: 170 },
+  { x: 350, y: 200, width: 18, height: 200 },
+  { x: 350, y: 200, width: 200, height: 18 },
 
-  { x: 680, y: 300, width: 120, height: 18 },
-  { x: 300, y: 340, width: 160, height: 18 },
+  { x: 550, y: 100, width: 18, height: 200 },
+  { x: 400, y: 100, width: 150, height: 18 },
+
+  { x: 600, y: 300, width: 200, height: 18 },
+  { x: 780, y: 150, width: 18, height: 200 },
+
+  { x: 250, y: 400, width: 120, height: 18 },
+  { x: 500, y: 350, width: 120, height: 18 },
+
+  { x: 450, y: 250, width: 18, height: 100 },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -63,7 +71,7 @@ function isCollidingWithWalls(x: number, y: number, size: number) {
 
 export function GameSection() {
   const [started, setStarted] = useState(false);
-  const [player, setPlayer] = useState({ x: 430, y: 240 });
+  const [player, setPlayer] = useState({ x: 40, y: 460 });
   const [nearPortalId, setNearPortalId] = useState<string | null>(null);
   const pressedKeys = useRef<Set<string>>(new Set());
 
@@ -348,7 +356,11 @@ export function GameSection() {
                 </p>
 
                 <button
-                  onClick={() => setStarted(true)}
+                  onClick={() => {
+                    setPlayer({ x: 40, y: 460 });
+                    setNearPortalId(null);
+                    setStarted(true);
+                  }}
                   className="px-8 py-4 transition-all duration-300"
                   style={{
                     fontFamily: 'var(--font-body)',
