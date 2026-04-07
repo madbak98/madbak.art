@@ -1,110 +1,336 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const W = 900;
-const H = 520;
+type Vec = { x: number; y: number };
 
-const PLAYER_SIZE = 20;
-const SPEED = 3.5;
+type Destination = {
+  id: 'about' | 'work' | 'contact';
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
 
-const targets = [
-  { id: 'about', x: 80, y: 80 },
-  { id: 'work', x: 700, y: 100 },
-  { id: 'contact', x: 400, y: 420 },
+type Building = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type Trap = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type Enemy = {
+  id: number;
+  x: number;
+  y: number;
+  hp: number;
+};
+
+type Bullet = {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+};
+
+const WORLD_W = 900;
+const WORLD_H = 520;
+
+const PLAYER_SIZE = 24;
+const PLAYER_SPEED = 3.2;
+const BULLET_SPEED = 7;
+const ENEMY_SPEED = 0.7;
+
+const START_POS: Vec = { x: 80, y: 430 };
+
+const destinations: Destination[] = [
+  { id: 'about', label: 'ABOUT', x: 66, y: 54, w: 104, h: 64 },
+  { id: 'work', label: 'WORK', x: 700, y: 66, w: 112, h: 64 },
+  { id: 'contact', label: 'CONTACT', x: 650, y: 390, w: 128, h: 64 },
 ];
 
-const traps = [
-  { x: 200, y: 200 },
-  { x: 500, y: 300 },
-  { x: 300, y: 120 },
+const buildings: Building[] = [
+  { x: 40, y: 36, w: 160, h: 110 },
+  { x: 270, y: 30, w: 150, h: 120 },
+  { x: 510, y: 28, w: 100, h: 130 },
+  { x: 676, y: 36, w: 160, h: 110 },
+
+  { x: 58, y: 220, w: 138, h: 110 },
+  { x: 300, y: 210, w: 170, h: 118 },
+  { x: 540, y: 208, w: 112, h: 122 },
+  { x: 684, y: 214, w: 136, h: 104 },
+
+  { x: 40, y: 382, w: 190, h: 92 },
+  { x: 286, y: 380, w: 150, h: 88 },
+  { x: 620, y: 370, w: 188, h: 100 },
 ];
 
-function distance(a: any, b: any) {
+const traps: Trap[] = [
+  { x: 235, y: 170, w: 72, h: 10 },
+  { x: 470, y: 340, w: 80, h: 10 },
+  { x: 620, y: 176, w: 10, h: 78 },
+];
+
+function rectsOverlap(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function distance(a: Vec, b: Vec) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function openSection(targetId: string) {
+  document.getElementById(targetId)?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
+}
+
+function Character({
+  x,
+  y,
+  facing,
+}: {
+  x: number;
+  y: number;
+  facing: number;
+}) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: PLAYER_SIZE,
+        height: PLAYER_SIZE,
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: 4,
+          top: 6,
+          width: 16,
+          height: 12,
+          borderRadius: '8px',
+          background: '#0f0f0f',
+          border: '2px solid #f5f5f5',
+          boxShadow: '0 0 10px rgba(255,255,255,0.18)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 7,
+          top: 1,
+          width: 10,
+          height: 10,
+          borderRadius: '999px',
+          background: '#f5f5f5',
+          boxShadow: '0 0 8px rgba(255,255,255,0.28)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 11,
+          top: 11,
+          width: 14,
+          height: 3,
+          transformOrigin: '0 50%',
+          transform: `rotate(${facing}rad)`,
+          background: '#ff4a4a',
+          borderRadius: '999px',
+          boxShadow: '0 0 8px rgba(255,74,74,0.42)',
+        }}
+      />
+    </div>
+  );
+}
+
+function Beast({ x, y }: { x: number; y: number }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: 22,
+        height: 22,
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '999px',
+          background: '#ff3b3b',
+          boxShadow: '0 0 14px rgba(255,59,59,0.35)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 4,
+          top: 5,
+          width: 4,
+          height: 4,
+          borderRadius: '999px',
+          background: '#0a0a0a',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          right: 4,
+          top: 5,
+          width: 4,
+          height: 4,
+          borderRadius: '999px',
+          background: '#0a0a0a',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 5,
+          bottom: 4,
+          width: 12,
+          height: 2,
+          background: '#0a0a0a',
+          borderRadius: '999px',
+        }}
+      />
+    </div>
+  );
+}
+
 export function GameSection() {
-  const [player, setPlayer] = useState({ x: 400, y: 250 });
-  const [bullets, setBullets] = useState<any[]>([]);
-  const [enemies, setEnemies] = useState([
-    { x: 300, y: 200 },
-    { x: 600, y: 350 },
-  ]);
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+  const [viewportHeight, setViewportHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight : 900
+  );
+
+  const [started, setStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [player, setPlayer] = useState<Vec>(START_POS);
+  const [facing, setFacing] = useState(0);
+  const [bullets, setBullets] = useState<Bullet[]>([]);
+  const [enemies, setEnemies] = useState<Enemy[]>([
+    { id: 1, x: 770, y: 250, hp: 2 },
+    { id: 2, x: 440, y: 120, hp: 2 },
+    { id: 3, x: 565, y: 410, hp: 2 },
+  ]);
+  const [message, setMessage] = useState('Reach a destination');
 
-  const keys = useRef<Set<string>>(new Set());
+  const keysRef = useRef<Set<string>>(new Set());
+  const bulletIdRef = useRef(1);
+  const arenaRef = useRef<HTMLDivElement | null>(null);
 
-  // 🎮 Movement
   useEffect(() => {
-    const down = (e: any) => keys.current.add(e.key.toLowerCase());
-    const up = (e: any) => keys.current.delete(e.key.toLowerCase());
+    const onResize = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
+  const isMobile = viewportWidth <= 767;
+  const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
 
-    let frame: any;
+  const renderWidth = isLandscapeMobile
+    ? Math.min(viewportWidth - 32, 300)
+    : isMobile
+    ? Math.min(viewportWidth - 32, 360)
+    : 760;
+
+  const scale = renderWidth / WORLD_W;
+  const renderHeight = WORLD_H * scale;
+
+  const worldBuildings = useMemo(() => buildings, []);
+
+  useEffect(() => {
+    if (!started || gameOver) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      keysRef.current.add(e.key.toLowerCase());
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      keysRef.current.delete(e.key.toLowerCase());
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    let frame = 0;
 
     const loop = () => {
-      setPlayer((p) => {
+      setPlayer((prev) => {
         let dx = 0;
         let dy = 0;
 
-        if (keys.current.has('w')) dy -= 1;
-        if (keys.current.has('s')) dy += 1;
-        if (keys.current.has('a')) dx -= 1;
-        if (keys.current.has('d')) dx += 1;
+        if (keysRef.current.has('w')) dy -= 1;
+        if (keysRef.current.has('s')) dy += 1;
+        if (keysRef.current.has('a')) dx -= 1;
+        if (keysRef.current.has('d')) dx += 1;
 
-        const nx = Math.max(0, Math.min(W - PLAYER_SIZE, p.x + dx * SPEED));
-        const ny = Math.max(0, Math.min(H - PLAYER_SIZE, p.y + dy * SPEED));
+        if (dx !== 0 && dy !== 0) {
+          dx *= 0.7071;
+          dy *= 0.7071;
+        }
 
-        return { x: nx, y: ny };
+        const tryX = clamp(prev.x + dx * PLAYER_SPEED, 0, WORLD_W - PLAYER_SIZE);
+        const tryY = clamp(prev.y + dy * PLAYER_SPEED, 0, WORLD_H - PLAYER_SIZE);
+
+        let nextX = prev.x;
+        let nextY = prev.y;
+
+        const rectX = { x: tryX, y: prev.y, w: PLAYER_SIZE, h: PLAYER_SIZE };
+        if (!worldBuildings.some((b) => rectsOverlap(rectX, b))) nextX = tryX;
+
+        const rectY = { x: nextX, y: tryY, w: PLAYER_SIZE, h: PLAYER_SIZE };
+        if (!worldBuildings.some((b) => rectsOverlap(rectY, b))) nextY = tryY;
+
+        return { x: nextX, y: nextY };
       });
 
-      frame = requestAnimationFrame(loop);
-    };
-
-    frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  // 🔫 Shoot
-  const shoot = (e: any) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const tx = ((e.clientX - rect.left) / rect.width) * W;
-    const ty = ((e.clientY - rect.top) / rect.height) * H;
-
-    const angle = Math.atan2(ty - player.y, tx - player.x);
-
-    setBullets((b) => [
-      ...b,
-      {
-        x: player.x,
-        y: player.y,
-        vx: Math.cos(angle) * 6,
-        vy: Math.sin(angle) * 6,
-      },
-    ]);
-  };
-
-  // 🔁 Update bullets + enemies
-  useEffect(() => {
-    let frame: any;
-
-    const loop = () => {
-      setBullets((bs) =>
-        bs.map((b) => ({
-          ...b,
-          x: b.x + b.vx,
-          y: b.y + b.vy,
-        }))
+      setBullets((prev) =>
+        prev
+          .map((b) => ({
+            ...b,
+            x: b.x + b.vx,
+            y: b.y + b.vy,
+          }))
+          .filter((b) => b.x > -20 && b.x < WORLD_W + 20 && b.y > -20 && b.y < WORLD_H + 20)
       );
 
-      setEnemies((es) =>
-        es.map((e) => {
-          const angle = Math.atan2(player.y - e.y, player.x - e.x);
-          return {
-            x: e.x + Math.cos(angle) * 1.2,
-            y: e.y + Math.sin(angle) * 1.2,
-          };
+      setEnemies((prev) =>
+        prev.map((enemy) => {
+          const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+          const nx = enemy.x + Math.cos(angle) * ENEMY_SPEED;
+          const ny = enemy.y + Math.sin(angle) * ENEMY_SPEED;
+
+          const enemyRect = { x: nx, y: ny, w: 22, h: 22 };
+          const blocked = worldBuildings.some((b) => rectsOverlap(enemyRect, b));
+
+          if (blocked) return enemy;
+          return { ...enemy, x: nx, y: ny };
         })
       );
 
@@ -112,137 +338,490 @@ export function GameSection() {
     };
 
     frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
-  }, [player]);
 
-  // 💀 Collision
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      cancelAnimationFrame(frame);
+    };
+  }, [started, gameOver, player, worldBuildings]);
+
   useEffect(() => {
-    // trap
-    for (const t of traps) {
-      if (distance(player, t) < 20) {
+    if (!started || gameOver) return;
+
+    setEnemies((prevEnemies) => {
+      let nextEnemies = [...prevEnemies];
+
+      bullets.forEach((bullet) => {
+        nextEnemies = nextEnemies
+          .map((enemy) => {
+            const hit = distance(
+              { x: bullet.x, y: bullet.y },
+              { x: enemy.x + 11, y: enemy.y + 11 }
+            ) < 16;
+
+            if (!hit) return enemy;
+            return { ...enemy, hp: enemy.hp - 1 };
+          })
+          .filter((enemy) => enemy.hp > 0);
+      });
+
+      return nextEnemies;
+    });
+  }, [bullets, started, gameOver]);
+
+  useEffect(() => {
+    if (!started || gameOver) return;
+
+    for (const trap of traps) {
+      if (
+        rectsOverlap(
+          { x: player.x, y: player.y, w: PLAYER_SIZE, h: PLAYER_SIZE },
+          trap
+        )
+      ) {
         setGameOver(true);
+        setMessage('You hit a trap');
+        return;
       }
     }
 
-    // enemy
-    for (const e of enemies) {
-      if (distance(player, e) < 20) {
+    for (const enemy of enemies) {
+      if (distance(player, enemy) < 18) {
         setGameOver(true);
+        setMessage('A beast got you');
+        return;
       }
     }
 
-    // target
-    for (const t of targets) {
-      if (distance(player, t) < 30) {
-        document.getElementById(t.id)?.scrollIntoView({
-          behavior: 'smooth',
-        });
+    for (const dest of destinations) {
+      if (
+        rectsOverlap(
+          { x: player.x, y: player.y, w: PLAYER_SIZE, h: PLAYER_SIZE },
+          { x: dest.x, y: dest.y, w: dest.w, h: dest.h }
+        )
+      ) {
+        setMessage(`Entering ${dest.label}`);
+        openSection(dest.id);
+        return;
       }
     }
-  }, [player, enemies]);
+  }, [player, enemies, started, gameOver]);
+
+  const shoot = (clientX: number, clientY: number) => {
+    if (!arenaRef.current || !started || gameOver) return;
+
+    const rect = arenaRef.current.getBoundingClientRect();
+    const tx = ((clientX - rect.left) / rect.width) * WORLD_W;
+    const ty = ((clientY - rect.top) / rect.height) * WORLD_H;
+
+    const cx = player.x + PLAYER_SIZE / 2;
+    const cy = player.y + PLAYER_SIZE / 2;
+    const angle = Math.atan2(ty - cy, tx - cx);
+
+    setFacing(angle);
+
+    setBullets((prev) => [
+      ...prev,
+      {
+        id: bulletIdRef.current++,
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle) * BULLET_SPEED,
+        vy: Math.sin(angle) * BULLET_SPEED,
+      },
+    ]);
+  };
+
+  const restart = () => {
+    setGameOver(false);
+    setStarted(true);
+    setPlayer(START_POS);
+    setBullets([]);
+    setEnemies([
+      { id: 1, x: 770, y: 250, hp: 2 },
+      { id: 2, x: 440, y: 120, hp: 2 },
+      { id: 3, x: 565, y: 410, hp: 2 },
+    ]);
+    setMessage('Reach a destination');
+  };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-black">
-      <div
-        onClick={shoot}
-        style={{
-          width: W,
-          height: H,
-          position: 'relative',
-          border: '2px solid red',
-          overflow: 'hidden',
-        }}
-      >
-        {/* PLAYER */}
-        <div
-          style={{
-            position: 'absolute',
-            left: player.x,
-            top: player.y,
-            width: PLAYER_SIZE,
-            height: PLAYER_SIZE,
-            background: 'white',
-          }}
-        />
+    <section
+      id="game"
+      className={`relative min-h-screen flex items-center justify-center px-4 ${
+        isLandscapeMobile ? 'py-8' : 'py-20'
+      }`}
+    >
+      <div className="w-full max-w-6xl z-10">
+        <div className="mb-8 text-center">
+          <div className="mb-3">
+            <span
+              className="text-xs tracking-[0.3em] uppercase"
+              style={{ fontFamily: 'var(--font-mono)', color: '#ff4a4a' }}
+            >
+              [00X] CITY RUN
+            </span>
+          </div>
 
-        {/* TARGETS */}
-        {targets.map((t) => (
-          <div
-            key={t.id}
+          <h2
+            className="mb-3"
             style={{
-              position: 'absolute',
-              left: t.x,
-              top: t.y,
-              width: 30,
-              height: 30,
-              border: '2px solid red',
-            }}
-          />
-        ))}
-
-        {/* TRAPS */}
-        {traps.map((t, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: t.x,
-              top: t.y,
-              width: 20,
-              height: 20,
-              background: 'purple',
-            }}
-          />
-        ))}
-
-        {/* ENEMIES */}
-        {enemies.map((e, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: e.x,
-              top: e.y,
-              width: 20,
-              height: 20,
-              background: 'red',
-            }}
-          />
-        ))}
-
-        {/* BULLETS */}
-        {bullets.map((b, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: b.x,
-              top: b.y,
-              width: 6,
-              height: 6,
-              background: 'yellow',
-            }}
-          />
-        ))}
-
-        {gameOver && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'black',
-              color: 'white',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              fontSize: 40,
-              fontFamily: 'monospace',
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'clamp(2.2rem, 8vw, 5rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              color: '#F5F5F5',
+              lineHeight: 1,
             }}
           >
-            GAME OVER
+            REACH THE TARGET
+          </h2>
+
+          <p
+            className="mx-auto max-w-2xl text-[11px] sm:text-sm tracking-[0.12em] uppercase"
+            style={{
+              fontFamily: 'var(--font-body)',
+              color: 'rgba(245,245,245,0.58)',
+            }}
+          >
+            Move with WASD. Click to shoot. Avoid traps and beasts.
+          </p>
+        </div>
+
+        <div
+          className="relative mx-auto"
+          style={{
+            width: `${renderWidth}px`,
+            height: `${renderHeight}px`,
+          }}
+        >
+          <div
+            ref={arenaRef}
+            onClick={(e) => shoot(e.clientX, e.clientY)}
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              if (touch) shoot(touch.clientX, touch.clientY);
+            }}
+            className="absolute left-0 top-0 origin-top-left overflow-hidden"
+            style={{
+              width: `${WORLD_W}px`,
+              height: `${WORLD_H}px`,
+              transform: `scale(${scale})`,
+              border: '2px solid rgba(255,74,74,0.55)',
+              background:
+                'linear-gradient(180deg, rgba(12,12,12,1) 0%, rgba(8,8,8,1) 100%)',
+              boxShadow: '0 0 38px rgba(255,74,74,0.12)',
+              cursor: 'crosshair',
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px',
+              }}
+            />
+
+            {/* roads */}
+            <div
+              className="absolute"
+              style={{
+                left: 0,
+                top: 156,
+                width: WORLD_W,
+                height: 52,
+                background: 'rgba(255,255,255,0.03)',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: 0,
+                top: 334,
+                width: WORLD_W,
+                height: 52,
+                background: 'rgba(255,255,255,0.03)',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: 230,
+                top: 0,
+                width: 54,
+                height: WORLD_H,
+                background: 'rgba(255,255,255,0.03)',
+                borderLeft: '1px solid rgba(255,255,255,0.08)',
+                borderRight: '1px solid rgba(255,255,255,0.08)',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: 616,
+                top: 0,
+                width: 54,
+                height: WORLD_H,
+                background: 'rgba(255,255,255,0.03)',
+                borderLeft: '1px solid rgba(255,255,255,0.08)',
+                borderRight: '1px solid rgba(255,255,255,0.08)',
+              }}
+            />
+
+            {/* buildings */}
+            {buildings.map((b, i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: b.x,
+                  top: b.y,
+                  width: b.w,
+                  height: b.h,
+                  background: 'rgba(255,255,255,0.035)',
+                  border: '1px solid rgba(255,255,255,0.11)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 8,
+                    border: '1px solid rgba(255,255,255,0.05)',
+                  }}
+                />
+              </div>
+            ))}
+
+            {/* destinations */}
+            {destinations.map((d) => (
+              <div
+                key={d.id}
+                style={{
+                  position: 'absolute',
+                  left: d.x,
+                  top: d.y,
+                  width: d.w,
+                  height: d.h,
+                  border: '1px solid rgba(255,74,74,0.9)',
+                  background: 'rgba(255,74,74,0.07)',
+                  boxShadow: '0 0 16px rgba(255,74,74,0.16)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#f5f5f5',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {d.label}
+              </div>
+            ))}
+
+            {/* traps */}
+            {traps.map((t, i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: t.x,
+                  top: t.y,
+                  width: t.w,
+                  height: t.h,
+                  background:
+                    t.w > t.h
+                      ? 'linear-gradient(90deg, rgba(255,0,0,0.08), rgba(255,0,0,0.52), rgba(255,0,0,0.08))'
+                      : 'linear-gradient(180deg, rgba(255,0,0,0.08), rgba(255,0,0,0.52), rgba(255,0,0,0.08))',
+                  border: '1px solid rgba(255,0,0,0.8)',
+                  boxShadow: '0 0 10px rgba(255,0,0,0.24)',
+                }}
+              />
+            ))}
+
+            {/* bullets */}
+            {bullets.map((b) => (
+              <div
+                key={b.id}
+                style={{
+                  position: 'absolute',
+                  left: b.x,
+                  top: b.y,
+                  width: 6,
+                  height: 6,
+                  borderRadius: '999px',
+                  background: '#f5f5f5',
+                  boxShadow: '0 0 8px rgba(255,255,255,0.5)',
+                }}
+              />
+            ))}
+
+            {/* enemies */}
+            {enemies.map((e) => (
+              <Beast key={e.id} x={e.x} y={e.y} />
+            ))}
+
+            {/* player */}
+            <Character x={player.x} y={player.y} facing={facing} />
+
+            {/* HUD */}
+            <div
+              className="absolute left-4 top-4 px-4 py-3"
+              style={{
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(10,10,10,0.68)',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.18em',
+                  color: '#ff4a4a',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Status
+              </div>
+              <div
+                className="mt-1"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.16em',
+                  color: 'rgba(245,245,245,0.56)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {message}
+              </div>
+            </div>
+
+            {!started && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/72 backdrop-blur-[2px]">
+                <div className="text-center px-6">
+                  <div
+                    className="mb-4"
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: 'clamp(1.4rem, 4vw, 2.2rem)',
+                      fontWeight: 800,
+                      color: '#F5F5F5',
+                    }}
+                  >
+                    ENTER THE CITY
+                  </div>
+
+                  <p
+                    className="mb-3 uppercase"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      color: 'rgba(245,245,245,0.58)',
+                      fontSize: '10px',
+                      letterSpacing: '0.18em',
+                    }}
+                  >
+                    WASD to move
+                  </p>
+
+                  <p
+                    className="mb-6 uppercase"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      color: 'rgba(245,245,245,0.42)',
+                      fontSize: '10px',
+                      letterSpacing: '0.18em',
+                    }}
+                  >
+                    Click / Tap to shoot
+                  </p>
+
+                  <button
+                    onClick={() => {
+                      setStarted(true);
+                      setGameOver(false);
+                      setPlayer(START_POS);
+                      setMessage('Reach a destination');
+                    }}
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.16em',
+                      textTransform: 'uppercase',
+                      border: '2px solid #ff4a4a',
+                      color: '#F5F5F5',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '12px 26px',
+                    }}
+                  >
+                    Start
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {gameOver && (
+              <div
+                onClick={restart}
+                className="absolute inset-0 flex items-center justify-center bg-black/86"
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="text-center px-6">
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: 'clamp(2rem, 6vw, 3.4rem)',
+                      color: '#F5F5F5',
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Game Over
+                  </div>
+                  <div
+                    className="mt-3"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '10px',
+                      letterSpacing: '0.18em',
+                      color: 'rgba(245,245,245,0.52)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Tap to restart
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {isMobile && started && !gameOver && (
+          <div className="mt-4 text-center">
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                color: 'rgba(245,245,245,0.58)',
+                fontSize: '10px',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Move with WASD keyboard. Tap to shoot.
+            </p>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
