@@ -31,9 +31,9 @@ const INTERACTION_DISTANCE = 26;
 const START_POSITION = { x: 18, y: 482 };
 
 const portals: Portal[] = [
-  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 78, y: 72 },
-  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 286, y: 74 },
-  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 258, y: 408 },
+  { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 56, y: 82 },
+  { id: 'work-portal', label: 'WORK', targetId: 'work', x: 272, y: 84 },
+  { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 244, y: 392 },
 ];
 
 const walls: Wall[] = [
@@ -43,75 +43,53 @@ const walls: Wall[] = [
   { x: 348, y: 0, width: 12, height: 520 },
   { x: 0, y: 508, width: 360, height: 12 },
 
-  // top band
-  { x: 36, y: 24, width: 12, height: 82 },
-  { x: 48, y: 94, width: 58, height: 12 },
-  { x: 94, y: 36, width: 12, height: 116 },
-  { x: 94, y: 36, width: 48, height: 12 },
-  { x: 142, y: 36, width: 12, height: 70 },
-  { x: 142, y: 94, width: 54, height: 12 },
-  { x: 184, y: 24, width: 12, height: 82 },
-  { x: 184, y: 24, width: 70, height: 12 },
-  { x: 242, y: 24, width: 12, height: 44 },
-  { x: 242, y: 56, width: 46, height: 12 },
-  { x: 288, y: 24, width: 12, height: 94 },
-  { x: 300, y: 106, width: 24, height: 12 },
-  { x: 324, y: 24, width: 12, height: 128 },
+  // left side
+  { x: 60, y: 24, width: 12, height: 120 },
+  { x: 60, y: 132, width: 92, height: 12 },
 
-  // upper middle
-  { x: 36, y: 140, width: 12, height: 70 },
-  { x: 24, y: 198, width: 24, height: 12 },
-  { x: 70, y: 140, width: 12, height: 118 },
-  { x: 70, y: 140, width: 54, height: 12 },
-  { x: 124, y: 140, width: 12, height: 58 },
-  { x: 124, y: 186, width: 60, height: 12 },
-  { x: 172, y: 128, width: 12, height: 70 },
-  { x: 172, y: 128, width: 82, height: 12 },
-  { x: 242, y: 128, width: 12, height: 106 },
-  { x: 242, y: 222, width: 44, height: 12 },
-  { x: 286, y: 152, width: 12, height: 82 },
-  { x: 312, y: 140, width: 12, height: 106 },
+  { x: 84, y: 214, width: 12, height: 138 },
+  { x: 24, y: 340, width: 72, height: 12 },
 
-  // center shrine
-  { x: 94, y: 234, width: 12, height: 90 },
-  { x: 94, y: 234, width: 58, height: 12 },
-  { x: 140, y: 246, width: 12, height: 116 },
-  { x: 140, y: 350, width: 58, height: 12 },
-  { x: 198, y: 246, width: 12, height: 70 },
-  { x: 198, y: 246, width: 70, height: 12 },
-  { x: 256, y: 246, width: 12, height: 58 },
-  { x: 222, y: 292, width: 46, height: 12 },
+  { x: 132, y: 84, width: 12, height: 82 },
+  { x: 132, y: 84, width: 72, height: 12 },
 
-  // lower mid
-  { x: 36, y: 292, width: 12, height: 82 },
-  { x: 24, y: 362, width: 24, height: 12 },
-  { x: 70, y: 280, width: 12, height: 118 },
-  { x: 24, y: 398, width: 58, height: 12 },
-  { x: 106, y: 386, width: 58, height: 12 },
-  { x: 164, y: 386, width: 12, height: 46 },
-  { x: 164, y: 420, width: 34, height: 12 },
-  { x: 198, y: 340, width: 12, height: 92 },
-  { x: 198, y: 340, width: 58, height: 12 },
-  { x: 244, y: 352, width: 12, height: 58 },
-  { x: 244, y: 398, width: 58, height: 12 },
-  { x: 302, y: 328, width: 12, height: 82 },
+  // center block
+  { x: 204, y: 60, width: 12, height: 152 },
+  { x: 144, y: 60, width: 72, height: 12 },
 
-  // bottom band
-  { x: 36, y: 444, width: 58, height: 12 },
-  { x: 94, y: 444, width: 12, height: 52 },
-  { x: 118, y: 444, width: 12, height: 64 },
-  { x: 130, y: 496, width: 58, height: 12 },
-  { x: 188, y: 456, width: 12, height: 52 },
-  { x: 200, y: 456, width: 52, height: 12 },
-  { x: 252, y: 432, width: 12, height: 76 },
-  { x: 276, y: 432, width: 12, height: 46 },
-  { x: 288, y: 466, width: 48, height: 12 },
+  { x: 144, y: 200, width: 12, height: 120 },
+  { x: 144, y: 308, width: 84, height: 12 },
+
+  { x: 228, y: 200, width: 12, height: 120 },
+  { x: 228, y: 200, width: 72, height: 12 },
+
+  { x: 288, y: 120, width: 12, height: 92 },
+  { x: 252, y: 120, width: 48, height: 12 },
+
+  // lower center
+  { x: 180, y: 356, width: 12, height: 92 },
+  { x: 120, y: 436, width: 72, height: 12 },
+
+  { x: 228, y: 356, width: 72, height: 12 },
+  { x: 288, y: 356, width: 12, height: 92 },
+
+  // right side
+  { x: 300, y: 60, width: 12, height: 104 },
+  { x: 300, y: 152, width: 36, height: 12 },
+
+  { x: 300, y: 252, width: 12, height: 56 },
+  { x: 264, y: 296, width: 48, height: 12 },
+
+  // bottom accents
+  { x: 48, y: 460, width: 72, height: 12 },
+  { x: 144, y: 472, width: 84, height: 12 },
+  { x: 264, y: 472, width: 60, height: 12 },
 ];
 
 const traps: Trap[] = [
-  { x: 152, y: 94, width: 26, height: 8 },
-  { x: 228, y: 292, width: 20, height: 8 },
-  { x: 166, y: 420, width: 20, height: 8 },
+  { x: 156, y: 308, width: 36, height: 8 },
+  { x: 264, y: 152, width: 24, height: 8 },
+  { x: 180, y: 472, width: 24, height: 8 },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -166,7 +144,9 @@ export function GameSection() {
 
   useEffect(() => {
     return () => {
-      if (resetTimeoutRef.current) window.clearTimeout(resetTimeoutRef.current);
+      if (resetTimeoutRef.current) {
+        window.clearTimeout(resetTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -200,7 +180,9 @@ export function GameSection() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       pressedKeys.current.add(e.key.toLowerCase());
-      if (e.key.toLowerCase() === 'e') interactWithPortal();
+      if (e.key.toLowerCase() === 'e') {
+        interactWithPortal();
+      }
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
