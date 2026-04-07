@@ -14,6 +14,7 @@ type Wall = {
   y: number;
   width: number;
   height: number;
+  kind?: 'main' | 'sub';
 };
 
 type Trap = {
@@ -23,55 +24,66 @@ type Trap = {
   height: number;
 };
 
+type InfoBox = {
+  x: number;
+  y: number;
+};
+
 type GameConfig = {
   width: number;
   height: number;
   playerSize: number;
   playerSpeed: number;
   interactionDistance: number;
-  startPosition: { x: number; y: number };
   portalSize: number;
-  infoBox: { x: number; y: number };
+  startPosition: { x: number; y: number };
   portals: Portal[];
   walls: Wall[];
   traps: Trap[];
+  infoBox: InfoBox;
 };
 
 function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
   if (mode === 'mobile') {
     return {
       width: 340,
-      height: 240,
+      height: 250,
       playerSize: 14,
-      playerSpeed: 2.6,
-      interactionDistance: 48,
-      startPosition: { x: 12, y: 204 },
+      playerSpeed: 2.4,
+      interactionDistance: 42,
       portalSize: 46,
-      infoBox: { x: 10, y: 186 },
+      startPosition: { x: 14, y: 216 },
+      infoBox: { x: 10, y: 10 },
       portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 18, y: 16 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 272, y: 18 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 246, y: 174 },
+        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 18, y: 18 },
+        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 274, y: 18 },
+        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 246, y: 182 },
       ],
       walls: [
-        { x: 58, y: 0, width: 10, height: 112 },
-        { x: 0, y: 98, width: 104, height: 10 },
+        // left district
+        { x: 66, y: 0, width: 10, height: 118, kind: 'main' },
+        { x: 0, y: 102, width: 110, height: 10, kind: 'main' },
 
-        { x: 122, y: 32, width: 10, height: 138 },
-        { x: 122, y: 32, width: 112, height: 10 },
+        // central shrine
+        { x: 138, y: 34, width: 10, height: 154, kind: 'main' },
+        { x: 138, y: 34, width: 126, height: 10, kind: 'main' },
+        { x: 254, y: 34, width: 10, height: 102, kind: 'main' },
+        { x: 188, y: 126, width: 76, height: 10, kind: 'main' },
+        { x: 188, y: 126, width: 10, height: 70, kind: 'main' },
 
-        { x: 224, y: 32, width: 10, height: 92 },
-        { x: 160, y: 114, width: 74, height: 10 },
+        // lower spine
+        { x: 86, y: 186, width: 128, height: 10, kind: 'main' },
 
-        { x: 78, y: 174, width: 118, height: 10 },
-        { x: 268, y: 112, width: 60, height: 10 },
+        // right district
+        { x: 270, y: 146, width: 58, height: 10, kind: 'main' },
 
-        { x: 200, y: 54, width: 26, height: 8 },
-        { x: 166, y: 144, width: 44, height: 8 },
+        // fake path hints
+        { x: 208, y: 60, width: 28, height: 8, kind: 'sub' },
+        { x: 164, y: 164, width: 48, height: 8, kind: 'sub' },
       ],
       traps: [
-        { x: 102, y: 198, width: 42, height: 8 },
-        { x: 188, y: 58, width: 24, height: 8 },
+        { x: 116, y: 214, width: 40, height: 8 },
+        { x: 214, y: 60, width: 18, height: 8 },
       ],
     };
   }
@@ -81,95 +93,83 @@ function getGameConfig(mode: 'mobile' | 'tablet' | 'desktop'): GameConfig {
       width: 760,
       height: 430,
       playerSize: 18,
-      playerSpeed: 3.2,
-      interactionDistance: 66,
-      startPosition: { x: 20, y: 386 },
+      playerSpeed: 3.1,
+      interactionDistance: 62,
       portalSize: 58,
-      infoBox: { x: 18, y: 358 },
+      startPosition: { x: 20, y: 388 },
+      infoBox: { x: 14, y: 14 },
       portals: [
-        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 72, y: 68 },
-        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 628, y: 70 },
-        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 600, y: 334 },
+        { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 74, y: 60 },
+        { id: 'work-portal', label: 'WORK', targetId: 'work', x: 628, y: 60 },
+        { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 598, y: 336 },
       ],
       walls: [
-        // left chamber
-        { x: 92, y: 0, width: 14, height: 190 },
-        { x: 0, y: 178, width: 210, height: 14 },
+        { x: 102, y: 0, width: 14, height: 190, kind: 'main' },
+        { x: 0, y: 176, width: 212, height: 14, kind: 'main' },
 
-        // central shrine
-        { x: 278, y: 52, width: 14, height: 286 },
-        { x: 278, y: 52, width: 238, height: 14 },
-        { x: 502, y: 52, width: 14, height: 182 },
-        { x: 372, y: 176, width: 144, height: 14 },
-        { x: 372, y: 176, width: 14, height: 136 },
+        { x: 286, y: 54, width: 14, height: 286, kind: 'main' },
+        { x: 286, y: 54, width: 240, height: 14, kind: 'main' },
+        { x: 512, y: 54, width: 14, height: 188, kind: 'main' },
+        { x: 376, y: 176, width: 150, height: 14, kind: 'main' },
+        { x: 376, y: 176, width: 14, height: 136, kind: 'main' },
 
-        // bottom spine
-        { x: 154, y: 328, width: 232, height: 14 },
+        { x: 156, y: 328, width: 236, height: 14, kind: 'main' },
+        { x: 560, y: 284, width: 176, height: 14, kind: 'main' },
 
-        // right district
-        { x: 560, y: 284, width: 176, height: 14 },
-        { x: 736, y: 118, width: 14, height: 180 },
-
-        // micro blockers
-        { x: 458, y: 238, width: 14, height: 90 },
-        { x: 520, y: 340, width: 92, height: 12 },
-        { x: 438, y: 102, width: 56, height: 10 },
-        { x: 206, y: 364, width: 84, height: 10 },
+        { x: 450, y: 96, width: 56, height: 10, kind: 'sub' },
+        { x: 474, y: 236, width: 14, height: 76, kind: 'sub' },
+        { x: 222, y: 370, width: 82, height: 10, kind: 'sub' },
       ],
       traps: [
-        { x: 210, y: 370, width: 74, height: 10 },
-        { x: 432, y: 106, width: 50, height: 10 },
-        { x: 582, y: 214, width: 10, height: 64 },
+        { x: 224, y: 372, width: 72, height: 10 },
+        { x: 454, y: 96, width: 42, height: 10 },
+        { x: 612, y: 236, width: 10, height: 62 },
       ],
     };
   }
 
   return {
-    width: 900,
+    width: 920,
     height: 520,
     playerSize: 22,
     playerSpeed: 3.8,
-    interactionDistance: 82,
-    startPosition: { x: 26, y: 470 },
+    interactionDistance: 78,
     portalSize: 66,
-    infoBox: { x: 18, y: 444 },
+    startPosition: { x: 24, y: 474 },
+    infoBox: { x: 18, y: 18 },
     portals: [
-      { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 82, y: 84 },
-      { id: 'work-portal', label: 'WORK', targetId: 'work', x: 760, y: 86 },
-      { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 724, y: 414 },
+      { id: 'about-portal', label: 'ABOUT', targetId: 'about', x: 86, y: 72 },
+      { id: 'work-portal', label: 'WORK', targetId: 'work', x: 770, y: 74 },
+      { id: 'contact-portal', label: 'CONTACT', targetId: 'contact', x: 728, y: 414 },
     ],
     walls: [
-      // left chamber
-      { x: 104, y: 0, width: 18, height: 236 },
-      { x: 0, y: 222, width: 250, height: 18 },
+      // left district
+      { x: 116, y: 0, width: 18, height: 230, kind: 'main' },
+      { x: 0, y: 214, width: 258, height: 18, kind: 'main' },
 
-      // central shrine outer
-      { x: 330, y: 70, width: 18, height: 320 },
-      { x: 330, y: 70, width: 276, height: 18 },
-      { x: 588, y: 70, width: 18, height: 220 },
+      // central shrine / spine
+      { x: 344, y: 72, width: 18, height: 312, kind: 'main' },
+      { x: 344, y: 72, width: 286, height: 18, kind: 'main' },
+      { x: 612, y: 72, width: 18, height: 212, kind: 'main' },
+      { x: 448, y: 206, width: 182, height: 18, kind: 'main' },
+      { x: 448, y: 206, width: 18, height: 166, kind: 'main' },
 
-      // shrine inner
-      { x: 430, y: 202, width: 176, height: 18 },
-      { x: 430, y: 202, width: 18, height: 168 },
-
-      // bottom spine
-      { x: 184, y: 398, width: 264, height: 18 },
+      // lower spine
+      { x: 198, y: 402, width: 276, height: 18, kind: 'main' },
 
       // right district
-      { x: 662, y: 324, width: 220, height: 18 },
-      { x: 882, y: 136, width: 18, height: 206 },
+      { x: 686, y: 320, width: 210, height: 18, kind: 'main' },
 
-      // blockers / fake paths
-      { x: 530, y: 274, width: 18, height: 114 },
-      { x: 610, y: 410, width: 128, height: 16 },
-      { x: 520, y: 118, width: 70, height: 12 },
-      { x: 244, y: 444, width: 114, height: 12 },
-      { x: 472, y: 250, width: 56, height: 12 },
+      // hints / fake branches
+      { x: 536, y: 118, width: 72, height: 12, kind: 'sub' },
+      { x: 560, y: 262, width: 18, height: 104, kind: 'sub' },
+      { x: 246, y: 448, width: 112, height: 12, kind: 'sub' },
+      { x: 496, y: 272, width: 60, height: 12, kind: 'sub' },
     ],
     traps: [
-      { x: 250, y: 456, width: 96, height: 12 },
-      { x: 516, y: 122, width: 52, height: 12 },
-      { x: 692, y: 238, width: 12, height: 84 },
+      { x: 258, y: 458, width: 86, height: 12 },
+      { x: 540, y: 118, width: 48, height: 12 },
+      { x: 754, y: 244, width: 12, height: 78 },
     ],
   };
 }
@@ -243,9 +243,7 @@ export function GameSection() {
 
   useEffect(() => {
     return () => {
-      if (resetTimeoutRef.current) {
-        window.clearTimeout(resetTimeoutRef.current);
-      }
+      if (resetTimeoutRef.current) window.clearTimeout(resetTimeoutRef.current);
     };
   }, []);
 
@@ -267,9 +265,7 @@ export function GameSection() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       pressedKeys.current.add(e.key.toLowerCase());
-      if (e.key.toLowerCase() === 'e') {
-        interactWithPortal();
-      }
+      if (e.key.toLowerCase() === 'e') interactWithPortal();
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
@@ -317,15 +313,15 @@ export function GameSection() {
           config.height - config.playerSize
         );
 
-        const collidesWallX = config.walls.some((wall) =>
+        const hitsWallX = config.walls.some((wall) =>
           isCollidingRect(attemptedX, prev.y, config.playerSize, wall)
         );
-        const collidesWallY = config.walls.some((wall) =>
+        const hitsWallY = config.walls.some((wall) =>
           isCollidingRect(nextX, attemptedY, config.playerSize, wall)
         );
 
-        if (!collidesWallX) nextX = attemptedX;
-        if (!collidesWallY) nextY = attemptedY;
+        if (!hitsWallX) nextX = attemptedX;
+        if (!hitsWallY) nextY = attemptedY;
 
         const hitTrap = config.traps.some((trap) =>
           isCollidingRect(nextX, nextY, config.playerSize, trap)
@@ -344,7 +340,7 @@ export function GameSection() {
             setPlayer(config.startPosition);
             setFlashTrap(false);
             setShowGameOver(false);
-          }, 1200);
+          }, 1100);
 
           return prev;
         }
@@ -411,30 +407,31 @@ export function GameSection() {
     : isMobile
     ? 'min(94vw, 360px)'
     : isTablet
-    ? 'min(86vw, 760px)'
+    ? 'min(88vw, 760px)'
     : `${config.width}px`;
 
   const arenaHeight = isLandscapeMobile
     ? 'min(36vh, 220px)'
     : isMobile
-    ? 'min(58vw, 250px)'
+    ? '250px'
     : isTablet
     ? '430px'
     : `${config.height}px`;
 
-  const sectionPadding = isLandscapeMobile ? 'py-8' : 'py-20';
   const titleSize = isLandscapeMobile
-    ? 'clamp(1.8rem, 6vw, 3.5rem)'
+    ? 'clamp(1.7rem, 6vw, 3.2rem)'
     : isMobile
-    ? 'clamp(2.2rem, 9vw, 4rem)'
+    ? 'clamp(2rem, 9vw, 3.8rem)'
     : isTablet
-    ? 'clamp(4rem, 8vw, 5.4rem)'
+    ? 'clamp(3.6rem, 8vw, 5rem)'
     : 'clamp(2.5rem, 8vw, 5rem)';
 
   return (
     <section
       id="game"
-      className={`relative min-h-screen flex items-center justify-center px-4 ${sectionPadding}`}
+      className={`relative min-h-screen flex items-center justify-center px-4 ${
+        isLandscapeMobile ? 'py-8' : 'py-20'
+      }`}
     >
       <div className="w-full max-w-7xl z-10">
         <div className="mb-6 text-center">
@@ -501,10 +498,10 @@ export function GameSection() {
             />
 
             <div
-              className="absolute left-0 top-0 w-full h-full pointer-events-none"
+              className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  'linear-gradient(to bottom, rgba(230,37,37,0.08), transparent 20%, transparent 80%, rgba(230,37,37,0.08))',
+                  'radial-gradient(circle at 50% 46%, rgba(230,37,37,0.12), transparent 42%)',
               }}
             />
 
@@ -517,9 +514,18 @@ export function GameSection() {
                   top: wall.y,
                   width: wall.width,
                   height: wall.height,
-                  background: 'rgba(230,37,37,0.14)',
-                  border: '1px solid rgba(230,37,37,0.45)',
-                  boxShadow: '0 0 12px rgba(230,37,37,0.18)',
+                  background:
+                    wall.kind === 'sub'
+                      ? 'rgba(230,37,37,0.1)'
+                      : 'rgba(230,37,37,0.16)',
+                  border:
+                    wall.kind === 'sub'
+                      ? '1px solid rgba(230,37,37,0.55)'
+                      : '1px solid rgba(230,37,37,0.72)',
+                  boxShadow:
+                    wall.kind === 'sub'
+                      ? '0 0 10px rgba(230,37,37,0.14)'
+                      : '0 0 16px rgba(230,37,37,0.18)',
                 }}
               />
             ))}
@@ -533,12 +539,12 @@ export function GameSection() {
                   top: trap.y,
                   width: trap.width,
                   height: trap.height,
-                  background: 'rgba(255, 0, 0, 0.16)',
+                  background: 'rgba(255, 0, 0, 0.14)',
                   border: '1px solid rgba(255, 0, 0, 0.85)',
-                  boxShadow: '0 0 12px rgba(255, 0, 0, 0.35)',
+                  boxShadow: '0 0 12px rgba(255, 0, 0, 0.25)',
                 }}
-                animate={{ opacity: [0.45, 0.9, 0.45] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                animate={{ opacity: [0.35, 0.9, 0.35] }}
+                transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
               />
             ))}
 
@@ -562,17 +568,17 @@ export function GameSection() {
                     width: config.portalSize,
                     height: config.portalSize,
                     borderRadius: 999,
-                    border: '2px solid #E62525',
-                    background: isActive ? 'rgba(230,37,37,0.22)' : 'rgba(230,37,37,0.08)',
+                    border: '2px solid #ff3838',
+                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.05)',
                     boxShadow: isActive
-                      ? '0 0 28px rgba(230,37,37,0.75)'
-                      : '0 0 16px rgba(230,37,37,0.28)',
+                      ? '0 0 28px rgba(255,56,56,0.45)'
+                      : '0 0 16px rgba(255,56,56,0.22)',
                     color: '#F5F5F5',
                     cursor: 'pointer',
                   }}
-                  animate={{ scale: isActive ? 1.08 : [1, 1.04, 1] }}
+                  animate={{ scale: isActive ? 1.08 : [1, 1.03, 1] }}
                   transition={{
-                    duration: isActive ? 0.2 : 2.2,
+                    duration: isActive ? 0.2 : 2.4,
                     repeat: isActive ? 0 : Infinity,
                     ease: 'easeInOut',
                   }}
@@ -583,7 +589,7 @@ export function GameSection() {
                       fontFamily: 'var(--font-mono)',
                       fontSize:
                         mode === 'mobile' ? '8px' : mode === 'tablet' ? '9px' : '10px',
-                      letterSpacing: '0.22em',
+                      letterSpacing: '0.2em',
                     }}
                   >
                     {portal.label}
@@ -592,35 +598,12 @@ export function GameSection() {
               );
             })}
 
-            <motion.div
-              className="absolute"
-              style={{
-                left: player.x,
-                top: player.y,
-                width: config.playerSize,
-                height: config.playerSize,
-                borderRadius: 8,
-                background: '#F5F5F5',
-                boxShadow:
-                  '0 0 0 2px #0A0A0A, 0 0 18px rgba(245,245,245,0.35), 0 0 30px rgba(230,37,37,0.25)',
-              }}
-              animate={{
-                rotate: nearPortalId ? 0 : [0, -6, 6, 0],
-                scale: flashTrap ? [1, 1.18, 1] : 1,
-              }}
-              transition={{
-                duration: 0.35,
-                repeat: nearPortalId || flashTrap ? 0 : Infinity,
-                ease: 'easeInOut',
-              }}
-            />
-
             {!started && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/58 backdrop-blur-[3px]">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px]">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full h-full flex flex-col items-center justify-center text-center px-4 sm:px-6"
+                  className="text-center px-4"
                 >
                   <h3
                     className="mb-4"
@@ -628,23 +611,23 @@ export function GameSection() {
                       fontFamily: 'var(--font-heading)',
                       fontSize:
                         mode === 'mobile'
-                          ? 'clamp(1.1rem, 4vw, 1.7rem)'
+                          ? '1.2rem'
                           : mode === 'tablet'
-                          ? 'clamp(2.2rem, 4vw, 3rem)'
-                          : 'clamp(1.2rem, 4vw, 2.5rem)',
+                          ? '2rem'
+                          : '2.4rem',
                       fontWeight: 800,
                       color: '#F5F5F5',
                     }}
                   >
-                    READY TO EXPLORE?
+                    ENTER MAZE
                   </h3>
 
                   <p
                     className="mb-3 uppercase"
                     style={{
                       fontFamily: 'var(--font-body)',
-                      color: 'rgba(245, 245, 245, 0.65)',
-                      fontSize: mode === 'mobile' ? '9px' : mode === 'tablet' ? '12px' : '11px',
+                      color: 'rgba(245,245,245,0.64)',
+                      fontSize: mode === 'mobile' ? '9px' : '11px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -655,8 +638,8 @@ export function GameSection() {
                     className="mb-6 uppercase"
                     style={{
                       fontFamily: 'var(--font-body)',
-                      color: 'rgba(245, 245, 245, 0.45)',
-                      fontSize: mode === 'mobile' ? '9px' : mode === 'tablet' ? '12px' : '11px',
+                      color: 'rgba(245,245,245,0.42)',
+                      fontSize: mode === 'mobile' ? '9px' : '11px',
                       letterSpacing: '0.18em',
                     }}
                   >
@@ -669,23 +652,16 @@ export function GameSection() {
                       setNearPortalId(null);
                       setStarted(true);
                     }}
-                    className="transition-all duration-300"
                     style={{
                       fontFamily: 'var(--font-body)',
-                      fontSize: mode === 'mobile' ? '0.75rem' : '0.875rem',
+                      fontSize: mode === 'mobile' ? '0.75rem' : '0.9rem',
                       letterSpacing: '0.16em',
                       textTransform: 'uppercase',
-                      border: '2px solid #E62525',
+                      border: '2px solid #ff3838',
                       color: '#F5F5F5',
                       background: 'transparent',
                       cursor: 'pointer',
                       padding: mode === 'mobile' ? '10px 20px' : '12px 28px',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#E62525';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
                     GO
@@ -696,20 +672,16 @@ export function GameSection() {
 
             {showGameOver && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/52 backdrop-blur-[2px] pointer-events-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center px-6"
-                >
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                   <div
                     style={{
                       fontFamily: '"Courier New", monospace',
                       fontSize:
                         mode === 'mobile'
-                          ? 'clamp(1.2rem, 5vw, 2rem)'
+                          ? '1.4rem'
                           : mode === 'tablet'
-                          ? 'clamp(2rem, 5vw, 3rem)'
-                          : 'clamp(1.5rem, 5vw, 3.5rem)',
+                          ? '2.4rem'
+                          : '3rem',
                       fontWeight: 800,
                       letterSpacing: '0.22em',
                       textTransform: 'uppercase',
@@ -724,6 +696,26 @@ export function GameSection() {
               </div>
             )}
 
+            {started && (
+              <motion.div
+                className="absolute"
+                style={{
+                  left: player.x,
+                  top: player.y,
+                  width: config.playerSize,
+                  height: config.playerSize,
+                  borderRadius: 999,
+                  background: '#F5F5F5',
+                  boxShadow:
+                    '0 0 0 2px #0A0A0A, 0 0 14px rgba(245,245,245,0.42), 0 0 24px rgba(255,56,56,0.18)',
+                }}
+                animate={{
+                  scale: flashTrap ? [1, 1.16, 1] : 1,
+                }}
+                transition={{ duration: 0.24 }}
+              />
+            )}
+
             {mode !== 'mobile' && (
               <div
                 className="absolute"
@@ -735,8 +727,8 @@ export function GameSection() {
                 <div
                   className="px-4 py-3"
                   style={{
-                    border: '1px solid rgba(230,37,37,0.35)',
-                    background: 'rgba(10,10,10,0.7)',
+                    border: '1px solid rgba(255,56,56,0.28)',
+                    background: 'rgba(10,10,10,0.62)',
                     backdropFilter: 'blur(6px)',
                   }}
                 >
@@ -744,7 +736,7 @@ export function GameSection() {
                     className="uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: 'rgba(245,245,245,0.6)',
+                      color: 'rgba(245,245,245,0.56)',
                       fontSize: mode === 'tablet' ? '9px' : '10px',
                       letterSpacing: '0.18em',
                     }}
@@ -755,7 +747,7 @@ export function GameSection() {
                     className="mt-1 uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: '#E62525',
+                      color: '#ff4a4a',
                       fontSize: mode === 'tablet' ? '9px' : '10px',
                       letterSpacing: '0.18em',
                     }}
@@ -767,24 +759,20 @@ export function GameSection() {
             )}
 
             {activePortal && started && !showGameOver && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute right-4 bottom-4"
-              >
+              <div className="absolute right-4 bottom-4">
                 <div
                   className="px-4 py-3"
                   style={{
-                    border: '1px solid #E62525',
-                    background: 'rgba(10,10,10,0.82)',
-                    boxShadow: '0 0 20px rgba(230,37,37,0.2)',
+                    border: '1px solid rgba(255,56,56,0.34)',
+                    background: 'rgba(10,10,10,0.78)',
+                    boxShadow: '0 0 20px rgba(255,56,56,0.12)',
                   }}
                 >
                   <p
                     className="uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: 'rgba(245,245,245,0.6)',
+                      color: 'rgba(245,245,245,0.56)',
                       fontSize: mode === 'mobile' ? '8px' : '10px',
                       letterSpacing: '0.18em',
                     }}
@@ -796,14 +784,14 @@ export function GameSection() {
                     style={{
                       fontFamily: 'var(--font-mono)',
                       color: '#F5F5F5',
-                      fontSize: mode === 'mobile' ? '9px' : '12px',
-                      letterSpacing: '0.2em',
+                      fontSize: mode === 'mobile' ? '9px' : '11px',
+                      letterSpacing: '0.18em',
                     }}
                   >
                     Desktop: E / Mobile: GO
                   </p>
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
         </div>
@@ -815,8 +803,8 @@ export function GameSection() {
               onClick={interactWithPortal}
               className={isLandscapeMobile ? 'px-6 py-2' : 'px-8 py-3'}
               style={{
-                border: '2px solid #E62525',
-                background: activePortal ? 'rgba(230,37,37,0.18)' : 'transparent',
+                border: '2px solid #ff3838',
+                background: activePortal ? 'rgba(255,56,56,0.14)' : 'transparent',
                 color: '#F5F5F5',
                 fontFamily: 'var(--font-body)',
                 letterSpacing: '0.16em',
@@ -838,7 +826,7 @@ export function GameSection() {
                 {...bindPressEvents('arrowup')}
                 className={isLandscapeMobile ? 'h-12' : 'h-14'}
                 style={{
-                  border: '1px solid rgba(230,37,37,0.5)',
+                  border: '1px solid rgba(255,56,56,0.42)',
                   background: 'rgba(10,10,10,0.75)',
                   color: '#F5F5F5',
                   fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
@@ -853,7 +841,7 @@ export function GameSection() {
                 {...bindPressEvents('arrowleft')}
                 className={isLandscapeMobile ? 'h-12' : 'h-14'}
                 style={{
-                  border: '1px solid rgba(230,37,37,0.5)',
+                  border: '1px solid rgba(255,56,56,0.42)',
                   background: 'rgba(10,10,10,0.75)',
                   color: '#F5F5F5',
                   fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
@@ -867,7 +855,7 @@ export function GameSection() {
                 {...bindPressEvents('arrowdown')}
                 className={isLandscapeMobile ? 'h-12' : 'h-14'}
                 style={{
-                  border: '1px solid rgba(230,37,37,0.5)',
+                  border: '1px solid rgba(255,56,56,0.42)',
                   background: 'rgba(10,10,10,0.75)',
                   color: '#F5F5F5',
                   fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
@@ -881,7 +869,7 @@ export function GameSection() {
                 {...bindPressEvents('arrowright')}
                 className={isLandscapeMobile ? 'h-12' : 'h-14'}
                 style={{
-                  border: '1px solid rgba(230,37,37,0.5)',
+                  border: '1px solid rgba(255,56,56,0.42)',
                   background: 'rgba(10,10,10,0.75)',
                   color: '#F5F5F5',
                   fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
