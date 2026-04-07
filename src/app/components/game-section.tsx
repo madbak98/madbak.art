@@ -62,10 +62,6 @@ const traps: Trap[] = [
   { x: 705, y: 240, width: 16, height: 90 },
 ];
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
-
 function distance(ax: number, ay: number, bx: number, by: number) {
   return Math.hypot(ax - bx, ay - by);
 }
@@ -92,16 +88,22 @@ function isCollidingWithTraps(x: number, y: number, size: number) {
   return traps.some((trap) => isCollidingRect(x, y, size, trap));
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
+
 export function GameSection() {
   const [started, setStarted] = useState(false);
   const [player, setPlayer] = useState(START_POSITION);
   const [nearPortalId, setNearPortalId] = useState<string | null>(null);
   const [flashTrap, setFlashTrap] = useState(false);
+  const [showGameOver, setShowGameOver] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
 
   const pressedKeys = useRef<Set<string>>(new Set());
   const mobileKeys = useRef<Set<string>>(new Set());
+  const resetTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const updateViewportFlags = () => {
@@ -118,6 +120,14 @@ export function GameSection() {
     window.addEventListener('resize', updateViewportFlags);
 
     return () => window.removeEventListener('resize', updateViewportFlags);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) {
+        window.clearTimeout(resetTimeoutRef.current);
+      }
+    };
   }, []);
 
   const activePortal = useMemo(
@@ -155,6 +165,8 @@ export function GameSection() {
 
     const tick = () => {
       setPlayer((prev) => {
+        if (showGameOver) return prev;
+
         const allKeys = new Set([
           ...Array.from(pressedKeys.current),
           ...Array.from(mobileKeys.current),
@@ -189,9 +201,20 @@ export function GameSection() {
 
         if (isCollidingWithTraps(nextX, nextY, PLAYER_SIZE)) {
           setFlashTrap(true);
-          setTimeout(() => setFlashTrap(false), 220);
+          setShowGameOver(true);
           setNearPortalId(null);
-          return START_POSITION;
+
+          if (resetTimeoutRef.current) {
+            window.clearTimeout(resetTimeoutRef.current);
+          }
+
+          resetTimeoutRef.current = window.setTimeout(() => {
+            setPlayer(START_POSITION);
+            setFlashTrap(false);
+            setShowGameOver(false);
+          }, 1200);
+
+          return prev;
         }
 
         let closest: Portal | null = null;
@@ -230,7 +253,7 @@ export function GameSection() {
       window.removeEventListener('keyup', onKeyUp);
       cancelAnimationFrame(frameId);
     };
-  }, [started, activePortal]);
+  }, [started, activePortal, showGameOver]);
 
   const setMobileKey = (key: string, isPressed: boolean) => {
     if (isPressed) {
@@ -460,11 +483,11 @@ export function GameSection() {
             />
 
             {!started && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/58 backdrop-blur-[3px]">
                 <motion.div
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center px-6"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="w-full h-full flex flex-col items-center justify-center text-center px-6"
                 >
                   <h3
                     className="mb-4"
@@ -522,8 +545,33 @@ export function GameSection() {
                       e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
-                    Start Experience
+                    GO
                   </button>
+                </motion.div>
+              </div>
+            )}
+
+            {showGameOver && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/52 backdrop-blur-[2px] pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center px-6"
+                >
+                  <div
+                    style={{
+                      fontFamily: '"Courier New", monospace',
+                      fontSize: 'clamp(1.5rem, 5vw, 3.5rem)',
+                      fontWeight: 800,
+                      letterSpacing: '0.22em',
+                      textTransform: 'uppercase',
+                      color: '#ff3b3b',
+                      textShadow:
+                        '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
+                    }}
+                  >
+                    Game Over
+                  </div>
                 </motion.div>
               </div>
             )}
@@ -554,7 +602,7 @@ export function GameSection() {
               </div>
             )}
 
-            {activePortal && started && (
+            {activePortal && started && !showGameOver && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
