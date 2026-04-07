@@ -24,12 +24,11 @@ const projects = [
     year: '2022',
     image: 'https://github.com/madbak98/My-image/blob/main/07c36aee-e7ba-456f-bb91-bb238e60cbf1.png?raw=true',
     images: [
-      'https://pbs.twimg.com/media/HEbs0geasAMhgwg?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbpBc_WoAA3sMS?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbs0f9WUAA1yAT?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEWbhH1bYAcMjdI?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbs0gAXMAAXnsK?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbpBdfbQAAYGwJ?format=jpg&name=900x900',
+      'https://github.com/madbak98/My-image/blob/main/6fe54cd9-9cce-492c-ba0c-e6438d486fff.png?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/hf_20260218_004459_b98c0ec6-0c6a-4a90-a28a-beb3712647cc.png?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/hf_20260218_000747_13e6678b-ebae-4047-a96d-57a325ebbf6f.png?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/hf_20260218_000558_d245cf16-18d6-49a3-a994-a4a524d5049e.png?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/07c36aee-e7ba-456f-bb91-bb238e60cbf1.png?raw=true',
     ],
   },
   {
