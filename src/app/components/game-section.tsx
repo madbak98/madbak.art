@@ -1,142 +1,190 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-type Room = {
+type MovingTarget = {
   id: string;
   label: string;
   targetId: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  baseX: number;
+  baseY: number;
+  size: number;
+  pattern: 'horizontal' | 'orbit' | 'wave';
+  speed: number;
+  rangeX: number;
+  rangeY: number;
 };
 
-type Wall = {
+type ShotEffect = {
   x: number;
   y: number;
-  width: number;
-  height: number;
+  hit: boolean;
+  id: number;
 };
 
-type Trap = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  direction: 'horizontal' | 'vertical';
-};
+const ARENA_W = 900;
+const ARENA_H = 520;
 
-const PLAN_W = 360;
-const PLAN_H = 520;
-const PLAYER_SIZE = 12;
-const PLAYER_SPEED = 2.4;
-const INTERACTION_DISTANCE = 30;
-const START_POS = { x: 26, y: 470 };
-
-const rooms: Room[] = [
+const targets: MovingTarget[] = [
   {
-    id: 'about-room',
+    id: 'about-target',
     label: 'ABOUT',
     targetId: 'about',
-    x: 26,
-    y: 58,
-    width: 112,
-    height: 108,
+    baseX: 170,
+    baseY: 140,
+    size: 64,
+    pattern: 'horizontal',
+    speed: 1.9,
+    rangeX: 90,
+    rangeY: 0,
   },
   {
-    id: 'work-room',
+    id: 'work-target',
     label: 'WORK',
     targetId: 'work',
-    x: 222,
-    y: 42,
-    width: 112,
-    height: 124,
+    baseX: 650,
+    baseY: 155,
+    size: 64,
+    pattern: 'wave',
+    speed: 2.5,
+    rangeX: 90,
+    rangeY: 30,
   },
   {
-    id: 'contact-room',
+    id: 'contact-target',
     label: 'CONTACT',
     targetId: 'contact',
-    x: 214,
-    y: 334,
-    width: 120,
-    height: 126,
+    baseX: 480,
+    baseY: 360,
+    size: 64,
+    pattern: 'orbit',
+    speed: 2.1,
+    rangeX: 46,
+    rangeY: 46,
   },
 ];
 
-const walls: Wall[] = [
-  // outer shell
-  { x: 0, y: 0, width: 360, height: 10 },
-  { x: 0, y: 0, width: 10, height: 520 },
-  { x: 350, y: 0, width: 10, height: 520 },
-  { x: 0, y: 510, width: 360, height: 10 },
+function getTargetPosition(target: MovingTarget, time: number) {
+  switch (target.pattern) {
+    case 'horizontal':
+      return {
+        x: target.baseX + Math.sin(time * target.speed) * target.rangeX,
+        y: target.baseY,
+      };
 
-  // ABOUT room
-  { x: 26, y: 58, width: 112, height: 10 },
-  { x: 26, y: 58, width: 10, height: 108 },
-  { x: 128, y: 58, width: 10, height: 48 },
-  { x: 128, y: 122, width: 10, height: 44 },
-  { x: 26, y: 156, width: 112, height: 10 },
+    case 'wave':
+      return {
+        x: target.baseX + Math.sin(time * target.speed) * target.rangeX,
+        y: target.baseY + Math.cos(time * target.speed * 1.3) * target.rangeY,
+      };
 
-  // WORK room
-  { x: 222, y: 42, width: 112, height: 10 },
-  { x: 222, y: 42, width: 10, height: 50 },
-  { x: 222, y: 108, width: 10, height: 58 },
-  { x: 324, y: 42, width: 10, height: 124 },
-  { x: 222, y: 156, width: 112, height: 10 },
+    case 'orbit':
+      return {
+        x: target.baseX + Math.cos(time * target.speed) * target.rangeX,
+        y: target.baseY + Math.sin(time * target.speed) * target.rangeY,
+      };
 
-  // CONTACT room
-  { x: 214, y: 334, width: 120, height: 10 },
-  { x: 214, y: 334, width: 10, height: 126 },
-  { x: 324, y: 334, width: 10, height: 60 },
-  { x: 324, y: 410, width: 10, height: 50 },
-  { x: 214, y: 450, width: 120, height: 10 },
-
-  // main corridor spine
-  { x: 84, y: 208, width: 10, height: 176 },
-  { x: 84, y: 374, width: 144, height: 10 },
-
-  { x: 172, y: 98, width: 10, height: 172 },
-  { x: 172, y: 98, width: 92, height: 10 },
-
-  { x: 120, y: 260, width: 122, height: 10 },
-  { x: 232, y: 190, width: 10, height: 80 },
-
-  // lower hall
-  { x: 36, y: 428, width: 132, height: 10 },
-  { x: 158, y: 428, width: 10, height: 58 },
-
-  // architectural accents / furniture-like separators
-  { x: 54, y: 88, width: 42, height: 8 },
-  { x: 246, y: 80, width: 50, height: 8 },
-  { x: 244, y: 378, width: 58, height: 8 },
-  { x: 244, y: 406, width: 40, height: 8 },
-];
-
-const traps: Trap[] = [
-  { x: 184, y: 98, width: 30, height: 8, direction: 'horizontal' },
-  { x: 132, y: 260, width: 28, height: 8, direction: 'horizontal' },
-  { x: 258, y: 406, width: 8, height: 26, direction: 'vertical' },
-];
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
+    default:
+      return {
+        x: target.baseX,
+        y: target.baseY,
+      };
+  }
 }
 
 function distance(ax: number, ay: number, bx: number, by: number) {
   return Math.hypot(ax - bx, ay - by);
 }
 
-function isCollidingRect(
-  x: number,
-  y: number,
-  size: number,
-  rect: { x: number; y: number; width: number; height: number }
-) {
+function TargetIcon({
+  label,
+  size,
+  active,
+}: {
+  label: string;
+  size: number;
+  active: boolean;
+}) {
+  const ring = active ? '#ff5a5a' : '#ff3b3b';
+  const faint = active ? 'rgba(255,90,90,0.2)' : 'rgba(255,59,59,0.12)';
+
   return (
-    x < rect.x + rect.width &&
-    x + size > rect.x &&
-    y < rect.y + rect.height &&
-    y + size > rect.y
+    <div
+      style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        filter: active ? 'drop-shadow(0 0 16px rgba(255,59,59,0.45))' : 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '999px',
+          border: `2px solid ${ring}`,
+          background: faint,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: '10px',
+          borderRadius: '999px',
+          border: `2px solid ${ring}`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: '20px',
+          borderRadius: '999px',
+          border: `2px solid ${ring}`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: 2,
+          bottom: 2,
+          width: 2,
+          transform: 'translateX(-50%)',
+          background: ring,
+          opacity: 0.85,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: 2,
+          right: 2,
+          height: 2,
+          transform: 'translateY(-50%)',
+          background: ring,
+          opacity: 0.85,
+        }}
+      />
+      <span
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          fontFamily: 'var(--font-mono)',
+          fontSize: size < 56 ? '7px' : '8px',
+          letterSpacing: '0.18em',
+          color: '#F5F5F5',
+          textTransform: 'uppercase',
+          textAlign: 'center',
+          textShadow: '0 0 8px rgba(0,0,0,0.8)',
+          pointerEvents: 'none',
+        }}
+      >
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -149,14 +197,14 @@ export function GameSection() {
   );
 
   const [started, setStarted] = useState(false);
-  const [player, setPlayer] = useState(START_POS);
-  const [nearRoomId, setNearRoomId] = useState<string | null>(null);
-  const [showGameOver, setShowGameOver] = useState(false);
-  const [flashTrap, setFlashTrap] = useState(false);
+  const [time, setTime] = useState(0);
+  const [shots, setShots] = useState<ShotEffect[]>([]);
+  const [hitTargetId, setHitTargetId] = useState<string | null>(null);
+  const [crosshair, setCrosshair] = useState({ x: ARENA_W / 2, y: ARENA_H / 2 });
+  const [gameMessage, setGameMessage] = useState<string>('LOCK TARGETS');
 
-  const pressedKeys = useRef<Set<string>>(new Set());
-  const mobileKeys = useRef<Set<string>>(new Set());
-  const resetTimeoutRef = useRef<number | null>(null);
+  const arenaRef = useRef<HTMLDivElement | null>(null);
+  const shotIdRef = useRef(1);
 
   useEffect(() => {
     const onResize = () => {
@@ -168,177 +216,127 @@ export function GameSection() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (resetTimeoutRef.current) {
-        window.clearTimeout(resetTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const isMobile = viewportWidth <= 767;
   const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
 
   const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 32, 250)
+    ? Math.min(viewportWidth - 32, 300)
     : isMobile
     ? Math.min(viewportWidth - 32, 360)
-    : 460;
+    : 760;
 
-  const scale = renderWidth / PLAN_W;
-  const renderHeight = PLAN_H * scale;
-
-  const activeRoom = useMemo(
-    () => rooms.find((room) => room.id === nearRoomId) ?? null,
-    [nearRoomId]
-  );
-
-  const interactWithRoom = () => {
-    if (!activeRoom) return;
-    document.getElementById(activeRoom.targetId)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
+  const scale = renderWidth / ARENA_W;
+  const renderHeight = ARENA_H * scale;
 
   useEffect(() => {
     if (!started) return;
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      pressedKeys.current.add(e.key.toLowerCase());
-      if (e.key.toLowerCase() === 'e') {
-        interactWithRoom();
-      }
-    };
-
-    const onKeyUp = (e: KeyboardEvent) => {
-      pressedKeys.current.delete(e.key.toLowerCase());
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-
     let frameId = 0;
+    let startTs: number | null = null;
 
-    const tick = () => {
-      setPlayer((prev) => {
-        if (showGameOver) return prev;
-
-        const allKeys = new Set([
-          ...Array.from(pressedKeys.current),
-          ...Array.from(mobileKeys.current),
-        ]);
-
-        let dx = 0;
-        let dy = 0;
-
-        if (allKeys.has('arrowup') || allKeys.has('w')) dy -= 1;
-        if (allKeys.has('arrowdown') || allKeys.has('s')) dy += 1;
-        if (allKeys.has('arrowleft') || allKeys.has('a')) dx -= 1;
-        if (allKeys.has('arrowright') || allKeys.has('d')) dx += 1;
-
-        if (dx !== 0 && dy !== 0) {
-          dx *= 0.7071;
-          dy *= 0.7071;
-        }
-
-        let nextX = prev.x;
-        let nextY = prev.y;
-
-        const attemptedX = clamp(prev.x + dx * PLAYER_SPEED, 0, PLAN_W - PLAYER_SIZE);
-        const attemptedY = clamp(prev.y + dy * PLAYER_SPEED, 0, PLAN_H - PLAYER_SIZE);
-
-        const hitsWallX = walls.some((wall) =>
-          isCollidingRect(attemptedX, prev.y, PLAYER_SIZE, wall)
-        );
-        const hitsWallY = walls.some((wall) =>
-          isCollidingRect(nextX, attemptedY, PLAYER_SIZE, wall)
-        );
-
-        if (!hitsWallX) nextX = attemptedX;
-        if (!hitsWallY) nextY = attemptedY;
-
-        const hitTrap = traps.some((trap) =>
-          isCollidingRect(nextX, nextY, PLAYER_SIZE, trap)
-        );
-
-        if (hitTrap) {
-          setShowGameOver(true);
-          setFlashTrap(true);
-          setNearRoomId(null);
-
-          if (resetTimeoutRef.current) {
-            window.clearTimeout(resetTimeoutRef.current);
-          }
-
-          resetTimeoutRef.current = window.setTimeout(() => {
-            setPlayer(START_POS);
-            setShowGameOver(false);
-            setFlashTrap(false);
-          }, 1100);
-
-          return prev;
-        }
-
-        let closest: Room | null = null;
-        let closestDist = Infinity;
-
-        for (const room of rooms) {
-          const cx = room.x + room.width / 2;
-          const cy = room.y + room.height / 2;
-
-          const d = distance(
-            nextX + PLAYER_SIZE / 2,
-            nextY + PLAYER_SIZE / 2,
-            cx,
-            cy
-          );
-
-          if (d < closestDist) {
-            closestDist = d;
-            closest = room;
-          }
-        }
-
-        if (closest && closestDist <= INTERACTION_DISTANCE + 26) {
-          setNearRoomId(closest.id);
-        } else {
-          setNearRoomId(null);
-        }
-
-        return { x: nextX, y: nextY };
-      });
-
-      frameId = requestAnimationFrame(tick);
+    const loop = (ts: number) => {
+      if (startTs === null) startTs = ts;
+      const elapsed = (ts - startTs) / 1000;
+      setTime(elapsed);
+      frameId = requestAnimationFrame(loop);
     };
 
-    frameId = requestAnimationFrame(tick);
+    frameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameId);
+  }, [started]);
 
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      cancelAnimationFrame(frameId);
+  const positionedTargets = useMemo(() => {
+    return targets.map((target) => {
+      const pos = getTargetPosition(target, time);
+      return {
+        ...target,
+        x: pos.x,
+        y: pos.y,
+      };
+    });
+  }, [time]);
+
+  const shootAt = (x: number, y: number) => {
+    if (!started) return;
+
+    let hit: (typeof positionedTargets)[number] | null = null;
+
+    for (const target of positionedTargets) {
+      const cx = target.x + target.size / 2;
+      const cy = target.y + target.size / 2;
+      const d = distance(x, y, cx, cy);
+
+      if (d <= target.size * 0.42) {
+        hit = target;
+        break;
+      }
+    }
+
+    const effect: ShotEffect = {
+      x,
+      y,
+      hit: Boolean(hit),
+      id: shotIdRef.current++,
     };
-  }, [started, showGameOver, activeRoom]);
 
-  const setMobileKey = (key: string, isPressed: boolean) => {
-    if (isPressed) mobileKeys.current.add(key);
-    else mobileKeys.current.delete(key);
+    setShots((prev) => [...prev, effect]);
+
+    window.setTimeout(() => {
+      setShots((prev) => prev.filter((s) => s.id !== effect.id));
+    }, 350);
+
+    if (hit) {
+      setHitTargetId(hit.id);
+      setGameMessage(`TARGET LOCKED: ${hit.label}`);
+
+      window.setTimeout(() => {
+        document.getElementById(hit!.targetId)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 250);
+
+      window.setTimeout(() => {
+        setHitTargetId(null);
+        setGameMessage('LOCK TARGETS');
+      }, 900);
+    } else {
+      setGameMessage('MISS');
+      window.setTimeout(() => setGameMessage('LOCK TARGETS'), 350);
+    }
   };
 
-  const bindPressEvents = (key: string) => ({
-    onMouseDown: () => setMobileKey(key, true),
-    onMouseUp: () => setMobileKey(key, false),
-    onMouseLeave: () => setMobileKey(key, false),
-    onTouchStart: (e: React.TouchEvent) => {
-      e.preventDefault();
-      setMobileKey(key, true);
-    },
-    onTouchEnd: (e: React.TouchEvent) => {
-      e.preventDefault();
-      setMobileKey(key, false);
-    },
-  });
+  const handleArenaPointer = (
+    clientX: number,
+    clientY: number,
+    shouldShoot = false
+  ) => {
+    if (!arenaRef.current) return;
+
+    const rect = arenaRef.current.getBoundingClientRect();
+    const localX = ((clientX - rect.left) / rect.width) * ARENA_W;
+    const localY = ((clientY - rect.top) / rect.height) * ARENA_H;
+
+    setCrosshair({ x: localX, y: localY });
+
+    if (shouldShoot) {
+      shootAt(localX, localY);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleArenaPointer(e.clientX, e.clientY, false);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleArenaPointer(e.clientX, e.clientY, true);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    handleArenaPointer(touch.clientX, touch.clientY, true);
+  };
 
   return (
     <section
@@ -354,7 +352,7 @@ export function GameSection() {
               className="text-xs tracking-[0.3em] uppercase"
               style={{ fontFamily: 'var(--font-mono)', color: '#ff3b3b' }}
             >
-              [00X] INTERACTIVE MODE
+              [00X] TARGET MODE
             </span>
           </div>
 
@@ -369,7 +367,7 @@ export function GameSection() {
               lineHeight: 1,
             }}
           >
-            ENTER THE HOUSE
+            LOCK & SHOOT
           </h2>
 
           <p
@@ -379,7 +377,7 @@ export function GameSection() {
               color: 'rgba(245,245,245,0.6)',
             }}
           >
-            Walk through a floor plan and enter each room to explore the site.
+            Moving targets guard each section. Hit the right one to enter.
           </p>
         </div>
 
@@ -391,19 +389,20 @@ export function GameSection() {
           }}
         >
           <div
+            ref={arenaRef}
             className="absolute left-0 top-0 origin-top-left overflow-hidden"
+            onMouseMove={handleMouseMove}
+            onClick={handleClick}
+            onTouchStart={handleTouchStart}
             style={{
-              width: `${PLAN_W}px`,
-              height: `${PLAN_H}px`,
+              width: `${ARENA_W}px`,
+              height: `${ARENA_H}px`,
               transform: `scale(${scale})`,
-              border: flashTrap
-                ? '2px solid rgba(255, 70, 70, 0.95)'
-                : '2px solid rgba(255, 56, 56, 0.55)',
+              cursor: isMobile ? 'default' : 'crosshair',
+              border: '2px solid rgba(255,56,56,0.55)',
               background:
-                'radial-gradient(circle at center, rgba(255,56,56,0.08) 0%, rgba(10,10,10,1) 70%)',
-              boxShadow: flashTrap
-                ? '0 0 45px rgba(255,0,0,0.28)'
-                : '0 0 40px rgba(255,56,56,0.12)',
+                'radial-gradient(circle at 50% 40%, rgba(255,56,56,0.08) 0%, rgba(10,10,10,1) 70%)',
+              boxShadow: '0 0 40px rgba(255,56,56,0.12)',
             }}
           >
             <div
@@ -417,109 +416,103 @@ export function GameSection() {
               }}
             />
 
-            {walls.map((wall, index) => (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.18) 58%, rgba(0,0,0,0.46) 100%)',
+              }}
+            />
+
+            {positionedTargets.map((target) => (
+              <motion.div
+                key={target.id}
+                className="absolute"
+                style={{
+                  left: target.x,
+                  top: target.y,
+                  width: target.size,
+                  height: target.size,
+                }}
+                animate={{
+                  scale: hitTargetId === target.id ? [1, 1.15, 1] : [1, 1.03, 1],
+                }}
+                transition={{
+                  duration: hitTargetId === target.id ? 0.35 : 1.8,
+                  repeat: hitTargetId === target.id ? 0 : Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                <TargetIcon
+                  label={target.label}
+                  size={target.size}
+                  active={hitTargetId === target.id}
+                />
+              </motion.div>
+            ))}
+
+            {shots.map((shot) => (
+              <motion.div
+                key={shot.id}
+                initial={{ opacity: 1, scale: 0.5 }}
+                animate={{ opacity: 0, scale: shot.hit ? 2 : 1.5 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: shot.x - 10,
+                  top: shot.y - 10,
+                  width: 20,
+                  height: 20,
+                  borderRadius: '999px',
+                  border: `2px solid ${shot.hit ? '#ffffff' : '#ff3b3b'}`,
+                  boxShadow: shot.hit
+                    ? '0 0 18px rgba(255,255,255,0.55)'
+                    : '0 0 14px rgba(255,59,59,0.4)',
+                }}
+              />
+            ))}
+
+            {!isMobile && started && (
               <div
-                key={index}
-                className="absolute"
+                className="absolute pointer-events-none"
                 style={{
-                  left: wall.x,
-                  top: wall.y,
-                  width: wall.width,
-                  height: wall.height,
-                  background: 'rgba(255,56,56,0.14)',
-                  border: '1px solid rgba(255,56,56,0.7)',
-                  boxShadow: '0 0 10px rgba(255,56,56,0.15)',
+                  left: crosshair.x - 16,
+                  top: crosshair.y - 16,
+                  width: 32,
+                  height: 32,
                 }}
-              />
-            ))}
-
-            {traps.map((trap, index) => (
-              <motion.div
-                key={`trap-${index}`}
-                className="absolute"
-                style={{
-                  left: trap.x,
-                  top: trap.y,
-                  width: trap.width,
-                  height: trap.height,
-                  background:
-                    trap.direction === 'horizontal'
-                      ? 'linear-gradient(90deg, rgba(255,0,0,0.1), rgba(255,0,0,0.45), rgba(255,0,0,0.1))'
-                      : 'linear-gradient(180deg, rgba(255,0,0,0.1), rgba(255,0,0,0.45), rgba(255,0,0,0.1))',
-                  border: '1px solid rgba(255,0,0,0.8)',
-                  boxShadow: '0 0 14px rgba(255,0,0,0.28)',
-                }}
-                animate={{ opacity: [0.35, 0.9, 0.35] }}
-                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            ))}
-
-            {rooms.map((room) => {
-              const isActive = nearRoomId === room.id;
-              const labelX = room.x + room.width / 2 - 30;
-              const labelY = room.y + room.height / 2 - 14;
-
-              return (
-                <motion.button
-                  key={room.id}
-                  type="button"
-                  onClick={() => {
-                    document.getElementById(room.targetId)?.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'start',
-                    });
-                  }}
-                  className="absolute flex items-center justify-center"
+              >
+                <div
                   style={{
-                    left: labelX,
-                    top: labelY,
-                    width: 60,
-                    height: 28,
-                    border: '1px solid rgba(255,56,56,0.82)',
-                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.05)',
-                    boxShadow: isActive
-                      ? '0 0 18px rgba(255,56,56,0.3)'
-                      : '0 0 8px rgba(255,56,56,0.12)',
-                    color: '#F5F5F5',
-                    cursor: 'pointer',
-                    textTransform: 'uppercase',
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '999px',
+                    border: '1px solid rgba(255,255,255,0.75)',
                   }}
-                  animate={{ scale: isActive ? 1.04 : [1, 1.015, 1] }}
-                  transition={{
-                    duration: isActive ? 0.2 : 2.2,
-                    repeat: isActive ? 0 : Infinity,
-                    ease: 'easeInOut',
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: -4,
+                    bottom: -4,
+                    width: 1,
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(255,255,255,0.85)',
                   }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '8px',
-                      letterSpacing: '0.18em',
-                    }}
-                  >
-                    {room.label}
-                  </span>
-                </motion.button>
-              );
-            })}
-
-            {started && (
-              <motion.div
-                className="absolute"
-                style={{
-                  left: player.x,
-                  top: player.y,
-                  width: PLAYER_SIZE,
-                  height: PLAYER_SIZE,
-                  borderRadius: 999,
-                  background: '#F5F5F5',
-                  boxShadow:
-                    '0 0 0 2px #0A0A0A, 0 0 14px rgba(245,245,245,0.42), 0 0 24px rgba(255,56,56,0.18)',
-                }}
-                animate={{ scale: flashTrap ? [1, 1.16, 1] : 1 }}
-                transition={{ duration: 0.24 }}
-              />
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: -4,
+                    right: -4,
+                    height: 1,
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255,255,255,0.85)',
+                  }}
+                />
+              </div>
             )}
 
             {!started && (
@@ -534,7 +527,7 @@ export function GameSection() {
                       color: '#F5F5F5',
                     }}
                   >
-                    ENTER HOUSE
+                    ENTER TARGET MODE
                   </h3>
 
                   <p
@@ -546,7 +539,7 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Desktop: WASD / Arrows + E
+                    Desktop: Aim + Click
                   </p>
 
                   <p
@@ -558,14 +551,14 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Mobile: Touch controls + GO
+                    Mobile: Tap the targets
                   </p>
 
                   <button
                     onClick={() => {
-                      setPlayer(START_POS);
-                      setNearRoomId(null);
                       setStarted(true);
+                      setHitTargetId(null);
+                      setGameMessage('LOCK TARGETS');
                     }}
                     style={{
                       fontFamily: 'var(--font-body)',
@@ -585,26 +578,7 @@ export function GameSection() {
               </div>
             )}
 
-            {showGameOver && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/52 backdrop-blur-[2px] pointer-events-none">
-                <div
-                  style={{
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: isMobile ? '1.4rem' : '2.6rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.22em',
-                    textTransform: 'uppercase',
-                    color: '#ff3b3b',
-                    textShadow:
-                      '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
-                  }}
-                >
-                  Alarm Triggered
-                </div>
-              </div>
-            )}
-
-            {!isMobile && (
+            {started && (
               <div
                 className="absolute"
                 style={{
@@ -629,18 +603,18 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Move: WASD / Arrows
+                    Mode: Live Fire
                   </p>
                   <p
                     className="mt-1 uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: '#ff4a4a',
+                      color: hitTargetId ? '#ffffff' : '#ff4a4a',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Interact: E
+                    {gameMessage}
                   </p>
                 </div>
               </div>
@@ -648,88 +622,19 @@ export function GameSection() {
           </div>
         </div>
 
-        {isMobile && (
-          <div className={`mt-4 flex flex-col items-center ${isLandscapeMobile ? 'gap-3' : 'gap-4'}`}>
-            <button
-              type="button"
-              onClick={interactWithRoom}
-              className={isLandscapeMobile ? 'px-6 py-2' : 'px-8 py-3'}
+        {isMobile && started && (
+          <div className="mt-4 text-center">
+            <p
               style={{
-                border: '2px solid #ff3838',
-                background: activeRoom ? 'rgba(255,56,56,0.14)' : 'transparent',
-                color: '#F5F5F5',
-                fontFamily: 'var(--font-body)',
-                letterSpacing: '0.16em',
+                fontFamily: 'var(--font-mono)',
+                color: 'rgba(245,245,245,0.58)',
+                fontSize: '10px',
+                letterSpacing: '0.18em',
                 textTransform: 'uppercase',
-                fontSize: isLandscapeMobile ? '0.8rem' : '0.9rem',
               }}
             >
-              GO
-            </button>
-
-            <div
-              className={`grid grid-cols-3 select-none ${
-                isLandscapeMobile ? 'gap-2 w-[180px]' : 'gap-3 w-[220px]'
-              }`}
-            >
-              <div />
-              <button
-                type="button"
-                {...bindPressEvents('arrowup')}
-                className={isLandscapeMobile ? 'h-12' : 'h-14'}
-                style={{
-                  border: '1px solid rgba(255,56,56,0.42)',
-                  background: 'rgba(10,10,10,0.75)',
-                  color: '#F5F5F5',
-                  fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
-                }}
-              >
-                ↑
-              </button>
-              <div />
-
-              <button
-                type="button"
-                {...bindPressEvents('arrowleft')}
-                className={isLandscapeMobile ? 'h-12' : 'h-14'}
-                style={{
-                  border: '1px solid rgba(255,56,56,0.42)',
-                  background: 'rgba(10,10,10,0.75)',
-                  color: '#F5F5F5',
-                  fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
-                }}
-              >
-                ←
-              </button>
-
-              <button
-                type="button"
-                {...bindPressEvents('arrowdown')}
-                className={isLandscapeMobile ? 'h-12' : 'h-14'}
-                style={{
-                  border: '1px solid rgba(255,56,56,0.42)',
-                  background: 'rgba(10,10,10,0.75)',
-                  color: '#F5F5F5',
-                  fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
-                }}
-              >
-                ↓
-              </button>
-
-              <button
-                type="button"
-                {...bindPressEvents('arrowright')}
-                className={isLandscapeMobile ? 'h-12' : 'h-14'}
-                style={{
-                  border: '1px solid rgba(255,56,56,0.42)',
-                  background: 'rgba(10,10,10,0.75)',
-                  color: '#F5F5F5',
-                  fontSize: isLandscapeMobile ? '1rem' : '1.25rem',
-                }}
-              >
-                →
-              </button>
-            </div>
+              Tap the moving targets
+            </p>
           </div>
         )}
       </div>
