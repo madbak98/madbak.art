@@ -36,11 +36,11 @@ const projects = [
     title: 'ETHEREAL BEINGS',
     category: 'Cover Art',
     year: '2025',
-    image: 'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
+    image: 'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_v6xqw8v6xqw8v6xq.png?raw=true',
     images: [
-      'https://pbs.twimg.com/media/HEWcDx9WkAA2AN6?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/HEbu-GpbAAIfHv8?format=jpg&name=small',
-      'https://pbs.twimg.com/media/HEbu-GRXYAAx0a0?format=jpg&name=small',
+      'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_v6xqw8v6xqw8v6xq.png?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_ovdyb1ovdyb1ovdy.jpg?raw=true',
+      'https://github.com/madbak98/My-image/blob/main/IMG_3225.JPG?raw=true',
     ],
   },
   {
@@ -75,7 +75,7 @@ const projects = [
     title: 'BACKTALK',
     category: 'Poster',
     year: '2023',
-    image: 'https://pbs.twimg.com/media/HEbvc4tbAAQIAdM?format=jpg&name=medium',
+    image: 'https://github.com/madbak98/My-image/blob/main/A71CBD71-2336-4019-AB4E-65A920E28D27.PNG?raw=true',
     images: [
       'https://withered-field-589.linkyhost.com',
       'https://pbs.twimg.com/media/GT_QPtuX0AAEdB9?format=jpg&name=medium',
