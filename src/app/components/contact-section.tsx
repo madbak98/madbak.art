@@ -19,7 +19,7 @@ export function ContactSection() {
 
   return (
     <section
-      id="about"
+      id="contact"
       ref={ref}
       className="relative min-h-screen flex items-center justify-center py-32 px-4"
     >
