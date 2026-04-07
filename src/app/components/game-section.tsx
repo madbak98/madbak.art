@@ -23,42 +23,43 @@ type Trap = {
   y: number;
   width: number;
   height: number;
+  direction: 'horizontal' | 'vertical';
 };
 
 const PLAN_W = 360;
 const PLAN_H = 520;
 const PLAYER_SIZE = 12;
 const PLAYER_SPEED = 2.4;
-const INTERACTION_DISTANCE = 24;
-const START_POS = { x: 22, y: 474 };
+const INTERACTION_DISTANCE = 30;
+const START_POS = { x: 26, y: 470 };
 
 const rooms: Room[] = [
   {
     id: 'about-room',
     label: 'ABOUT',
     targetId: 'about',
-    x: 28,
-    y: 62,
-    width: 108,
-    height: 104,
+    x: 26,
+    y: 58,
+    width: 112,
+    height: 108,
   },
   {
     id: 'work-room',
     label: 'WORK',
     targetId: 'work',
-    x: 226,
-    y: 48,
-    width: 106,
-    height: 118,
+    x: 222,
+    y: 42,
+    width: 112,
+    height: 124,
   },
   {
     id: 'contact-room',
     label: 'CONTACT',
     targetId: 'contact',
-    x: 212,
-    y: 342,
+    x: 214,
+    y: 334,
     width: 120,
-    height: 122,
+    height: 126,
   },
 ];
 
@@ -69,52 +70,52 @@ const walls: Wall[] = [
   { x: 350, y: 0, width: 10, height: 520 },
   { x: 0, y: 510, width: 360, height: 10 },
 
-  // about room
-  { x: 28, y: 62, width: 108, height: 10 },
-  { x: 28, y: 62, width: 10, height: 104 },
-  { x: 126, y: 62, width: 10, height: 54 },
-  { x: 126, y: 132, width: 10, height: 34 },
-  { x: 28, y: 156, width: 108, height: 10 },
+  // ABOUT room
+  { x: 26, y: 58, width: 112, height: 10 },
+  { x: 26, y: 58, width: 10, height: 108 },
+  { x: 128, y: 58, width: 10, height: 48 },
+  { x: 128, y: 122, width: 10, height: 44 },
+  { x: 26, y: 156, width: 112, height: 10 },
 
-  // work room
-  { x: 226, y: 48, width: 106, height: 10 },
-  { x: 226, y: 48, width: 10, height: 48 },
-  { x: 226, y: 112, width: 10, height: 54 },
-  { x: 322, y: 48, width: 10, height: 118 },
-  { x: 226, y: 156, width: 106, height: 10 },
+  // WORK room
+  { x: 222, y: 42, width: 112, height: 10 },
+  { x: 222, y: 42, width: 10, height: 50 },
+  { x: 222, y: 108, width: 10, height: 58 },
+  { x: 324, y: 42, width: 10, height: 124 },
+  { x: 222, y: 156, width: 112, height: 10 },
 
-  // contact room
-  { x: 212, y: 342, width: 120, height: 10 },
-  { x: 212, y: 342, width: 10, height: 122 },
-  { x: 322, y: 342, width: 10, height: 56 },
-  { x: 322, y: 414, width: 10, height: 50 },
-  { x: 212, y: 454, width: 120, height: 10 },
+  // CONTACT room
+  { x: 214, y: 334, width: 120, height: 10 },
+  { x: 214, y: 334, width: 10, height: 126 },
+  { x: 324, y: 334, width: 10, height: 60 },
+  { x: 324, y: 410, width: 10, height: 50 },
+  { x: 214, y: 450, width: 120, height: 10 },
 
-  // central corridor structure
-  { x: 84, y: 210, width: 10, height: 172 },
-  { x: 84, y: 372, width: 142, height: 10 },
+  // main corridor spine
+  { x: 84, y: 208, width: 10, height: 176 },
+  { x: 84, y: 374, width: 144, height: 10 },
 
-  { x: 172, y: 108, width: 10, height: 160 },
-  { x: 172, y: 108, width: 86, height: 10 },
+  { x: 172, y: 98, width: 10, height: 172 },
+  { x: 172, y: 98, width: 92, height: 10 },
 
-  { x: 120, y: 268, width: 122, height: 10 },
-  { x: 232, y: 198, width: 10, height: 80 },
+  { x: 120, y: 260, width: 122, height: 10 },
+  { x: 232, y: 190, width: 10, height: 80 },
 
-  // bottom hall
-  { x: 36, y: 430, width: 128, height: 10 },
-  { x: 154, y: 430, width: 10, height: 56 },
+  // lower hall
+  { x: 36, y: 428, width: 132, height: 10 },
+  { x: 158, y: 428, width: 10, height: 58 },
 
-  // decorative small walls / furniture feel
-  { x: 52, y: 92, width: 38, height: 8 },
-  { x: 248, y: 84, width: 46, height: 8 },
-  { x: 244, y: 384, width: 54, height: 8 },
-  { x: 244, y: 412, width: 36, height: 8 },
+  // architectural accents / furniture-like separators
+  { x: 54, y: 88, width: 42, height: 8 },
+  { x: 246, y: 80, width: 50, height: 8 },
+  { x: 244, y: 378, width: 58, height: 8 },
+  { x: 244, y: 406, width: 40, height: 8 },
 ];
 
 const traps: Trap[] = [
-  { x: 186, y: 108, width: 24, height: 8 },
-  { x: 134, y: 268, width: 24, height: 8 },
-  { x: 256, y: 412, width: 22, height: 8 },
+  { x: 184, y: 98, width: 30, height: 8, direction: 'horizontal' },
+  { x: 132, y: 260, width: 28, height: 8, direction: 'horizontal' },
+  { x: 258, y: 406, width: 8, height: 26, direction: 'vertical' },
 ];
 
 function clamp(value: number, min: number, max: number) {
@@ -299,7 +300,7 @@ export function GameSection() {
           }
         }
 
-        if (closest && closestDist <= INTERACTION_DISTANCE + 24) {
+        if (closest && closestDist <= INTERACTION_DISTANCE + 26) {
           setNearRoomId(closest.id);
         } else {
           setNearRoomId(null);
@@ -425,9 +426,9 @@ export function GameSection() {
                   top: wall.y,
                   width: wall.width,
                   height: wall.height,
-                  background: 'rgba(255,56,56,0.15)',
-                  border: '1px solid rgba(255,56,56,0.72)',
-                  boxShadow: '0 0 12px rgba(255,56,56,0.18)',
+                  background: 'rgba(255,56,56,0.14)',
+                  border: '1px solid rgba(255,56,56,0.7)',
+                  boxShadow: '0 0 10px rgba(255,56,56,0.15)',
                 }}
               />
             ))}
@@ -441,17 +442,22 @@ export function GameSection() {
                   top: trap.y,
                   width: trap.width,
                   height: trap.height,
-                  background: 'rgba(255,0,0,0.16)',
-                  border: '1px solid rgba(255,0,0,0.82)',
-                  boxShadow: '0 0 10px rgba(255,0,0,0.28)',
+                  background:
+                    trap.direction === 'horizontal'
+                      ? 'linear-gradient(90deg, rgba(255,0,0,0.1), rgba(255,0,0,0.45), rgba(255,0,0,0.1))'
+                      : 'linear-gradient(180deg, rgba(255,0,0,0.1), rgba(255,0,0,0.45), rgba(255,0,0,0.1))',
+                  border: '1px solid rgba(255,0,0,0.8)',
+                  boxShadow: '0 0 14px rgba(255,0,0,0.28)',
                 }}
                 animate={{ opacity: [0.35, 0.9, 0.35] }}
-                transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
               />
             ))}
 
             {rooms.map((room) => {
               const isActive = nearRoomId === room.id;
+              const labelX = room.x + room.width / 2 - 30;
+              const labelY = room.y + room.height / 2 - 14;
 
               return (
                 <motion.button
@@ -465,20 +471,20 @@ export function GameSection() {
                   }}
                   className="absolute flex items-center justify-center"
                   style={{
-                    left: room.x + room.width / 2 - 26,
-                    top: room.y + room.height / 2 - 26,
-                    width: 52,
-                    height: 52,
-                    borderRadius: 999,
-                    border: '2px solid #ff3b3b',
-                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.06)',
+                    left: labelX,
+                    top: labelY,
+                    width: 60,
+                    height: 28,
+                    border: '1px solid rgba(255,56,56,0.82)',
+                    background: isActive ? 'rgba(255,56,56,0.16)' : 'rgba(255,56,56,0.05)',
                     boxShadow: isActive
-                      ? '0 0 22px rgba(255,56,56,0.42)'
-                      : '0 0 14px rgba(255,56,56,0.18)',
+                      ? '0 0 18px rgba(255,56,56,0.3)'
+                      : '0 0 8px rgba(255,56,56,0.12)',
                     color: '#F5F5F5',
                     cursor: 'pointer',
+                    textTransform: 'uppercase',
                   }}
-                  animate={{ scale: isActive ? 1.06 : [1, 1.02, 1] }}
+                  animate={{ scale: isActive ? 1.04 : [1, 1.015, 1] }}
                   transition={{
                     duration: isActive ? 0.2 : 2.2,
                     repeat: isActive ? 0 : Infinity,
@@ -486,11 +492,10 @@ export function GameSection() {
                   }}
                 >
                   <span
-                    className="uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
                       fontSize: '8px',
-                      letterSpacing: '0.16em',
+                      letterSpacing: '0.18em',
                     }}
                   >
                     {room.label}
@@ -594,7 +599,7 @@ export function GameSection() {
                       '0 0 6px rgba(255,0,0,0.7), 0 0 18px rgba(255,0,0,0.35)',
                   }}
                 >
-                  Game Over
+                  Alarm Triggered
                 </div>
               </div>
             )}
