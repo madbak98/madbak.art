@@ -321,8 +321,8 @@ return nearest;
 // FIX 1: global keydown listener that always works regardless of focus
 useEffect(() => {
 const onKeyDown = (e: KeyboardEvent) => {
-// prevent page scroll with arrow keys
-if ([‘arrowup’,‘arrowdown’,‘arrowleft’,‘arrowright’,’ ’].includes(e.key.toLowerCase())) {
+const blocked = [‘ArrowUp’,‘ArrowDown’,‘ArrowLeft’,‘ArrowRight’,’ ’];
+if (blocked.includes(e.key)) {
 e.preventDefault();
 }
 keysRef.current.add(e.key.toLowerCase());
