@@ -46,7 +46,7 @@ const WORLD_H = 520;
 const PLAYER_SIZE = 22;
 const PLAYER_SPEED = 3;
 const BULLET_SPEED = 7.5;
-const ENEMY_SPEED = 0.75;
+const ENEMY_SPEED = 0.82;
 const FIRE_COOLDOWN = 260;
 
 const START_POS: Vec = { x: 72, y: 438 };
@@ -77,6 +77,11 @@ const traps: Trap[] = [
   { x: 234, y: 168, w: 82, h: 10 },
   { x: 476, y: 336, w: 88, h: 10 },
   { x: 620, y: 174, w: 10, h: 86 },
+
+  { x: 332, y: 168, w: 74, h: 10 },
+  { x: 118, y: 336, w: 72, h: 10 },
+  { x: 742, y: 336, w: 62, h: 10 },
+  { x: 618, y: 272, w: 10, h: 70 },
 ];
 
 function rectsOverlap(
@@ -231,6 +236,9 @@ export function GameSection() {
     { id: 1, x: 770, y: 246, hp: 2 },
     { id: 2, x: 444, y: 120, hp: 2 },
     { id: 3, x: 570, y: 408, hp: 2 },
+    { id: 4, x: 350, y: 246, hp: 2 },
+    { id: 5, x: 182, y: 350, hp: 2 },
+    { id: 6, x: 705, y: 350, hp: 2 },
   ]);
   const [message, setMessage] = useState('Reach ABOUT / WORK / CONTACT');
 
@@ -477,6 +485,9 @@ export function GameSection() {
       { id: 1, x: 770, y: 246, hp: 2 },
       { id: 2, x: 444, y: 120, hp: 2 },
       { id: 3, x: 570, y: 408, hp: 2 },
+      { id: 4, x: 350, y: 246, hp: 2 },
+      { id: 5, x: 182, y: 350, hp: 2 },
+      { id: 6, x: 705, y: 350, hp: 2 },
     ]);
     setMessage('Reach ABOUT / WORK / CONTACT');
     touchMoveRef.current.clear();
@@ -500,6 +511,7 @@ export function GameSection() {
       e.preventDefault();
       setTouchMove(key, false);
     },
+    onTouchCancel: () => setTouchMove(key, false),
   });
 
   return (
@@ -555,12 +567,6 @@ export function GameSection() {
           <div
             ref={arenaRef}
             onClick={(e) => shootByPointer(e.clientX, e.clientY)}
-            onTouchStart={(e) => {
-              const touch = e.touches[0];
-              if (touch && !isPhone && !isTablet) {
-                shootByPointer(touch.clientX, touch.clientY);
-              }
-            }}
             className="absolute left-0 top-0 origin-top-left overflow-hidden"
             style={{
               width: `${WORLD_W}px`,
@@ -871,12 +877,15 @@ export function GameSection() {
               <button
                 type="button"
                 {...bindMoveBtn('w')}
-                className={isTablet ? 'h-16' : 'h-14'}
                 style={{
+                  touchAction: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
                   border: '1px solid rgba(255,74,74,0.45)',
                   background: 'rgba(10,10,10,0.78)',
                   color: '#F5F5F5',
                   fontSize: isTablet ? '1.3rem' : '1.2rem',
+                  height: isTablet ? '64px' : '56px',
                 }}
               >
                 ↑
@@ -886,12 +895,15 @@ export function GameSection() {
               <button
                 type="button"
                 {...bindMoveBtn('a')}
-                className={isTablet ? 'h-16' : 'h-14'}
                 style={{
+                  touchAction: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
                   border: '1px solid rgba(255,74,74,0.45)',
                   background: 'rgba(10,10,10,0.78)',
                   color: '#F5F5F5',
                   fontSize: isTablet ? '1.3rem' : '1.2rem',
+                  height: isTablet ? '64px' : '56px',
                 }}
               >
                 ←
@@ -900,12 +912,15 @@ export function GameSection() {
               <button
                 type="button"
                 {...bindMoveBtn('s')}
-                className={isTablet ? 'h-16' : 'h-14'}
                 style={{
+                  touchAction: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
                   border: '1px solid rgba(255,74,74,0.45)',
                   background: 'rgba(10,10,10,0.78)',
                   color: '#F5F5F5',
                   fontSize: isTablet ? '1.3rem' : '1.2rem',
+                  height: isTablet ? '64px' : '56px',
                 }}
               >
                 ↓
@@ -914,12 +929,15 @@ export function GameSection() {
               <button
                 type="button"
                 {...bindMoveBtn('d')}
-                className={isTablet ? 'h-16' : 'h-14'}
                 style={{
+                  touchAction: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
                   border: '1px solid rgba(255,74,74,0.45)',
                   background: 'rgba(10,10,10,0.78)',
                   color: '#F5F5F5',
                   fontSize: isTablet ? '1.3rem' : '1.2rem',
+                  height: isTablet ? '64px' : '56px',
                 }}
               >
                 →
@@ -930,8 +948,8 @@ export function GameSection() {
               <button
                 type="button"
                 onClick={shootNearestTarget}
-                className={isTablet ? 'px-8 py-5' : 'px-7 py-4'}
                 style={{
+                  touchAction: 'manipulation',
                   border: '2px solid #ff4a4a',
                   background: 'rgba(255,74,74,0.08)',
                   color: '#F5F5F5',
@@ -939,6 +957,7 @@ export function GameSection() {
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',
                   fontSize: isTablet ? '1rem' : '0.9rem',
+                  padding: isTablet ? '18px 34px' : '16px 28px',
                 }}
               >
                 Fire
@@ -947,8 +966,8 @@ export function GameSection() {
               <button
                 type="button"
                 onClick={() => openSection(centerTarget.targetId)}
-                className={isTablet ? 'px-8 py-5' : 'px-7 py-4'}
                 style={{
+                  touchAction: 'manipulation',
                   border: '2px solid rgba(255,255,255,0.2)',
                   background: 'rgba(255,255,255,0.04)',
                   color: '#F5F5F5',
@@ -956,6 +975,7 @@ export function GameSection() {
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',
                   fontSize: isTablet ? '1rem' : '0.9rem',
+                  padding: isTablet ? '18px 34px' : '16px 28px',
                 }}
               >
                 Enter
