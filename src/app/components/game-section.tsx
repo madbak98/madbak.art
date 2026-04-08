@@ -43,42 +43,46 @@ type Bullet = {
 const WORLD_W = 900;
 const WORLD_H = 520;
 
-const PLAYER_SIZE = 24;
-const PLAYER_SPEED = 3.2;
-const BULLET_SPEED = 7;
-const ENEMY_SPEED = 0.7;
+const PLAYER_SIZE = 22;
+const PLAYER_SPEED = 3;
+const BULLET_SPEED = 7.5;
+const ENEMY_SPEED = 0.75;
+const FIRE_COOLDOWN = 260;
 
-const START_POS: Vec = { x: 80, y: 430 };
+const START_POS: Vec = { x: 72, y: 438 };
 
 const destinations: Destination[] = [
-  { id: 'about', label: 'ABOUT', x: 66, y: 54, w: 104, h: 64 },
-  { id: 'work', label: 'WORK', x: 700, y: 66, w: 112, h: 64 },
-  { id: 'contact', label: 'CONTACT', x: 650, y: 390, w: 128, h: 64 },
+  { id: 'about', label: 'ABOUT', x: 56, y: 56, w: 120, h: 68 },
+  { id: 'work', label: 'WORK', x: 690, y: 60, w: 132, h: 68 },
+  { id: 'contact', label: 'CONTACT', x: 640, y: 392, w: 150, h: 72 },
 ];
 
 const buildings: Building[] = [
-  { x: 40, y: 36, w: 160, h: 110 },
-  { x: 270, y: 30, w: 150, h: 120 },
-  { x: 510, y: 28, w: 100, h: 130 },
-  { x: 676, y: 36, w: 160, h: 110 },
+  { x: 28, y: 28, w: 180, h: 118 },
+  { x: 272, y: 34, w: 152, h: 110 },
+  { x: 492, y: 28, w: 130, h: 120 },
+  { x: 670, y: 30, w: 188, h: 116 },
 
-  { x: 58, y: 220, w: 138, h: 110 },
-  { x: 300, y: 210, w: 170, h: 118 },
-  { x: 540, y: 208, w: 112, h: 122 },
-  { x: 684, y: 214, w: 136, h: 104 },
+  { x: 56, y: 212, w: 146, h: 112 },
+  { x: 294, y: 202, w: 174, h: 118 },
+  { x: 548, y: 208, w: 112, h: 118 },
+  { x: 696, y: 212, w: 136, h: 106 },
 
-  { x: 40, y: 382, w: 190, h: 92 },
-  { x: 286, y: 380, w: 150, h: 88 },
-  { x: 620, y: 370, w: 188, h: 100 },
+  { x: 28, y: 380, w: 198, h: 92 },
+  { x: 286, y: 378, w: 152, h: 90 },
+  { x: 606, y: 372, w: 212, h: 100 },
 ];
 
 const traps: Trap[] = [
-  { x: 235, y: 170, w: 72, h: 10 },
-  { x: 470, y: 340, w: 80, h: 10 },
-  { x: 620, y: 176, w: 10, h: 78 },
+  { x: 234, y: 168, w: 82, h: 10 },
+  { x: 476, y: 336, w: 88, h: 10 },
+  { x: 620, y: 174, w: 10, h: 86 },
 ];
 
-function rectsOverlap(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) {
+function rectsOverlap(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number }
+) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
@@ -97,15 +101,7 @@ function openSection(targetId: string) {
   });
 }
 
-function Character({
-  x,
-  y,
-  facing,
-}: {
-  x: number;
-  y: number;
-  facing: number;
-}) {
+function Character({ x, y, facing }: { x: number; y: number; facing: number }) {
   return (
     <div
       style={{
@@ -121,25 +117,25 @@ function Character({
         style={{
           position: 'absolute',
           left: 4,
-          top: 6,
-          width: 16,
-          height: 12,
-          borderRadius: '8px',
-          background: '#0f0f0f',
-          border: '2px solid #f5f5f5',
+          top: 8,
+          width: 14,
+          height: 11,
+          borderRadius: '7px',
+          background: '#101010',
+          border: '2px solid #F5F5F5',
           boxShadow: '0 0 10px rgba(255,255,255,0.18)',
         }}
       />
       <div
         style={{
           position: 'absolute',
-          left: 7,
+          left: 6,
           top: 1,
           width: 10,
           height: 10,
           borderRadius: '999px',
-          background: '#f5f5f5',
-          boxShadow: '0 0 8px rgba(255,255,255,0.28)',
+          background: '#F5F5F5',
+          boxShadow: '0 0 8px rgba(255,255,255,0.3)',
         }}
       />
       <div
@@ -149,11 +145,11 @@ function Character({
           top: 11,
           width: 14,
           height: 3,
-          transformOrigin: '0 50%',
-          transform: `rotate(${facing}rad)`,
           background: '#ff4a4a',
           borderRadius: '999px',
-          boxShadow: '0 0 8px rgba(255,74,74,0.42)',
+          transformOrigin: '0 50%',
+          transform: `rotate(${facing}rad)`,
+          boxShadow: '0 0 10px rgba(255,74,74,0.4)',
         }}
       />
     </div>
@@ -178,7 +174,7 @@ function Beast({ x, y }: { x: number; y: number }) {
           inset: 0,
           borderRadius: '999px',
           background: '#ff3b3b',
-          boxShadow: '0 0 14px rgba(255,59,59,0.35)',
+          boxShadow: '0 0 16px rgba(255,59,59,0.35)',
         }}
       />
       <div
@@ -210,8 +206,8 @@ function Beast({ x, y }: { x: number; y: number }) {
           bottom: 4,
           width: 12,
           height: 2,
-          background: '#0a0a0a',
           borderRadius: '999px',
+          background: '#0a0a0a',
         }}
       />
     </div>
@@ -232,15 +228,17 @@ export function GameSection() {
   const [facing, setFacing] = useState(0);
   const [bullets, setBullets] = useState<Bullet[]>([]);
   const [enemies, setEnemies] = useState<Enemy[]>([
-    { id: 1, x: 770, y: 250, hp: 2 },
-    { id: 2, x: 440, y: 120, hp: 2 },
-    { id: 3, x: 565, y: 410, hp: 2 },
+    { id: 1, x: 770, y: 246, hp: 2 },
+    { id: 2, x: 444, y: 120, hp: 2 },
+    { id: 3, x: 570, y: 408, hp: 2 },
   ]);
-  const [message, setMessage] = useState('Reach a destination');
+  const [message, setMessage] = useState('Reach ABOUT / WORK / CONTACT');
 
   const keysRef = useRef<Set<string>>(new Set());
+  const touchMoveRef = useRef<Set<string>>(new Set());
   const bulletIdRef = useRef(1);
   const arenaRef = useRef<HTMLDivElement | null>(null);
+  const lastFireRef = useRef(0);
 
   useEffect(() => {
     const onResize = () => {
@@ -251,19 +249,38 @@ export function GameSection() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const isMobile = viewportWidth <= 767;
-  const isLandscapeMobile = isMobile && viewportWidth > viewportHeight;
+  const isPhone = viewportWidth <= 767;
+  const isTablet = viewportWidth > 767 && viewportWidth <= 1180;
+  const isLandscapeMobile = isPhone && viewportWidth > viewportHeight;
 
   const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 32, 300)
-    : isMobile
-    ? Math.min(viewportWidth - 32, 360)
-    : 760;
+    ? Math.min(viewportWidth - 32, 420)
+    : isPhone
+    ? Math.min(viewportWidth - 24, 360)
+    : isTablet
+    ? Math.min(viewportWidth - 48, 760)
+    : 820;
 
   const scale = renderWidth / WORLD_W;
   const renderHeight = WORLD_H * scale;
 
-  const worldBuildings = useMemo(() => buildings, []);
+  const centerTarget = useMemo(() => {
+    const nearest = destinations
+      .map((d) => {
+        const cx = d.x + d.w / 2;
+        const cy = d.y + d.h / 2;
+        return {
+          id: d.id,
+          targetId: d.id,
+          x: cx,
+          y: cy,
+          dist: distance(player, { x: cx, y: cy }),
+        };
+      })
+      .sort((a, b) => a.dist - b.dist)[0];
+
+    return nearest;
+  }, [player]);
 
   useEffect(() => {
     if (!started || gameOver) return;
@@ -271,6 +288,7 @@ export function GameSection() {
     const onKeyDown = (e: KeyboardEvent) => {
       keysRef.current.add(e.key.toLowerCase());
     };
+
     const onKeyUp = (e: KeyboardEvent) => {
       keysRef.current.delete(e.key.toLowerCase());
     };
@@ -282,13 +300,18 @@ export function GameSection() {
 
     const loop = () => {
       setPlayer((prev) => {
+        const allKeys = new Set([
+          ...Array.from(keysRef.current),
+          ...Array.from(touchMoveRef.current),
+        ]);
+
         let dx = 0;
         let dy = 0;
 
-        if (keysRef.current.has('w')) dy -= 1;
-        if (keysRef.current.has('s')) dy += 1;
-        if (keysRef.current.has('a')) dx -= 1;
-        if (keysRef.current.has('d')) dx += 1;
+        if (allKeys.has('w') || allKeys.has('arrowup')) dy -= 1;
+        if (allKeys.has('s') || allKeys.has('arrowdown')) dy += 1;
+        if (allKeys.has('a') || allKeys.has('arrowleft')) dx -= 1;
+        if (allKeys.has('d') || allKeys.has('arrowright')) dx += 1;
 
         if (dx !== 0 && dy !== 0) {
           dx *= 0.7071;
@@ -302,10 +325,10 @@ export function GameSection() {
         let nextY = prev.y;
 
         const rectX = { x: tryX, y: prev.y, w: PLAYER_SIZE, h: PLAYER_SIZE };
-        if (!worldBuildings.some((b) => rectsOverlap(rectX, b))) nextX = tryX;
+        if (!buildings.some((b) => rectsOverlap(rectX, b))) nextX = tryX;
 
         const rectY = { x: nextX, y: tryY, w: PLAYER_SIZE, h: PLAYER_SIZE };
-        if (!worldBuildings.some((b) => rectsOverlap(rectY, b))) nextY = tryY;
+        if (!buildings.some((b) => rectsOverlap(rectY, b))) nextY = tryY;
 
         return { x: nextX, y: nextY };
       });
@@ -327,9 +350,9 @@ export function GameSection() {
           const ny = enemy.y + Math.sin(angle) * ENEMY_SPEED;
 
           const enemyRect = { x: nx, y: ny, w: 22, h: 22 };
-          const blocked = worldBuildings.some((b) => rectsOverlap(enemyRect, b));
-
+          const blocked = buildings.some((b) => rectsOverlap(enemyRect, b));
           if (blocked) return enemy;
+
           return { ...enemy, x: nx, y: ny };
         })
       );
@@ -344,16 +367,16 @@ export function GameSection() {
       window.removeEventListener('keyup', onKeyUp);
       cancelAnimationFrame(frame);
     };
-  }, [started, gameOver, player, worldBuildings]);
+  }, [started, gameOver, player]);
 
   useEffect(() => {
     if (!started || gameOver) return;
 
     setEnemies((prevEnemies) => {
-      let nextEnemies = [...prevEnemies];
+      let next = [...prevEnemies];
 
       bullets.forEach((bullet) => {
-        nextEnemies = nextEnemies
+        next = next
           .map((enemy) => {
             const hit = distance(
               { x: bullet.x, y: bullet.y },
@@ -366,7 +389,7 @@ export function GameSection() {
           .filter((enemy) => enemy.hp > 0);
       });
 
-      return nextEnemies;
+      return next;
     });
   }, [bullets, started, gameOver]);
 
@@ -381,7 +404,7 @@ export function GameSection() {
         )
       ) {
         setGameOver(true);
-        setMessage('You hit a trap');
+        setMessage('Trap hit');
         return;
       }
     }
@@ -408,12 +431,12 @@ export function GameSection() {
     }
   }, [player, enemies, started, gameOver]);
 
-  const shoot = (clientX: number, clientY: number) => {
-    if (!arenaRef.current || !started || gameOver) return;
+  const shootToward = (tx: number, ty: number) => {
+    if (!started || gameOver) return;
 
-    const rect = arenaRef.current.getBoundingClientRect();
-    const tx = ((clientX - rect.left) / rect.width) * WORLD_W;
-    const ty = ((clientY - rect.top) / rect.height) * WORLD_H;
+    const now = Date.now();
+    if (now - lastFireRef.current < FIRE_COOLDOWN) return;
+    lastFireRef.current = now;
 
     const cx = player.x + PLAYER_SIZE / 2;
     const cy = player.y + PLAYER_SIZE / 2;
@@ -433,18 +456,51 @@ export function GameSection() {
     ]);
   };
 
+  const shootByPointer = (clientX: number, clientY: number) => {
+    if (!arenaRef.current) return;
+    const rect = arenaRef.current.getBoundingClientRect();
+    const tx = ((clientX - rect.left) / rect.width) * WORLD_W;
+    const ty = ((clientY - rect.top) / rect.height) * WORLD_H;
+    shootToward(tx, ty);
+  };
+
+  const shootNearestTarget = () => {
+    shootToward(centerTarget.x, centerTarget.y);
+  };
+
   const restart = () => {
     setGameOver(false);
     setStarted(true);
     setPlayer(START_POS);
     setBullets([]);
     setEnemies([
-      { id: 1, x: 770, y: 250, hp: 2 },
-      { id: 2, x: 440, y: 120, hp: 2 },
-      { id: 3, x: 565, y: 410, hp: 2 },
+      { id: 1, x: 770, y: 246, hp: 2 },
+      { id: 2, x: 444, y: 120, hp: 2 },
+      { id: 3, x: 570, y: 408, hp: 2 },
     ]);
-    setMessage('Reach a destination');
+    setMessage('Reach ABOUT / WORK / CONTACT');
+    touchMoveRef.current.clear();
+    keysRef.current.clear();
   };
+
+  const setTouchMove = (key: string, active: boolean) => {
+    if (active) touchMoveRef.current.add(key);
+    else touchMoveRef.current.delete(key);
+  };
+
+  const bindMoveBtn = (key: string) => ({
+    onMouseDown: () => setTouchMove(key, true),
+    onMouseUp: () => setTouchMove(key, false),
+    onMouseLeave: () => setTouchMove(key, false),
+    onTouchStart: (e: React.TouchEvent) => {
+      e.preventDefault();
+      setTouchMove(key, true);
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      e.preventDefault();
+      setTouchMove(key, false);
+    },
+  });
 
   return (
     <section
@@ -485,7 +541,7 @@ export function GameSection() {
               color: 'rgba(245,245,245,0.58)',
             }}
           >
-            Move with WASD. Click to shoot. Avoid traps and beasts.
+            WASD on desktop. Touch controls on phone and iPad.
           </p>
         </div>
 
@@ -498,10 +554,12 @@ export function GameSection() {
         >
           <div
             ref={arenaRef}
-            onClick={(e) => shoot(e.clientX, e.clientY)}
+            onClick={(e) => shootByPointer(e.clientX, e.clientY)}
             onTouchStart={(e) => {
               const touch = e.touches[0];
-              if (touch) shoot(touch.clientX, touch.clientY);
+              if (touch && !isPhone && !isTablet) {
+                shootByPointer(touch.clientX, touch.clientY);
+              }
             }}
             className="absolute left-0 top-0 origin-top-left overflow-hidden"
             style={{
@@ -512,7 +570,7 @@ export function GameSection() {
               background:
                 'linear-gradient(180deg, rgba(12,12,12,1) 0%, rgba(8,8,8,1) 100%)',
               boxShadow: '0 0 38px rgba(255,74,74,0.12)',
-              cursor: 'crosshair',
+              cursor: isPhone || isTablet ? 'default' : 'crosshair',
             }}
           >
             <div
@@ -526,7 +584,6 @@ export function GameSection() {
               }}
             />
 
-            {/* roads */}
             <div
               className="absolute"
               style={{
@@ -576,7 +633,6 @@ export function GameSection() {
               }}
             />
 
-            {/* buildings */}
             {buildings.map((b, i) => (
               <div
                 key={i}
@@ -601,7 +657,6 @@ export function GameSection() {
               </div>
             ))}
 
-            {/* destinations */}
             {destinations.map((d) => (
               <div
                 key={d.id}
@@ -628,7 +683,6 @@ export function GameSection() {
               </div>
             ))}
 
-            {/* traps */}
             {traps.map((t, i) => (
               <div
                 key={i}
@@ -648,7 +702,6 @@ export function GameSection() {
               />
             ))}
 
-            {/* bullets */}
             {bullets.map((b) => (
               <div
                 key={b.id}
@@ -665,15 +718,12 @@ export function GameSection() {
               />
             ))}
 
-            {/* enemies */}
             {enemies.map((e) => (
               <Beast key={e.id} x={e.x} y={e.y} />
             ))}
 
-            {/* player */}
             <Character x={player.x} y={player.y} facing={facing} />
 
-            {/* HUD */}
             <div
               className="absolute left-4 top-4 px-4 py-3"
               style={{
@@ -730,7 +780,7 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    WASD to move
+                    Desktop: WASD + click
                   </p>
 
                   <p
@@ -742,7 +792,7 @@ export function GameSection() {
                       letterSpacing: '0.18em',
                     }}
                   >
-                    Click / Tap to shoot
+                    Phone / iPad: touch controls
                   </p>
 
                   <button
@@ -750,7 +800,7 @@ export function GameSection() {
                       setStarted(true);
                       setGameOver(false);
                       setPlayer(START_POS);
-                      setMessage('Reach a destination');
+                      setMessage('Reach ABOUT / WORK / CONTACT');
                     }}
                     style={{
                       fontFamily: 'var(--font-body)',
@@ -806,19 +856,111 @@ export function GameSection() {
           </div>
         </div>
 
-        {isMobile && started && !gameOver && (
-          <div className="mt-4 text-center">
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                color: 'rgba(245,245,245,0.58)',
-                fontSize: '10px',
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-              }}
+        {(isPhone || isTablet) && started && !gameOver && (
+          <div
+            className={`mt-4 flex ${
+              isLandscapeMobile ? 'flex-row items-end justify-between gap-4' : 'flex-col items-center gap-4'
+            }`}
+          >
+            <div
+              className={`grid grid-cols-3 select-none ${
+                isTablet ? 'gap-3 w-[240px]' : 'gap-3 w-[210px]'
+              }`}
             >
-              Move with WASD keyboard. Tap to shoot.
-            </p>
+              <div />
+              <button
+                type="button"
+                {...bindMoveBtn('w')}
+                className={isTablet ? 'h-16' : 'h-14'}
+                style={{
+                  border: '1px solid rgba(255,74,74,0.45)',
+                  background: 'rgba(10,10,10,0.78)',
+                  color: '#F5F5F5',
+                  fontSize: isTablet ? '1.3rem' : '1.2rem',
+                }}
+              >
+                ↑
+              </button>
+              <div />
+
+              <button
+                type="button"
+                {...bindMoveBtn('a')}
+                className={isTablet ? 'h-16' : 'h-14'}
+                style={{
+                  border: '1px solid rgba(255,74,74,0.45)',
+                  background: 'rgba(10,10,10,0.78)',
+                  color: '#F5F5F5',
+                  fontSize: isTablet ? '1.3rem' : '1.2rem',
+                }}
+              >
+                ←
+              </button>
+
+              <button
+                type="button"
+                {...bindMoveBtn('s')}
+                className={isTablet ? 'h-16' : 'h-14'}
+                style={{
+                  border: '1px solid rgba(255,74,74,0.45)',
+                  background: 'rgba(10,10,10,0.78)',
+                  color: '#F5F5F5',
+                  fontSize: isTablet ? '1.3rem' : '1.2rem',
+                }}
+              >
+                ↓
+              </button>
+
+              <button
+                type="button"
+                {...bindMoveBtn('d')}
+                className={isTablet ? 'h-16' : 'h-14'}
+                style={{
+                  border: '1px solid rgba(255,74,74,0.45)',
+                  background: 'rgba(10,10,10,0.78)',
+                  color: '#F5F5F5',
+                  fontSize: isTablet ? '1.3rem' : '1.2rem',
+                }}
+              >
+                →
+              </button>
+            </div>
+
+            <div className={`flex ${isLandscapeMobile ? 'flex-col gap-3' : 'flex-row gap-3'}`}>
+              <button
+                type="button"
+                onClick={shootNearestTarget}
+                className={isTablet ? 'px-8 py-5' : 'px-7 py-4'}
+                style={{
+                  border: '2px solid #ff4a4a',
+                  background: 'rgba(255,74,74,0.08)',
+                  color: '#F5F5F5',
+                  fontFamily: 'var(--font-body)',
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  fontSize: isTablet ? '1rem' : '0.9rem',
+                }}
+              >
+                Fire
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openSection(centerTarget.targetId)}
+                className={isTablet ? 'px-8 py-5' : 'px-7 py-4'}
+                style={{
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: '#F5F5F5',
+                  fontFamily: 'var(--font-body)',
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  fontSize: isTablet ? '1rem' : '0.9rem',
+                }}
+              >
+                Enter
+              </button>
+            </div>
           </div>
         )}
       </div>
