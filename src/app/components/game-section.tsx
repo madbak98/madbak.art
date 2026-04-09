@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-
+ 
 type Vec = { x: number; y: number };
-
+ 
 type Destination = {
   id: 'about' | 'work' | 'contact';
   label: string;
@@ -10,28 +10,28 @@ type Destination = {
   w: number;
   h: number;
 };
-
+ 
 type Building = {
   x: number;
   y: number;
   w: number;
   h: number;
 };
-
+ 
 type Trap = {
   x: number;
   y: number;
   w: number;
   h: number;
 };
-
+ 
 type Enemy = {
   id: number;
   x: number;
   y: number;
   hp: number;
 };
-
+ 
 type Bullet = {
   id: number;
   x: number;
@@ -39,51 +39,51 @@ type Bullet = {
   vx: number;
   vy: number;
 };
-
+ 
 const WORLD_W = 900;
 const WORLD_H = 520;
-
+ 
 const PLAYER_SIZE = 22;
 const PLAYER_SPEED = 3;
 const BULLET_SPEED = 7.5;
 const ENEMY_SPEED = 0.82;
 const FIRE_COOLDOWN = 260;
-
+ 
 const START_POS: Vec = { x: 72, y: 438 };
-
+ 
 const destinations: Destination[] = [
   { id: 'about', label: 'ABOUT', x: 56, y: 56, w: 120, h: 68 },
   { id: 'work', label: 'WORK', x: 690, y: 60, w: 132, h: 68 },
   { id: 'contact', label: 'CONTACT', x: 640, y: 392, w: 150, h: 72 },
 ];
-
+ 
 const buildings: Building[] = [
   { x: 28, y: 28, w: 180, h: 118 },
   { x: 272, y: 34, w: 152, h: 110 },
   { x: 492, y: 28, w: 130, h: 120 },
   { x: 670, y: 30, w: 188, h: 116 },
-
+ 
   { x: 56, y: 212, w: 146, h: 112 },
   { x: 294, y: 202, w: 174, h: 118 },
   { x: 548, y: 208, w: 112, h: 118 },
   { x: 696, y: 212, w: 136, h: 106 },
-
+ 
   { x: 28, y: 380, w: 198, h: 92 },
   { x: 286, y: 378, w: 152, h: 90 },
   { x: 606, y: 372, w: 212, h: 100 },
 ];
-
+ 
 const traps: Trap[] = [
   { x: 234, y: 168, w: 82, h: 10 },
   { x: 476, y: 336, w: 88, h: 10 },
   { x: 620, y: 174, w: 10, h: 86 },
-
+ 
   { x: 332, y: 168, w: 74, h: 10 },
   { x: 118, y: 336, w: 72, h: 10 },
   { x: 742, y: 336, w: 62, h: 10 },
   { x: 618, y: 272, w: 10, h: 70 },
 ];
-
+ 
 // FIX 3: increased from 6 to 12 enemies
 const INITIAL_ENEMIES: Enemy[] = [
   { id: 1, x: 770, y: 246, hp: 2 },
@@ -99,29 +99,29 @@ const INITIAL_ENEMIES: Enemy[] = [
   { id: 11, x: 650, y: 220, hp: 2 },
   { id: 12, x: 200, y: 240, hp: 2 },
 ];
-
+ 
 function rectsOverlap(
   a: { x: number; y: number; w: number; h: number },
   b: { x: number; y: number; w: number; h: number }
 ) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
-
+ 
 function distance(a: Vec, b: Vec) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
-
+ 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
 }
-
+ 
 function openSection(targetId: string) {
   document.getElementById(targetId)?.scrollIntoView({
     behavior: 'smooth',
     block: 'start',
   });
 }
-
+ 
 function Character({ x, y, facing }: { x: number; y: number; facing: number }) {
   return (
     <div
@@ -176,7 +176,7 @@ function Character({ x, y, facing }: { x: number; y: number; facing: number }) {
     </div>
   );
 }
-
+ 
 function Beast({ x, y }: { x: number; y: number }) {
   return (
     <div
@@ -234,7 +234,7 @@ function Beast({ x, y }: { x: number; y: number }) {
     </div>
   );
 }
-
+ 
 export function GameSection() {
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -242,7 +242,7 @@ export function GameSection() {
   const [viewportHeight, setViewportHeight] = useState(
     typeof window !== 'undefined' ? window.innerHeight : 900
   );
-
+ 
   const [started, setStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [player, setPlayer] = useState<Vec>(START_POS);
@@ -250,7 +250,7 @@ export function GameSection() {
   const [bullets, setBullets] = useState<Bullet[]>([]);
   const [enemies, setEnemies] = useState<Enemy[]>(INITIAL_ENEMIES);
   const [message, setMessage] = useState('Reach ABOUT / WORK / CONTACT');
-
+ 
   const keysRef = useRef<Set<string>>(new Set());
   const touchMoveRef = useRef<Set<string>>(new Set());
   const bulletIdRef = useRef(1);
@@ -260,19 +260,19 @@ export function GameSection() {
   const lastFireRef = useRef(0);
   const startedRef = useRef(false);
   const gameOverRef = useRef(false);
-
+ 
   useEffect(() => {
     playerRef.current = player;
   }, [player]);
-
+ 
   useEffect(() => {
     startedRef.current = started;
   }, [started]);
-
+ 
   useEffect(() => {
     gameOverRef.current = gameOver;
   }, [gameOver]);
-
+ 
   useEffect(() => {
     const onResize = () => {
       setViewportWidth(window.innerWidth);
@@ -281,11 +281,11 @@ export function GameSection() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
+ 
   const isPhone = viewportWidth <= 767;
   const isTablet = viewportWidth > 767 && viewportWidth <= 1180;
   const isLandscapeMobile = isPhone && viewportWidth > viewportHeight;
-
+ 
   const renderWidth = isLandscapeMobile
     ? Math.min(viewportWidth - 32, 420)
     : isPhone
@@ -293,10 +293,10 @@ export function GameSection() {
     : isTablet
     ? Math.min(viewportWidth - 48, 760)
     : 820;
-
+ 
   const scale = renderWidth / WORLD_W;
   const renderHeight = WORLD_H * scale;
-
+ 
   const centerTarget = useMemo(() => {
     const nearest = destinations
       .map((d) => {
@@ -311,10 +311,10 @@ export function GameSection() {
         };
       })
       .sort((a, b) => a.dist - b.dist)[0];
-
+ 
     return nearest;
   }, [player]);
-
+ 
   // FIX 1: global keydown listener that always works regardless of focus
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -334,51 +334,51 @@ export function GameSection() {
       window.removeEventListener('keyup', onKeyUp);
     };
   }, []);
-
+ 
   useEffect(() => {
     if (!started || gameOver) return;
-
+ 
     let frame = 0;
-
+ 
     const loop = () => {
       if (!startedRef.current || gameOverRef.current) return;
-
+ 
       // --- Player movement ---
       setPlayer((prev) => {
         const allKeys = new Set([
           ...Array.from(keysRef.current),
           ...Array.from(touchMoveRef.current),
         ]);
-
+ 
         let dx = 0;
         let dy = 0;
-
+ 
         if (allKeys.has('w') || allKeys.has('arrowup')) dy -= 1;
         if (allKeys.has('s') || allKeys.has('arrowdown')) dy += 1;
         if (allKeys.has('a') || allKeys.has('arrowleft')) dx -= 1;
         if (allKeys.has('d') || allKeys.has('arrowright')) dx += 1;
-
+ 
         if (dx !== 0 && dy !== 0) {
           dx *= 0.7071;
           dy *= 0.7071;
         }
-
+ 
         const tryX = clamp(prev.x + dx * PLAYER_SPEED, 0, WORLD_W - PLAYER_SIZE);
         const tryY = clamp(prev.y + dy * PLAYER_SPEED, 0, WORLD_H - PLAYER_SIZE);
-
+ 
         let nextX = prev.x;
         let nextY = prev.y;
-
+ 
         const rectX = { x: tryX, y: prev.y, w: PLAYER_SIZE, h: PLAYER_SIZE };
         if (!buildings.some((b) => rectsOverlap(rectX, b))) nextX = tryX;
-
+ 
         const rectY = { x: nextX, y: tryY, w: PLAYER_SIZE, h: PLAYER_SIZE };
         if (!buildings.some((b) => rectsOverlap(rectY, b))) nextY = tryY;
-
+ 
         playerRef.current = { x: nextX, y: nextY };
         return { x: nextX, y: nextY };
       });
-
+ 
       // FIX 2: Bullets stop when hitting buildings
       setBullets((prev) =>
         prev
@@ -396,7 +396,7 @@ export function GameSection() {
             return true;
           })
       );
-
+ 
       // --- Enemy movement ---
       setEnemies((prev) =>
         prev.map((enemy) => {
@@ -404,32 +404,32 @@ export function GameSection() {
           const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
           const nx = enemy.x + Math.cos(angle) * ENEMY_SPEED;
           const ny = enemy.y + Math.sin(angle) * ENEMY_SPEED;
-
+ 
           const enemyRect = { x: nx, y: ny, w: 22, h: 22 };
           const blocked = buildings.some((b) => rectsOverlap(enemyRect, b));
           if (blocked) return enemy;
-
+ 
           return { ...enemy, x: nx, y: ny };
         })
       );
-
+ 
       frame = requestAnimationFrame(loop);
     };
-
+ 
     frame = requestAnimationFrame(loop);
-
+ 
     return () => {
       cancelAnimationFrame(frame);
     };
   }, [started, gameOver]);
-
+ 
   // Bullet-enemy collision
   useEffect(() => {
     if (!started || gameOver) return;
-
+ 
     setEnemies((prevEnemies) => {
       let next = [...prevEnemies];
-
+ 
       bullets.forEach((bullet) => {
         next = next
           .map((enemy) => {
@@ -437,21 +437,21 @@ export function GameSection() {
               { x: bullet.x, y: bullet.y },
               { x: enemy.x + 11, y: enemy.y + 11 }
             ) < 16;
-
+ 
             if (!hit) return enemy;
             return { ...enemy, hp: enemy.hp - 1 };
           })
           .filter((enemy) => enemy.hp > 0);
       });
-
+ 
       return next;
     });
   }, [bullets, started, gameOver]);
-
+ 
   // Collision detection: traps, enemies, destinations
   useEffect(() => {
     if (!started || gameOver) return;
-
+ 
     for (const trap of traps) {
       if (
         rectsOverlap(
@@ -464,7 +464,7 @@ export function GameSection() {
         return;
       }
     }
-
+ 
     for (const enemy of enemies) {
       if (distance(player, enemy) < 18) {
         setGameOver(true);
@@ -472,7 +472,7 @@ export function GameSection() {
         return;
       }
     }
-
+ 
     for (const dest of destinations) {
       if (
         rectsOverlap(
@@ -486,20 +486,20 @@ export function GameSection() {
       }
     }
   }, [player, enemies, started, gameOver]);
-
+ 
   const shootToward = (tx: number, ty: number) => {
     if (!started || gameOver) return;
-
+ 
     const now = Date.now();
     if (now - lastFireRef.current < FIRE_COOLDOWN) return;
     lastFireRef.current = now;
-
+ 
     const cx = player.x + PLAYER_SIZE / 2;
     const cy = player.y + PLAYER_SIZE / 2;
     const angle = Math.atan2(ty - cy, tx - cx);
-
+ 
     setFacing(angle);
-
+ 
     setBullets((prev) => [
       ...prev,
       {
@@ -511,7 +511,7 @@ export function GameSection() {
       },
     ]);
   };
-
+ 
   const shootByPointer = (clientX: number, clientY: number) => {
     if (!arenaRef.current) return;
     const rect = arenaRef.current.getBoundingClientRect();
@@ -519,11 +519,11 @@ export function GameSection() {
     const ty = ((clientY - rect.top) / rect.height) * WORLD_H;
     shootToward(tx, ty);
   };
-
+ 
   const shootNearestTarget = () => {
     shootToward(centerTarget.x, centerTarget.y);
   };
-
+ 
   const restart = () => {
     setGameOver(false);
     setStarted(true);
@@ -535,12 +535,12 @@ export function GameSection() {
     touchMoveRef.current.clear();
     keysRef.current.clear();
   };
-
+ 
   const setTouchMove = (key: string, active: boolean) => {
     if (active) touchMoveRef.current.add(key);
     else touchMoveRef.current.delete(key);
   };
-
+ 
   const bindMoveBtn = (key: string) => ({
     onMouseDown: () => setTouchMove(key, true),
     onMouseUp: () => setTouchMove(key, false),
@@ -555,7 +555,7 @@ export function GameSection() {
     },
     onTouchCancel: () => setTouchMove(key, false),
   });
-
+ 
   return (
     <section
       id="game"
@@ -573,7 +573,7 @@ export function GameSection() {
               [00X] CITY RUN
             </span>
           </div>
-
+ 
           <h2
             className="mb-3"
             style={{
@@ -587,7 +587,7 @@ export function GameSection() {
           >
             REACH THE TARGET
           </h2>
-
+ 
           <p
             className="mx-auto max-w-2xl text-[11px] sm:text-sm tracking-[0.12em] uppercase"
             style={{
@@ -598,7 +598,7 @@ export function GameSection() {
             WASD on desktop. Touch controls on phone and iPad.
           </p>
         </div>
-
+ 
         <div
           className="relative mx-auto"
           style={{
@@ -631,7 +631,7 @@ export function GameSection() {
                 backgroundSize: '40px 40px',
               }}
             />
-
+ 
             {/* Streets */}
             <div
               className="absolute"
@@ -669,7 +669,7 @@ export function GameSection() {
                 borderRight: '1px solid rgba(255,255,255,0.08)',
               }}
             />
-
+ 
             {/* Buildings */}
             {buildings.map((b, i) => (
               <div
@@ -685,7 +685,7 @@ export function GameSection() {
                 <div style={{ position: 'absolute', inset: 8, border: '1px solid rgba(255,255,255,0.05)' }} />
               </div>
             ))}
-
+ 
             {/* Destinations */}
             {destinations.map((d) => (
               <div
@@ -707,7 +707,7 @@ export function GameSection() {
                 {d.label}
               </div>
             ))}
-
+ 
             {/* Traps */}
             {traps.map((t, i) => (
               <div
@@ -723,7 +723,7 @@ export function GameSection() {
                 }}
               />
             ))}
-
+ 
             {/* Bullets */}
             {bullets.map((b) => (
               <div
@@ -738,15 +738,15 @@ export function GameSection() {
                 }}
               />
             ))}
-
+ 
             {/* Enemies */}
             {enemies.map((e) => (
               <Beast key={e.id} x={e.x} y={e.y} />
             ))}
-
+ 
             {/* Player */}
             <Character x={player.x} y={player.y} facing={facing} />
-
+ 
             {/* HUD */}
             <div
               className="absolute left-4 top-4 px-4 py-3"
@@ -765,7 +765,7 @@ export function GameSection() {
                 Enemies: {enemies.length}
               </div>
             </div>
-
+ 
             {/* Start screen */}
             {!started && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/72 backdrop-blur-[2px]">
@@ -798,7 +798,7 @@ export function GameSection() {
                 </div>
               </div>
             )}
-
+ 
             {/* Game over screen */}
             {gameOver && (
               <div
@@ -818,7 +818,7 @@ export function GameSection() {
             )}
           </div>
         </div>
-
+ 
         {/* Mobile controls */}
         {(isPhone || isTablet) && started && !gameOver && (
           <div className={`mt-4 flex ${isLandscapeMobile ? 'flex-row items-end justify-between gap-4' : 'flex-col items-center gap-4'}`}>
@@ -830,7 +830,7 @@ export function GameSection() {
               <button type="button" {...bindMoveBtn('s')} style={{ touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none', border: '1px solid rgba(255,74,74,0.45)', background: 'rgba(10,10,10,0.78)', color: '#F5F5F5', fontSize: isTablet ? '1.3rem' : '1.2rem', height: isTablet ? '64px' : '56px' }}>Down</button>
               <button type="button" {...bindMoveBtn('d')} style={{ touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none', border: '1px solid rgba(255,74,74,0.45)', background: 'rgba(10,10,10,0.78)', color: '#F5F5F5', fontSize: isTablet ? '1.3rem' : '1.2rem', height: isTablet ? '64px' : '56px' }}>Right</button>
             </div>
-
+ 
             <div className={`flex ${isLandscapeMobile ? 'flex-col gap-3' : 'flex-row gap-3'}`}>
               <button type="button" onClick={shootNearestTarget} style={{ touchAction: 'manipulation', border: '2px solid #ff4a4a', background: 'rgba(255,74,74,0.08)', color: '#F5F5F5', fontFamily: 'var(--font-body)', letterSpacing: '0.16em', textTransform: 'uppercase', fontSize: isTablet ? '1rem' : '0.9rem', padding: isTablet ? '18px 34px' : '16px 28px' }}>
                 Fire
@@ -845,3 +845,4 @@ export function GameSection() {
     </section>
   );
 }
+
