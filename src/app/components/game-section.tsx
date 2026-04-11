@@ -54,7 +54,7 @@ const BULLET_SPEED = 7.5;
 const ENEMY_SPEED = 0.82;
 const FIRE_COOLDOWN = 260;
 
-const START_POS: Vec = { x: 72, y: 438 };
+const START_POS: Vec = { x: 240, y: 438 };
 
 const destinations: Destination[] = [
   { id: 'about', label: 'ABOUT', x: 56, y: 56, w: 120, h: 68 },
