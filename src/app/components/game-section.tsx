@@ -46,8 +46,8 @@ const WORLD_W = 900;
 const WORLD_H = 520;
 
 const PLAYER_SIZE = 22;
-const ENEMY_SIZE = 50;
-const BULLET_SIZE = 6;
+const ENEMY_SIZE = 22;
+const BULLET_SIZE = 10;
 
 const PLAYER_SPEED = 3;
 const BULLET_SPEED = 7.5;
