@@ -221,38 +221,38 @@ export function HeroSection() {
                 aria-hidden="true"
                 className="absolute inset-0 select-none"
                 style={{
-                  transform: titleEchoTransform,
-                  transformStyle: 'preserve-3d',
-                  fontFamily: 'var(--font-hero)',
-                  fontSize: 'clamp(4rem, 15vw, 10rem)',
-                  fontWeight: 400,
-                  letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
-                  textTransform: 'uppercase',
-                  lineHeight: 0.92,
-                  color: 'rgba(255,255,255,0.16)',
-                  textShadow: '0 24px 40px rgba(0,0,0,0.5)',
-                  pointerEvents: 'none',
-                }}
-              >
-                MADBAK
-              </motion.span>
+                transform: titleEchoTransform,
+                transformStyle: 'preserve-3d',
+                fontFamily: 'var(--font-hero)',
+                fontSize: 'clamp(4rem, 15vw, 10rem)',
+                fontWeight: 700,
+                letterSpacing: 'clamp(0.01em, 0.12vw, 0.04em)',
+                textTransform: 'none',
+                lineHeight: 0.94,
+                color: 'rgba(255,255,255,0.14)',
+                textShadow: '0 20px 34px rgba(0,0,0,0.46)',
+                pointerEvents: 'none',
+              }}
+            >
+              MADBAK
+            </motion.span>
 
               <motion.h1
                 style={{
                   fontFamily: 'var(--font-hero)',
                   fontSize: 'clamp(4rem, 15vw, 10rem)',
-                  fontWeight: 400,
-                  letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
-                  textTransform: 'uppercase',
-                  lineHeight: 0.92,
+                  fontWeight: 700,
+                  letterSpacing: 'clamp(0.01em, 0.12vw, 0.04em)',
+                  textTransform: 'none',
+                  lineHeight: 0.94,
                   color: '#FFFFFF',
                   background:
-                    'linear-gradient(180deg, #ffffff 0%, #ffffff 46%, #e8edf5 100%)',
+                    'linear-gradient(180deg, #ffffff 0%, #f5f5f5 54%, #dfe6ef 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   textShadow:
-                    '0 0 18px rgba(255,255,255,0.18), 0 22px 40px rgba(0,0,0,0.4)',
-                  WebkitTextStroke: '1px rgba(255,255,255,0.18)',
+                    '0 0 14px rgba(255,255,255,0.12), 0 18px 34px rgba(0,0,0,0.36)',
+                  WebkitTextStroke: '0.6px rgba(255,255,255,0.12)',
                   position: 'relative',
                 }}
               >
