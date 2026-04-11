@@ -1,4 +1,10 @@
-import { motion, useScroll, useTransform } from 'motion/react';
+import {
+  motion,
+  useMotionTemplate,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'motion/react';
 import { useRef } from 'react';
 import { ArrowDown } from 'lucide-react';
 
@@ -12,6 +18,29 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
+  const titleRotateX = useSpring(
+    useTransform(scrollYProgress, [0, 0.28, 0.62], [0, 24, 62]),
+    { stiffness: 140, damping: 24, mass: 0.45 }
+  );
+  const titleRotateY = useSpring(
+    useTransform(scrollYProgress, [0, 0.35, 0.62], [0, -6, -16]),
+    { stiffness: 140, damping: 24, mass: 0.45 }
+  );
+  const titleDepth = useSpring(
+    useTransform(scrollYProgress, [0, 0.35, 0.62], [0, 40, 140]),
+    { stiffness: 140, damping: 24, mass: 0.45 }
+  );
+  const titleScale = useSpring(
+    useTransform(scrollYProgress, [0, 0.35, 0.62], [1, 1.04, 1.12]),
+    { stiffness: 140, damping: 26, mass: 0.4 }
+  );
+  const titleGlowOpacity = useTransform(scrollYProgress, [0, 0.35, 0.62], [0.24, 0.46, 0.62]);
+  const titleHaloScale = useTransform(scrollYProgress, [0, 0.35, 0.62], [1, 1.18, 1.42]);
+  const titleEchoY = useTransform(scrollYProgress, [0, 0.35, 0.62], [0, 12, 22]);
+  const titleEchoDepth = useTransform(scrollYProgress, [0, 0.35, 0.62], [-12, -42, -90]);
+  const titleTransform = useMotionTemplate`translate3d(0px, 0px, ${titleDepth}px) rotateX(${titleRotateX}deg) rotateY(${titleRotateY}deg) scale(${titleScale})`;
+  const titleHaloTransform = useMotionTemplate`translate3d(0px, 0px, -140px) scale(${titleHaloScale})`;
+  const titleEchoTransform = useMotionTemplate`translate3d(0px, ${titleEchoY}px, ${titleEchoDepth}px) scale(0.985)`;
 
   return (
     <section 
@@ -38,21 +67,79 @@ export function HeroSection() {
         </motion.div>
 
         {/* Main Title */}
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-6"
-          style={{ 
-            fontFamily: 'var(--font-heading)',
-            fontSize: 'clamp(4rem, 15vw, 10rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            color: '#F5F5F5',
+          style={{
+            perspective: '1800px',
+            transformStyle: 'preserve-3d',
           }}
         >
-          MADBAK
-        </motion.h1>
+          <motion.div
+            className="relative inline-flex items-center justify-center"
+            style={{
+              transform: titleTransform,
+              transformStyle: 'preserve-3d',
+              willChange: 'transform',
+            }}
+          >
+            <motion.div
+              aria-hidden="true"
+              className="absolute inset-[-10%] rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(230,37,37,0.34) 0%, rgba(230,37,37,0.12) 38%, rgba(230,37,37,0) 72%)',
+                filter: 'blur(28px)',
+                opacity: titleGlowOpacity,
+                transform: titleHaloTransform,
+              }}
+            />
+
+            <motion.span
+              aria-hidden="true"
+              className="absolute inset-0 select-none"
+              style={{
+                transform: titleEchoTransform,
+                transformStyle: 'preserve-3d',
+                fontFamily: 'var(--font-hero)',
+                fontSize: 'clamp(4rem, 15vw, 10rem)',
+                fontWeight: 400,
+                letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
+                textTransform: 'uppercase',
+                lineHeight: 0.92,
+                color: 'rgba(230,37,37,0.16)',
+                textShadow: '0 18px 34px rgba(0,0,0,0.42)',
+                pointerEvents: 'none',
+              }}
+            >
+              MADBAK
+            </motion.span>
+
+            <motion.h1
+              style={{
+                fontFamily: 'var(--font-hero)',
+                fontSize: 'clamp(4rem, 15vw, 10rem)',
+                fontWeight: 400,
+                letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
+                textTransform: 'uppercase',
+                lineHeight: 0.92,
+                color: '#F5F5F5',
+                background:
+                  'linear-gradient(180deg, #ffffff 0%, #f7f7f2 42%, rgba(230,37,37,0.96) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow:
+                  '0 0 22px rgba(255,255,255,0.12), 0 18px 30px rgba(0,0,0,0.34)',
+                WebkitTextStroke: '1px rgba(255,255,255,0.16)',
+                position: 'relative',
+              }}
+            >
+              MADBAK
+            </motion.h1>
+          </motion.div>
+        </motion.div>
 
         {/* Tagline */}
         <motion.p
