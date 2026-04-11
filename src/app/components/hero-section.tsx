@@ -154,68 +154,112 @@ export function HeroSection() {
             transformStyle: 'preserve-3d',
           }}
         >
-          <motion.div
-            className="relative inline-flex items-center justify-center"
+          <div
+            className="relative inline-flex items-center justify-center px-[clamp(1.2rem,3vw,2.6rem)] py-[clamp(1rem,2.4vw,1.9rem)]"
             style={{
-              transform: titleTransform,
-              transformStyle: 'preserve-3d',
-              willChange: 'transform',
+              borderRadius: '30px',
+              border: '1px solid rgba(255,255,255,0.16)',
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 38%, rgba(255,255,255,0.03) 100%)',
+              boxShadow:
+                '0 24px 80px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(18px)',
+              WebkitBackdropFilter: 'blur(18px)',
+              overflow: 'hidden',
             }}
           >
-            <motion.div
+            <div
               aria-hidden="true"
-              className="absolute inset-[-10%] rounded-full"
+              className="absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0) 72%)',
-                filter: 'blur(28px)',
-                opacity: titleGlowOpacity,
-                transform: titleHaloTransform,
+                  'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 16%, rgba(255,255,255,0.02) 42%, rgba(255,255,255,0.01) 100%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-[10px] rounded-[22px]"
+              style={{
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: 'inset 0 0 24px rgba(255,255,255,0.03)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute left-0 top-0 h-[2px] w-full"
+              style={{
+                background:
+                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0) 100%)',
+                opacity: 0.8,
+                pointerEvents: 'none',
               }}
             />
 
-            <motion.span
-              aria-hidden="true"
-              className="absolute inset-0 select-none"
+            <motion.div
+              className="relative inline-flex items-center justify-center"
               style={{
-                transform: titleEchoTransform,
+                transform: titleTransform,
                 transformStyle: 'preserve-3d',
-                fontFamily: 'var(--font-hero)',
-                fontSize: 'clamp(4rem, 15vw, 10rem)',
-                fontWeight: 400,
-                letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
-                textTransform: 'uppercase',
-                lineHeight: 0.92,
-                color: 'rgba(255,255,255,0.16)',
-                textShadow: '0 24px 40px rgba(0,0,0,0.5)',
-                pointerEvents: 'none',
+                willChange: 'transform',
               }}
             >
-              MADBAK
-            </motion.span>
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-[-10%] rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0) 72%)',
+                  filter: 'blur(28px)',
+                  opacity: titleGlowOpacity,
+                  transform: titleHaloTransform,
+                }}
+              />
 
-            <motion.h1
-              style={{
-                fontFamily: 'var(--font-hero)',
-                fontSize: 'clamp(4rem, 15vw, 10rem)',
-                fontWeight: 400,
-                letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
-                textTransform: 'uppercase',
-                lineHeight: 0.92,
-                color: '#FFFFFF',
-                background:
-                  'linear-gradient(180deg, #ffffff 0%, #ffffff 46%, #e8edf5 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow:
-                  '0 0 18px rgba(255,255,255,0.18), 0 22px 40px rgba(0,0,0,0.4)',
-                WebkitTextStroke: '1px rgba(255,255,255,0.18)',
-                position: 'relative',
-              }}
-            >
-              MADBAK
-            </motion.h1>
-          </motion.div>
+              <motion.span
+                aria-hidden="true"
+                className="absolute inset-0 select-none"
+                style={{
+                  transform: titleEchoTransform,
+                  transformStyle: 'preserve-3d',
+                  fontFamily: 'var(--font-hero)',
+                  fontSize: 'clamp(4rem, 15vw, 10rem)',
+                  fontWeight: 400,
+                  letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
+                  textTransform: 'uppercase',
+                  lineHeight: 0.92,
+                  color: 'rgba(255,255,255,0.16)',
+                  textShadow: '0 24px 40px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none',
+                }}
+              >
+                MADBAK
+              </motion.span>
+
+              <motion.h1
+                style={{
+                  fontFamily: 'var(--font-hero)',
+                  fontSize: 'clamp(4rem, 15vw, 10rem)',
+                  fontWeight: 400,
+                  letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
+                  textTransform: 'uppercase',
+                  lineHeight: 0.92,
+                  color: '#FFFFFF',
+                  background:
+                    'linear-gradient(180deg, #ffffff 0%, #ffffff 46%, #e8edf5 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow:
+                    '0 0 18px rgba(255,255,255,0.18), 0 22px 40px rgba(0,0,0,0.4)',
+                  WebkitTextStroke: '1px rgba(255,255,255,0.18)',
+                  position: 'relative',
+                }}
+              >
+                MADBAK
+              </motion.h1>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Tagline */}
