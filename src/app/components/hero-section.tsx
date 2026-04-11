@@ -221,30 +221,30 @@ export function HeroSection() {
                 aria-hidden="true"
                 className="absolute inset-0 select-none"
                 style={{
-                transform: titleEchoTransform,
-                transformStyle: 'preserve-3d',
-                fontFamily: 'var(--font-hero)',
-                fontSize: 'clamp(4rem, 15vw, 10rem)',
-                fontWeight: 700,
-                letterSpacing: 'clamp(0.01em, 0.12vw, 0.04em)',
-                textTransform: 'none',
-                lineHeight: 0.94,
-                color: 'rgba(255,255,255,0.14)',
-                textShadow: '0 20px 34px rgba(0,0,0,0.46)',
-                pointerEvents: 'none',
-              }}
-            >
-              MADBAK
-            </motion.span>
+                  transform: titleEchoTransform,
+                  transformStyle: 'preserve-3d',
+                  fontFamily: 'var(--font-hero)',
+                  fontSize: 'clamp(4.4rem, 15vw, 10.4rem)',
+                  fontWeight: 400,
+                  letterSpacing: 'clamp(0em, 0.05vw, 0.015em)',
+                  textTransform: 'none',
+                  lineHeight: 0.98,
+                  color: 'rgba(255,255,255,0.14)',
+                  textShadow: '0 20px 34px rgba(0,0,0,0.46)',
+                  pointerEvents: 'none',
+                }}
+              >
+                Madbak
+              </motion.span>
 
               <motion.h1
                 style={{
                   fontFamily: 'var(--font-hero)',
-                  fontSize: 'clamp(4rem, 15vw, 10rem)',
-                  fontWeight: 700,
-                  letterSpacing: 'clamp(0.01em, 0.12vw, 0.04em)',
+                  fontSize: 'clamp(4.4rem, 15vw, 10.4rem)',
+                  fontWeight: 400,
+                  letterSpacing: 'clamp(0em, 0.05vw, 0.015em)',
                   textTransform: 'none',
-                  lineHeight: 0.94,
+                  lineHeight: 0.98,
                   color: '#FFFFFF',
                   background:
                     'linear-gradient(180deg, #ffffff 0%, #f5f5f5 54%, #dfe6ef 100%)',
@@ -256,7 +256,7 @@ export function HeroSection() {
                   position: 'relative',
                 }}
               >
-                MADBAK
+                Madbak
               </motion.h1>
             </motion.div>
           </div>
