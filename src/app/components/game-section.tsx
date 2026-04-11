@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Vec = { x: number; y: number };
@@ -40,6 +41,72 @@ type Bullet = {
   y: number;
   vx: number;
   vy: number;
+};
+
+type Road = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  orientation: 'horizontal' | 'vertical';
+};
+
+type Crosswalk = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  orientation: 'horizontal' | 'vertical';
+  stripes: number;
+};
+
+type StreetLight = {
+  id: string;
+  x: number;
+  y: number;
+  color: string;
+  duration: number;
+  delay: number;
+};
+
+type LightTrail = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  axis: 'x' | 'y';
+  from: number;
+  to: number;
+  duration: number;
+  delay: number;
+  color: string;
+};
+
+type AmbientGlow = {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  duration: number;
+  delay: number;
+};
+
+type BuildingWindow = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  lit: boolean;
+  color: string;
+  duration: number;
+  delay: number;
+  minOpacity: number;
+  maxOpacity: number;
 };
 
 const WORLD_W = 900;
@@ -89,6 +156,119 @@ const traps: Trap[] = [
   { x: 618, y: 272, w: 10, h: 70 },
 ];
 
+const roads: Road[] = [
+  { id: 'road-h-1', x: 0, y: 156, w: WORLD_W, h: 52, orientation: 'horizontal' },
+  { id: 'road-h-2', x: 0, y: 334, w: WORLD_W, h: 52, orientation: 'horizontal' },
+  { id: 'road-v-1', x: 230, y: 0, w: 54, h: WORLD_H, orientation: 'vertical' },
+  { id: 'road-v-2', x: 616, y: 0, w: 54, h: WORLD_H, orientation: 'vertical' },
+];
+
+const crosswalks: Crosswalk[] = [
+  { id: 'cw-1', x: 200, y: 160, w: 28, h: 44, orientation: 'vertical', stripes: 5 },
+  { id: 'cw-2', x: 286, y: 160, w: 28, h: 44, orientation: 'vertical', stripes: 5 },
+  { id: 'cw-3', x: 586, y: 160, w: 28, h: 44, orientation: 'vertical', stripes: 5 },
+  { id: 'cw-4', x: 672, y: 160, w: 28, h: 44, orientation: 'vertical', stripes: 5 },
+  { id: 'cw-5', x: 236, y: 126, w: 42, h: 24, orientation: 'horizontal', stripes: 4 },
+  { id: 'cw-6', x: 236, y: 214, w: 42, h: 24, orientation: 'horizontal', stripes: 4 },
+  { id: 'cw-7', x: 622, y: 304, w: 42, h: 24, orientation: 'horizontal', stripes: 4 },
+  { id: 'cw-8', x: 622, y: 392, w: 42, h: 24, orientation: 'horizontal', stripes: 4 },
+];
+
+const streetLights: StreetLight[] = [
+  { id: 'light-1', x: 70, y: 150, color: '#ffd36a', duration: 2.2, delay: 0.2 },
+  { id: 'light-2', x: 190, y: 150, color: '#9ed7ff', duration: 2.8, delay: 0.4 },
+  { id: 'light-3', x: 352, y: 150, color: '#ffd36a', duration: 2.6, delay: 0.6 },
+  { id: 'light-4', x: 512, y: 150, color: '#9ed7ff', duration: 2.5, delay: 0.9 },
+  { id: 'light-5', x: 742, y: 150, color: '#ffd36a', duration: 2.3, delay: 1.1 },
+  { id: 'light-6', x: 830, y: 150, color: '#ff5e7d', duration: 3, delay: 1.4 },
+  { id: 'light-7', x: 92, y: 388, color: '#9ed7ff', duration: 2.4, delay: 0.5 },
+  { id: 'light-8', x: 260, y: 388, color: '#ffd36a', duration: 2.7, delay: 0.7 },
+  { id: 'light-9', x: 438, y: 388, color: '#9ed7ff', duration: 2.9, delay: 1.1 },
+  { id: 'light-10', x: 604, y: 388, color: '#ffd36a', duration: 2.4, delay: 1.5 },
+  { id: 'light-11', x: 786, y: 388, color: '#ff5e7d', duration: 3.1, delay: 1.8 },
+  { id: 'light-12', x: 226, y: 78, color: '#9ed7ff', duration: 2.8, delay: 0.3 },
+  { id: 'light-13', x: 226, y: 274, color: '#ffd36a', duration: 2.5, delay: 0.8 },
+  { id: 'light-14', x: 226, y: 460, color: '#ff5e7d', duration: 3, delay: 1.3 },
+  { id: 'light-15', x: 674, y: 102, color: '#ffd36a', duration: 2.4, delay: 0.5 },
+  { id: 'light-16', x: 674, y: 246, color: '#9ed7ff', duration: 2.7, delay: 1.1 },
+  { id: 'light-17', x: 674, y: 434, color: '#ff5e7d', duration: 3.2, delay: 1.6 },
+];
+
+const lightTrails: LightTrail[] = [
+  {
+    id: 'trail-h-1',
+    x: -70,
+    y: 171,
+    w: 72,
+    h: 3,
+    axis: 'x',
+    from: 0,
+    to: WORLD_W + 120,
+    duration: 6.8,
+    delay: 0.6,
+    color: 'rgba(158,215,255,0.9)',
+  },
+  {
+    id: 'trail-h-2',
+    x: WORLD_W,
+    y: 188,
+    w: 66,
+    h: 3,
+    axis: 'x',
+    from: 0,
+    to: -(WORLD_W + 160),
+    duration: 5.9,
+    delay: 1.8,
+    color: 'rgba(255,94,125,0.88)',
+  },
+  {
+    id: 'trail-h-3',
+    x: -90,
+    y: 351,
+    w: 80,
+    h: 3,
+    axis: 'x',
+    from: 0,
+    to: WORLD_W + 150,
+    duration: 7.2,
+    delay: 0.2,
+    color: 'rgba(255,211,106,0.9)',
+  },
+  {
+    id: 'trail-v-1',
+    x: 248,
+    y: -70,
+    w: 3,
+    h: 68,
+    axis: 'y',
+    from: 0,
+    to: WORLD_H + 120,
+    duration: 6.4,
+    delay: 1,
+    color: 'rgba(158,215,255,0.86)',
+  },
+  {
+    id: 'trail-v-2',
+    x: 646,
+    y: WORLD_H,
+    w: 3,
+    h: 74,
+    axis: 'y',
+    from: 0,
+    to: -(WORLD_H + 160),
+    duration: 7.4,
+    delay: 1.6,
+    color: 'rgba(255,94,125,0.82)',
+  },
+];
+
+const ambientGlows: AmbientGlow[] = [
+  { id: 'glow-1', x: 40, y: -30, size: 220, color: 'rgba(255,74,74,0.12)', duration: 6.2, delay: 0 },
+  { id: 'glow-2', x: 344, y: 12, size: 180, color: 'rgba(158,215,255,0.1)', duration: 7.4, delay: 1.1 },
+  { id: 'glow-3', x: 662, y: 300, size: 240, color: 'rgba(255,211,106,0.08)', duration: 8.1, delay: 0.6 },
+  { id: 'glow-4', x: 198, y: 342, size: 190, color: 'rgba(255,94,125,0.1)', duration: 6.8, delay: 1.8 },
+];
+
 const INITIAL_ENEMIES: Enemy[] = [
   { id: 1, x: 770, y: 246, hp: 2 },
   { id: 2, x: 444, y: 120, hp: 2 },
@@ -117,6 +297,46 @@ function distance(a: Vec, b: Vec) {
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
+}
+
+function getBuildingWindows(building: Building, seed: number): BuildingWindow[] {
+  const windowW = building.w >= 170 ? 12 : 10;
+  const windowH = building.h >= 110 ? 10 : 8;
+  const gapX = 8;
+  const gapY = 10;
+  const cols = Math.max(2, Math.floor((building.w - 24) / (windowW + gapX)));
+  const rows = Math.max(2, Math.floor((building.h - 24) / (windowH + gapY)));
+  const gridWidth = cols * windowW + (cols - 1) * gapX;
+  const gridHeight = rows * windowH + (rows - 1) * gapY;
+  const startX = Math.max(10, Math.round((building.w - gridWidth) / 2));
+  const startY = Math.max(12, Math.round((building.h - gridHeight) / 2));
+
+  return Array.from({ length: rows * cols }, (_, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    const pattern = (seed * 11 + row * 7 + col * 13) % 8;
+    const lit = pattern !== 0 && pattern !== 5;
+    const color =
+      pattern === 2
+        ? 'rgba(158,215,255,0.92)'
+        : pattern === 3
+          ? 'rgba(255,94,125,0.84)'
+          : 'rgba(255,211,106,0.94)';
+
+    return {
+      id: `${seed}-${row}-${col}`,
+      x: startX + col * (windowW + gapX),
+      y: startY + row * (windowH + gapY),
+      w: windowW,
+      h: windowH,
+      lit,
+      color,
+      duration: 2.8 + ((seed + row + col) % 4) * 0.65,
+      delay: ((seed * 0.17 + row * 0.21 + col * 0.13) % 1.8),
+      minOpacity: lit ? 0.42 : 0.12,
+      maxOpacity: lit ? 0.96 : 0.18,
+    };
+  });
 }
 
 function openSection(targetId: string) {
@@ -691,6 +911,54 @@ export function GameSection() {
             <div
               className="absolute inset-0"
               style={{
+                background:
+                  'radial-gradient(circle at top, rgba(255,74,74,0.08), transparent 34%), linear-gradient(180deg, rgba(255,255,255,0.015), transparent 40%)',
+              }}
+            />
+
+            {ambientGlows.map((glow) => (
+              <motion.div
+                key={glow.id}
+                className="absolute rounded-full"
+                animate={{
+                  opacity: [0.22, 0.52, 0.28],
+                  scale: [1, 1.08, 0.96],
+                }}
+                transition={{
+                  duration: glow.duration,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: glow.delay,
+                }}
+                style={{
+                  left: glow.x,
+                  top: glow.y,
+                  width: glow.size,
+                  height: glow.size,
+                  background: glow.color,
+                  filter: 'blur(42px)',
+                  pointerEvents: 'none',
+                }}
+              />
+            ))}
+
+            <motion.div
+              className="absolute left-0 w-full"
+              animate={{ y: [-160, WORLD_H + 80] }}
+              transition={{ duration: 11, repeat: Infinity, ease: 'linear' }}
+              style={{
+                top: 0,
+                height: 130,
+                background:
+                  'linear-gradient(180deg, rgba(255,74,74,0) 0%, rgba(255,74,74,0.06) 46%, rgba(255,74,74,0) 100%)',
+                pointerEvents: 'none',
+                mixBlendMode: 'screen',
+              }}
+            />
+
+            <div
+              className="absolute inset-0"
+              style={{
                 backgroundImage: `
                   linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
                   linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
@@ -699,78 +967,252 @@ export function GameSection() {
               }}
             />
 
-            <div
-              className="absolute"
-              style={{
-                left: 0,
-                top: 156,
-                width: WORLD_W,
-                height: 52,
-                background: 'rgba(255,255,255,0.03)',
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                left: 0,
-                top: 334,
-                width: WORLD_W,
-                height: 52,
-                background: 'rgba(255,255,255,0.03)',
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                left: 230,
-                top: 0,
-                width: 54,
-                height: WORLD_H,
-                background: 'rgba(255,255,255,0.03)',
-                borderLeft: '1px solid rgba(255,255,255,0.08)',
-                borderRight: '1px solid rgba(255,255,255,0.08)',
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                left: 616,
-                top: 0,
-                width: 54,
-                height: WORLD_H,
-                background: 'rgba(255,255,255,0.03)',
-                borderLeft: '1px solid rgba(255,255,255,0.08)',
-                borderRight: '1px solid rgba(255,255,255,0.08)',
-              }}
-            />
-
-            {buildings.map((b, i) => (
+            {roads.map((road) => (
               <div
-                key={i}
+                key={road.id}
+                className="absolute overflow-hidden"
                 style={{
-                  position: 'absolute',
-                  left: b.x,
-                  top: b.y,
-                  width: b.w,
-                  height: b.h,
-                  background: 'rgba(255,255,255,0.035)',
-                  border: '1px solid rgba(255,255,255,0.11)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)',
+                  left: road.x,
+                  top: road.y,
+                  width: road.w,
+                  height: road.h,
+                  background:
+                    road.orientation === 'horizontal'
+                      ? 'linear-gradient(180deg, rgba(28,28,28,0.94) 0%, rgba(18,18,18,0.98) 50%, rgba(28,28,28,0.94) 100%)'
+                      : 'linear-gradient(90deg, rgba(28,28,28,0.94) 0%, rgba(18,18,18,0.98) 50%, rgba(28,28,28,0.94) 100%)',
+                  border:
+                    road.orientation === 'horizontal'
+                      ? '1px solid rgba(255,255,255,0.05)'
+                      : '1px solid rgba(255,255,255,0.05)',
+                  boxShadow:
+                    'inset 0 0 26px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.02)',
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      road.orientation === 'horizontal'
+                        ? 'linear-gradient(180deg, rgba(255,74,74,0.06), transparent 22%, transparent 78%, rgba(158,215,255,0.05))'
+                        : 'linear-gradient(90deg, rgba(255,74,74,0.06), transparent 22%, transparent 78%, rgba(158,215,255,0.05))',
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    left: road.orientation === 'horizontal' ? 0 : road.w / 2 - 1,
+                    top: road.orientation === 'horizontal' ? road.h / 2 - 1 : 0,
+                    width: road.orientation === 'horizontal' ? road.w : 2,
+                    height: road.orientation === 'horizontal' ? 2 : road.h,
+                    backgroundImage:
+                      road.orientation === 'horizontal'
+                        ? 'repeating-linear-gradient(90deg, rgba(255,255,255,0.28) 0 18px, transparent 18px 38px)'
+                        : 'repeating-linear-gradient(180deg, rgba(255,255,255,0.28) 0 18px, transparent 18px 38px)',
+                    opacity: 0.7,
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    left: road.orientation === 'horizontal' ? 0 : 6,
+                    top: road.orientation === 'horizontal' ? 8 : 0,
+                    width: road.orientation === 'horizontal' ? road.w : 1,
+                    height: road.orientation === 'horizontal' ? 1 : road.h,
+                    background: 'rgba(255,255,255,0.07)',
+                  }}
+                />
+                <div
+                  className="absolute"
+                  style={{
+                    right: road.orientation === 'horizontal' ? 0 : 6,
+                    bottom: road.orientation === 'horizontal' ? 8 : 0,
+                    width: road.orientation === 'horizontal' ? road.w : 1,
+                    height: road.orientation === 'horizontal' ? 1 : road.h,
+                    background: 'rgba(255,255,255,0.04)',
+                  }}
+                />
+              </div>
+            ))}
+
+            {crosswalks.map((crosswalk) => (
+              <div
+                key={crosswalk.id}
+                className="absolute flex items-center justify-between"
+                style={{
+                  left: crosswalk.x,
+                  top: crosswalk.y,
+                  width: crosswalk.w,
+                  height: crosswalk.h,
+                  flexDirection:
+                    crosswalk.orientation === 'horizontal' ? 'row' : 'column',
+                  opacity: 0.58,
+                }}
+              >
+                {Array.from({ length: crosswalk.stripes }, (_, stripeIndex) => (
+                  <div
+                    key={stripeIndex}
+                    style={{
+                      width: crosswalk.orientation === 'horizontal' ? 6 : crosswalk.w,
+                      height: crosswalk.orientation === 'horizontal' ? crosswalk.h : 5,
+                      borderRadius: '999px',
+                      background: 'rgba(255,255,255,0.3)',
+                      boxShadow: '0 0 8px rgba(255,255,255,0.08)',
+                    }}
+                  />
+                ))}
+              </div>
+            ))}
+
+            {lightTrails.map((trail) => (
+              <motion.div
+                key={trail.id}
+                className="absolute"
+                animate={trail.axis === 'x' ? { x: trail.to } : { y: trail.to }}
+                initial={trail.axis === 'x' ? { x: trail.from } : { y: trail.from }}
+                transition={{
+                  duration: trail.duration,
+                  delay: trail.delay,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+                style={{
+                  left: trail.x,
+                  top: trail.y,
+                  width: trail.w,
+                  height: trail.h,
+                  borderRadius: '999px',
+                  background:
+                    trail.axis === 'x'
+                      ? `linear-gradient(90deg, rgba(255,255,255,0), ${trail.color}, rgba(255,255,255,0))`
+                      : `linear-gradient(180deg, rgba(255,255,255,0), ${trail.color}, rgba(255,255,255,0))`,
+                  boxShadow: `0 0 14px ${trail.color}`,
+                  pointerEvents: 'none',
+                }}
+              />
+            ))}
+
+            {streetLights.map((light) => (
+              <div
+                key={light.id}
+                className="absolute"
+                style={{
+                  left: light.x,
+                  top: light.y,
+                  width: 10,
+                  height: 10,
+                  pointerEvents: 'none',
                 }}
               >
                 <div
                   style={{
                     position: 'absolute',
-                    inset: 8,
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    left: 4,
+                    top: 8,
+                    width: 2,
+                    height: 16,
+                    background: 'rgba(255,255,255,0.18)',
+                  }}
+                />
+                <motion.div
+                  animate={{
+                    opacity: [0.45, 0.95, 0.55],
+                    scale: [0.94, 1.08, 1],
+                  }}
+                  transition={{
+                    duration: light.duration,
+                    delay: light.delay,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '999px',
+                    background: light.color,
+                    boxShadow: `0 0 16px ${light.color}, 0 0 28px ${light.color}`,
                   }}
                 />
               </div>
             ))}
+
+            {buildings.map((b, i) => {
+              const windows = getBuildingWindows(b, i + 1);
+
+              return (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: b.x,
+                    top: b.y,
+                    width: b.w,
+                    height: b.h,
+                    background:
+                      'linear-gradient(180deg, rgba(32,32,32,0.78) 0%, rgba(16,16,16,0.94) 100%)',
+                    border: '1px solid rgba(255,255,255,0.11)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(255,255,255,0.03), 0 14px 24px rgba(0,0,0,0.22)',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 8,
+                      border: '1px solid rgba(255,255,255,0.05)',
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: '100%',
+                      height: 14,
+                      background:
+                        'linear-gradient(90deg, rgba(255,74,74,0.08), rgba(255,255,255,0.06), rgba(158,215,255,0.08))',
+                    }}
+                  />
+                  {windows.map((window) => (
+                    <motion.div
+                      key={window.id}
+                      animate={
+                        window.lit
+                          ? {
+                              opacity: [
+                                window.minOpacity,
+                                window.maxOpacity,
+                                window.minOpacity + 0.08,
+                              ],
+                            }
+                          : undefined
+                      }
+                      transition={
+                        window.lit
+                          ? {
+                              duration: window.duration,
+                              delay: window.delay,
+                              repeat: Infinity,
+                              ease: 'easeInOut',
+                            }
+                          : undefined
+                      }
+                      style={{
+                        position: 'absolute',
+                        left: window.x,
+                        top: window.y,
+                        width: window.w,
+                        height: window.h,
+                        borderRadius: '2px',
+                        background: window.lit ? window.color : 'rgba(255,255,255,0.08)',
+                        boxShadow: window.lit ? `0 0 10px ${window.color}` : 'none',
+                        opacity: window.lit ? window.minOpacity : 0.16,
+                      }}
+                    />
+                  ))}
+                </div>
+              );
+            })}
 
             {destinations.map((d) => (
               <div
