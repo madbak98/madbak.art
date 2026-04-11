@@ -536,6 +536,7 @@ export function GameSection() {
   const bulletIdRef = useRef(1);
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Vec>(START_POS);
+  const centerTargetRef = useRef<{ x: number; y: number } | null>(null);
   const lastFireRef = useRef(0);
   const startedRef = useRef(false);
   const gameOverRef = useRef(false);
@@ -594,6 +595,10 @@ export function GameSection() {
 
     return nearest;
   }, [player]);
+
+  useEffect(() => {
+    centerTargetRef.current = centerTarget;
+  }, [centerTarget]);
 
   const shootToward = (tx: number, ty: number) => {
     if (!startedRef.current || gameOverRef.current) return;
@@ -654,11 +659,10 @@ export function GameSection() {
       keysRef.current.add(e.code);
 
       if (e.code === 'Space') {
-        const p = playerRef.current;
-        const angle = facing || 0;
-        const tx = p.x + Math.cos(angle) * 200;
-        const ty = p.y + Math.sin(angle) * 200;
-        shootToward(tx, ty);
+        const target = centerTargetRef.current;
+        if (target) {
+          shootToward(target.x, target.y);
+        }
       }
     };
 
@@ -673,7 +677,7 @@ export function GameSection() {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, [facing]);
+  }, []);
 
   useEffect(() => {
     if (!started || gameOver) return;
