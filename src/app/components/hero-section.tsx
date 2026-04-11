@@ -3,13 +3,19 @@ import {
   useMotionTemplate,
   useScroll,
   useSpring,
+  useMotionValue,
   useTransform,
 } from 'motion/react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useRef } from 'react';
 import { ArrowDown } from 'lucide-react';
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const pointerRotateXTarget = useMotionValue(0);
+  const pointerRotateYTarget = useMotionValue(0);
+  const pointerShiftXTarget = useMotionValue(0);
+  const pointerShiftYTarget = useMotionValue(0);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
@@ -18,34 +24,105 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
+  const titleLift = useSpring(
+    useTransform(scrollYProgress, [0, 0.36, 0.72], [0, -10, -24]),
+    { stiffness: 140, damping: 24, mass: 0.45 }
+  );
   const titleRotateX = useSpring(
-    useTransform(scrollYProgress, [0, 0.32, 0.72], [0, 14, 30]),
+    useTransform(scrollYProgress, [0, 0.32, 0.72], [0, 18, 40]),
     { stiffness: 140, damping: 24, mass: 0.45 }
   );
   const titleRotateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.36, 0.72], [0, -4, -10]),
+    useTransform(scrollYProgress, [0, 0.36, 0.72], [0, -5, -14]),
     { stiffness: 140, damping: 24, mass: 0.45 }
   );
   const titleDepth = useSpring(
-    useTransform(scrollYProgress, [0, 0.36, 0.72], [0, 28, 92]),
+    useTransform(scrollYProgress, [0, 0.36, 0.72], [0, 40, 128]),
     { stiffness: 140, damping: 24, mass: 0.45 }
   );
   const titleScale = useSpring(
-    useTransform(scrollYProgress, [0, 0.36, 0.72], [1, 1.02, 1.06]),
+    useTransform(scrollYProgress, [0, 0.36, 0.72], [1, 1.035, 1.085]),
     { stiffness: 140, damping: 26, mass: 0.4 }
   );
-  const titleGlowOpacity = useTransform(scrollYProgress, [0, 0.36, 0.72], [0.18, 0.3, 0.42]);
-  const titleHaloScale = useTransform(scrollYProgress, [0, 0.36, 0.72], [1, 1.1, 1.22]);
-  const titleEchoY = useTransform(scrollYProgress, [0, 0.36, 0.72], [0, 8, 16]);
-  const titleEchoDepth = useTransform(scrollYProgress, [0, 0.36, 0.72], [-10, -28, -54]);
-  const titleTransform = useMotionTemplate`translate3d(0px, 0px, ${titleDepth}px) rotateX(${titleRotateX}deg) rotateY(${titleRotateY}deg) scale(${titleScale})`;
-  const titleHaloTransform = useMotionTemplate`translate3d(0px, 0px, -110px) scale(${titleHaloScale})`;
-  const titleEchoTransform = useMotionTemplate`translate3d(0px, ${titleEchoY}px, ${titleEchoDepth}px) scale(0.985)`;
+  const titleGlowOpacity = useTransform(scrollYProgress, [0, 0.36, 0.72], [0.2, 0.36, 0.54]);
+  const titleHaloScale = useTransform(scrollYProgress, [0, 0.36, 0.72], [1, 1.14, 1.32]);
+  const titleEchoY = useTransform(scrollYProgress, [0, 0.36, 0.72], [0, 10, 20]);
+  const titleEchoDepth = useTransform(scrollYProgress, [0, 0.36, 0.72], [-10, -36, -76]);
+  const pointerRotateX = useSpring(pointerRotateXTarget, {
+    stiffness: 180,
+    damping: 22,
+    mass: 0.35,
+  });
+  const pointerRotateY = useSpring(pointerRotateYTarget, {
+    stiffness: 180,
+    damping: 22,
+    mass: 0.35,
+  });
+  const pointerShiftX = useSpring(pointerShiftXTarget, {
+    stiffness: 160,
+    damping: 22,
+    mass: 0.4,
+  });
+  const pointerShiftY = useSpring(pointerShiftYTarget, {
+    stiffness: 160,
+    damping: 22,
+    mass: 0.4,
+  });
+  const combinedRotateX = useTransform(
+    [titleRotateX, pointerRotateX],
+    ([scrollTilt, pointerTilt]) => scrollTilt + pointerTilt
+  );
+  const combinedRotateY = useTransform(
+    [titleRotateY, pointerRotateY],
+    ([scrollTilt, pointerTilt]) => scrollTilt + pointerTilt
+  );
+  const combinedLift = useTransform(
+    [titleLift, pointerShiftY],
+    ([scrollLift, pointerLift]) => scrollLift + pointerLift
+  );
+  const combinedDepth = useTransform(
+    [titleDepth, pointerRotateX, pointerRotateY],
+    ([scrollDepth, pointerX, pointerY]) =>
+      scrollDepth + Math.abs(pointerX) * 1.4 + Math.abs(pointerY) * 0.8
+  );
+  const haloShiftX = useTransform(pointerShiftX, (value) => value * 0.55);
+  const haloShiftY = useTransform(pointerShiftY, (value) => value * 0.35);
+  const echoShiftX = useTransform(pointerShiftX, (value) => value * 0.8);
+  const echoShiftY = useTransform(pointerShiftY, (value) => value * 0.6);
+  const combinedEchoY = useTransform(
+    [titleEchoY, echoShiftY],
+    ([scrollEchoY, pointerEchoY]) => scrollEchoY + pointerEchoY
+  );
+  const titleTransform = useMotionTemplate`translate3d(${pointerShiftX}px, ${combinedLift}px, ${combinedDepth}px) rotateX(${combinedRotateX}deg) rotateY(${combinedRotateY}deg) scale(${titleScale})`;
+  const titleHaloTransform = useMotionTemplate`translate3d(${haloShiftX}px, ${haloShiftY}px, -125px) scale(${titleHaloScale})`;
+  const titleEchoTransform = useMotionTemplate`translate3d(${echoShiftX}px, ${combinedEchoY}px, ${titleEchoDepth}px) scale(0.985)`;
+
+  const resetPointerTilt = () => {
+    pointerRotateXTarget.set(0);
+    pointerRotateYTarget.set(0);
+    pointerShiftXTarget.set(0);
+    pointerShiftYTarget.set(0);
+  };
+
+  const handleMouseMove = (event: ReactMouseEvent<HTMLElement>) => {
+    if (!ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const normalizedX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const normalizedY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+
+    pointerRotateXTarget.set(-normalizedY * 11);
+    pointerRotateYTarget.set(normalizedX * 14);
+    pointerShiftXTarget.set(normalizedX * 18);
+    pointerShiftYTarget.set(normalizedY * 12);
+  };
 
   return (
     <section 
       ref={ref}
       className="relative h-screen flex items-center justify-center overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={resetPointerTilt}
     >
       <motion.div 
         style={{ opacity, scale, y }}
@@ -91,7 +168,7 @@ export function HeroSection() {
               style={{
                 background:
                   'radial-gradient(circle, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0) 72%)',
-                filter: 'blur(24px)',
+                filter: 'blur(28px)',
                 opacity: titleGlowOpacity,
                 transform: titleHaloTransform,
               }}
@@ -109,8 +186,8 @@ export function HeroSection() {
                 letterSpacing: 'clamp(0.08em, 0.5vw, 0.18em)',
                 textTransform: 'uppercase',
                 lineHeight: 0.92,
-                color: 'rgba(255,255,255,0.12)',
-                textShadow: '0 20px 36px rgba(0,0,0,0.48)',
+                color: 'rgba(255,255,255,0.16)',
+                textShadow: '0 24px 40px rgba(0,0,0,0.5)',
                 pointerEvents: 'none',
               }}
             >
@@ -131,7 +208,7 @@ export function HeroSection() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textShadow:
-                  '0 0 16px rgba(255,255,255,0.14), 0 18px 34px rgba(0,0,0,0.38)',
+                  '0 0 18px rgba(255,255,255,0.18), 0 22px 40px rgba(0,0,0,0.4)',
                 WebkitTextStroke: '1px rgba(255,255,255,0.18)',
                 position: 'relative',
               }}
