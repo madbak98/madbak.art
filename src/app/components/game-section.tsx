@@ -1314,7 +1314,7 @@ export function GameSection() {
               lineHeight: 1,
             }}
           >
-            REACH THE TARGET
+            MAKE IT COUNT
           </h2>
 
           <p
@@ -1324,7 +1324,7 @@ export function GameSection() {
               color: 'rgba(245,245,245,0.58)',
             }}
           >
-            WASD on desktop. Touch controls on phone and iPad. Space to fire.
+            DON'T MISS
           </p>
         </div>
 
