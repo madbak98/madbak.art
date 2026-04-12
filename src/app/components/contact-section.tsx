@@ -1,9 +1,22 @@
 import { motion, useScroll, useTransform } from 'motion/react';
-import { useRef } from 'react';
-import { Mail, Twitter, Instagram } from 'lucide-react';
+import { useRef, type SVGProps } from 'react';
+import { Mail, Instagram } from 'lucide-react';
+
+function XIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M18.244 2h3.064l-6.697 7.653L22.488 20h-6.17l-4.835-6.229L6.03 20H2.964l7.162-8.186L2.57 2h6.328l4.37 5.693L18.244 2Zm-1.076 16.252h1.698L7.976 3.656H6.154l11.014 14.596Z" />
+    </svg>
+  );
+}
 
 const socialLinks = [
-  { icon: Twitter, label: 'X', handle: '@Lilosama98', url: 'https://x.com/Lilosama98' },
+  { icon: XIcon, label: 'X', handle: '@Lilosama98', url: 'https://x.com/Lilosama98' },
   { icon: Instagram, label: 'Instagram', handle: '@madbak98', url: 'https://www.instagram.com/madbak98/' },
 ];
 
