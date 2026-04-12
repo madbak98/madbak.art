@@ -1,67 +1,104 @@
 import { motion, useScroll, useTransform } from 'motion/react';
-import { useRef, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
-import ProjectModal from './project-modal';
+import { useRef } from 'react';
 
-const projects = [
-  {
-    id: 1,
-    title: 'YOUNG MI',
-    category: 'Character Series',
-    year: '2022',
-    image: 'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
-    images: [
-      'https://pbs.twimg.com/media/GUkhZdYXMAAW-54?format=jpg&name=small',
-      'https://pbs.twimg.com/media/GdN7WSoXQAAgQO0?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GUkhZdaXwAAdhCY?format=jpg&name=small',
-      'https://pbs.twimg.com/media/GVyCuqXXMAAj73g?format=jpg&name=small',
-      'https://pbs.twimg.com/media/GWak2uBXAAELrGP?format=jpg&name=medium',
-    ],
-  },
-  {
-    id: 2,
-    title: 'PINK ARMY',
-    category: 'AI Influencer',
-    year: '2022',
-    image: 'https://github.com/madbak98/My-image/blob/main/07c36aee-e7ba-456f-bb91-bb238e60cbf1.png?raw=true',
-    images: [
-      'https://github.com/madbak98/My-image/blob/main/6fe54cd9-9cce-492c-ba0c-e6438d486fff.png?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/hf_20260218_004459_b98c0ec6-0c6a-4a90-a28a-beb3712647cc.png?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/hf_20260218_000747_13e6678b-ebae-4047-a96d-57a325ebbf6f.png?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/hf_20260218_000558_d245cf16-18d6-49a3-a994-a4a524d5049e.png?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/07c36aee-e7ba-456f-bb91-bb238e60cbf1.png?raw=true',
-    ],
-  },
-  {
-    id: 3,
-    title: 'ETHEREAL BEINGS',
-    category: 'Cover Art',
-    year: '2025',
-    image: 'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_v6xqw8v6xqw8v6xq.png?raw=true',
-    images: [
-      'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_v6xqw8v6xqw8v6xq.png?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/Gemini_Generated_Image_ovdyb1ovdyb1ovdy.jpg?raw=true',
-      'https://github.com/madbak98/My-image/blob/main/IMG_3225.JPG?raw=true',
-    ],
-  },
-  {
-    id: 4,
-    title: 'BATMAN X LV',
-    category: 'Concept Design',
-    year: '2023',
-    image: 'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
-    images: [
-      'https://pbs.twimg.com/media/GbZStxSbIAEgwHH?format=jpg&name=large',
-      'https://pbs.twimg.com/media/GbZR4wrbQAAAtSn?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GbZStxTbAAAydlE?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GbZR4wpaIAA3Ino?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GbZStxQawAA56hR?format=jpg&name=medium',
-      'https://pbs.twimg.com/media/GbZR4wtbgAA92kW?format=jpg&name=medium',
-    ],
-  },
-  {
-    id: 5,
-    title: 'URBAN LEGENDS',
+export function AboutSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const x = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [-100, 0, 0, 100]);
+
+  return (
+    <section
+      id="about"
+      ref={ref}
+      className="relative min-h-screen flex items-center justify-center py-32 px-4"
+    >
+      <motion.div style={{ opacity, x }} className="max-w-4xl z-10">
+        <div className="mb-6">
+          <span
+            className="text-xs tracking-[0.3em] uppercase"
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
+          >
+            [001] ABOUT
+          </span>
+        </div>
+
+        <h2
+          className="mb-12"
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontSize: 'clamp(2.5rem, 8vw, 5rem)',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            color: 'var(--foreground)',
+          }}
+        >
+          CRAFTING
+          <br />
+          DIGITAL LEGENDS
+        </h2>
+
+        <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
+          <p
+            className="text-base leading-relaxed tracking-wide uppercase"
+            style={{ color: 'rgba(var(--foreground-rgb), 0.82)' }}
+          >
+            I’m a curious <span className="font-bold italic">video editor</span> and{' '}
+            <span className="font-bold">graphic designer</span> who sees every project
+            as a new adventure. Whether I’m crafting a dynamic edit or designing a
+            brand’s visual identity, I’m driven by a desire to create content that
+            feels fresh, striking and impactful. Off-screen, you’ll find me diving
+            into digital art communities, experimenting with new tools and chasing
+            inspiration in the city’s vibrant culture.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+          {[
+            { value: '80+', label: 'CHARACTERS' },
+            { value: '2', label: 'COLLECTIONS' },
+            { value: '50+', label: 'HOLDERS' },
+            { value: '5+', label: 'YEARS EXP' },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="border-l-2 pl-4"
+              style={{ borderColor: 'var(--accent-green)' }}
+            >
+              <div
+                className="text-4xl mb-2"
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: 800,
+                  color: 'var(--main-element)',
+                }}
+              >
+                {stat.value}
+              </div>
+              <div
+                className="text-xs tracking-[0.2em] uppercase"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  color: 'rgba(var(--foreground-rgb), 0.62)',
+                }}
+              >
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    </section>
+  );
+}
     category: 'Pixel Art',
     year: '2021',
     image: 'https://pbs.twimg.com/media/GT3NgmXW4AAK0cW?format=jpg&name=medium',
