@@ -604,25 +604,45 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.75, delay: 0.28, ease: 'easeOut' }}
-            className="mt-4 whitespace-nowrap sm:mt-5"
-            style={{
-              transform: subtitleTransform,
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.82rem, 1.45vw, 1.04rem)',
-              fontWeight: 400,
-              letterSpacing: '0.52em',
-              textTransform: 'uppercase',
-              color: '#E62525',
-              paddingLeft: '0.52em',
-              textShadow: '0 8px 22px rgba(230,37,37,0.18)',
-            }}
+            className="mt-4 flex flex-col items-center gap-2 sm:mt-5"
+            style={{ transform: subtitleTransform }}
           >
-            : DESIGNER :
-          </motion.p>
+            <p
+              className="whitespace-nowrap"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'clamp(0.82rem, 1.45vw, 1.04rem)',
+                fontWeight: 400,
+                letterSpacing: '0.52em',
+                textTransform: 'uppercase',
+                color: '#E62525',
+                paddingLeft: '0.52em',
+                textShadow: '0 8px 22px rgba(230,37,37,0.18)',
+              }}
+            >
+              : DESIGNER :
+            </p>
+
+            <p
+              className="whitespace-nowrap"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'clamp(0.74rem, 1.1vw, 0.92rem)',
+                fontWeight: 400,
+                letterSpacing: '0.42em',
+                textTransform: 'uppercase',
+                color: 'rgba(245, 245, 245, 0.82)',
+                paddingLeft: '0.42em',
+                textShadow: '0 8px 20px rgba(0,0,0,0.28)',
+              }}
+            >
+              &amp; DEVELOPER
+            </p>
+          </motion.div>
         </div>
       </motion.div>
     </section>
