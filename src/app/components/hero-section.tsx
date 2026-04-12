@@ -13,6 +13,7 @@ import { useRef } from 'react';
 const NAV_ITEMS = [
   { label: 'MINI GAME', target: 'game' },
   { label: 'ABOUT', target: 'about' },
+  { label: 'WORKS', target: 'work' },
   { label: 'NFT', target: 'nft' },
   { label: 'CONTACT', target: 'contact' },
 ] as const;
