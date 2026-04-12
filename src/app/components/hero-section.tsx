@@ -1,68 +1,49 @@
-import {
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-} from 'motion/react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import { useRef } from 'react';
-
-export function HeroSection() {
-  const ref = useRef<HTMLElement>(null);
-
-  const pointerRotateXTarget = useMotionValue(0);
-  const pointerRotateYTarget = useMotionValue(0);
-  const pointerShiftXTarget = useMotionValue(0);
-  const pointerShiftYTarget = useMotionValue(0);
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
-
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.56], [1, 0]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.56], [1, 0.94]);
-  const sectionY = useTransform(scrollYProgress, [0, 0.56], [0, -76]);
-
-  const titleRotateX = useSpring(
-    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, 12, 30]),
-    { stiffness: 150, damping: 24, mass: 0.42 }
-  );
-  const titleRotateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, -4, -10]),
-    { stiffness: 150, damping: 24, mass: 0.42 }
-  );
-  const titleLift = useSpring(
-    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, -10, -24]),
-    { stiffness: 150, damping: 24, mass: 0.42 }
-  );
-  const titleDepth = useSpring(
-    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, 48, 138]),
-    { stiffness: 150, damping: 24, mass: 0.42 }
-  );
-  const titleScale = useSpring(
-    useTransform(scrollYProgress, [0, 0.34, 0.72], [1, 1.024, 1.075]),
-    { stiffness: 155, damping: 26, mass: 0.38 }
-  );
-
-  const pointerRotateX = useSpring(pointerRotateXTarget, {
-    stiffness: 190,
-    damping: 24,
-    mass: 0.34,
-  });
-  const pointerRotateY = useSpring(pointerRotateYTarget, {
-    stiffness: 190,
-    damping: 24,
-    mass: 0.34,
-  });
-  const pointerShiftX = useSpring(pointerShiftXTarget, {
-    stiffness: 160,
-    damping: 24,
-    mass: 0.38,
-  });
-  const pointerShiftY = useSpring(pointerShiftYTarget, {
+14:04:41.451 
+error during build:
+14:04:41.451 
+[vite:esbuild] Transform failed with 1 error:
+14:04:41.451 
+/vercel/path0/src/app/components/hero-section.tsx:546:0: ERROR: Unexpected "}"
+14:04:41.451 
+file: /vercel/path0/src/app/components/hero-section.tsx:546:0
+14:04:41.451 
+14:04:41.452 
+Unexpected "}"
+14:04:41.452 
+544|      </section>
+14:04:41.452 
+545|    );
+14:04:41.452 
+546|  }  const pointerShiftY = useSpring(pointerShiftYTarget, {
+14:04:41.452 
+   |  ^
+14:04:41.452 
+547|      stiffness: 160,
+14:04:41.453 
+548|      damping: 24,
+14:04:41.453 
+14:04:41.453 
+    at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1467:15)
+14:04:41.453 
+    at /vercel/path0/node_modules/esbuild/lib/main.js:736:50
+14:04:41.453 
+    at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:603:9)
+14:04:41.454 
+    at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:658:12)
+14:04:41.454 
+    at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:581:7)
+14:04:41.454 
+    at Socket.emit (node:events:508:28)
+14:04:41.454 
+    at addChunk (node:internal/streams/readable:563:12)
+14:04:41.454 
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+14:04:41.454 
+    at Readable.push (node:internal/streams/readable:394:5)
+14:04:41.455 
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+14:04:41.478 
+Error: Command "npm run build" exited with 1  const pointerShiftY = useSpring(pointerShiftYTarget, {
     stiffness: 160,
     damping: 24,
     mass: 0.38,
