@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { useRef, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import ProjectModal from './project-modal';
-
 const projects = [
   {
     id: 1,
