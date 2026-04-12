@@ -101,7 +101,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
           className="self-start px-3 py-1"
           style={{
             backgroundColor: 'rgba(var(--main-element-rgb), 0.22)',
-            border: '1px solid var(--accent-red)',
+            border: '1px solid var(--accent-green)',
           }}
           animate={{
             opacity: isHovered ? 1 : 0,
@@ -111,7 +111,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
         >
           <span 
             className="text-xs tracking-[0.15em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
           >
             {nft.platform}
           </span>
@@ -143,10 +143,10 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
         </div>
       </div>
 
-      {/* Red border on hover */}
+      {/* Accent border on hover */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
-        style={{ border: '2px solid var(--accent-red)' }}
+        style={{ border: '2px solid var(--accent-green)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
         transition={{ duration: 0.3 }}
@@ -179,7 +179,7 @@ export function NFTSection() {
           <div className="mb-6">
             <span 
               className="text-xs tracking-[0.3em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
             >
               [003] NFT COLLECTIONS
             </span>
@@ -233,7 +233,7 @@ export function NFTSection() {
               fontSize: '0.875rem',
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
-              borderColor: 'var(--accent-red)',
+              borderColor: 'var(--accent-green)',
               color: 'var(--foreground)',
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--main-element)'}
