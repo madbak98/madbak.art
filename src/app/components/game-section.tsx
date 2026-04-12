@@ -1420,7 +1420,7 @@ export function GameSection() {
               lineHeight: 1,
             }}
           >
-            MAKE IT COUNT
+            MAKE IT COUNT!
           </h2>
 
           <p
