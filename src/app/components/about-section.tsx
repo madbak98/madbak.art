@@ -22,7 +22,7 @@ export function AboutSection() {
         <div className="mb-6">
           <span
             className="text-xs tracking-[0.3em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
           >
             [001] ABOUT
           </span>
@@ -36,7 +36,7 @@ export function AboutSection() {
             fontSize: 'clamp(2.5rem, 8vw, 5rem)',
             fontWeight: 800,
             letterSpacing: '-0.02em',
-            color: '#F5F5F5',
+            color: 'var(--foreground)',
           }}
         >
           CRAFTING
@@ -48,7 +48,7 @@ export function AboutSection() {
         <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
           <p
             className="text-base leading-relaxed tracking-wide uppercase"
-            style={{ color: 'rgba(245, 245, 245, 0.8)' }}
+            style={{ color: 'rgba(var(--foreground-rgb), 0.82)' }}
           >I’m a curious          <span className="font-bold italic">video editor</span> and <span className="font-bold">graphic designer</span> who sees every project as a new adventure. Whether I’m crafting a dynamic edit or designing a brand’s visual identity, I’m driven by a desire to create content that feels fresh, striking and impactful. Off‑screen, you’ll find me diving into digital art communities, experimenting with new tools and chasing inspiration in the city’s vibrant culture.</p>
           
         </div>
@@ -68,14 +68,14 @@ export function AboutSection() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               className="border-l-2 pl-4"
-              style={{ borderColor: '#E62525' }}
+              style={{ borderColor: 'var(--accent-red)' }}
             >
               <div
                 className="text-4xl mb-2"
                 style={{
                   fontFamily: 'var(--font-heading)',
                   fontWeight: 800,
-                  color: '#E62525',
+                  color: 'var(--main-element)',
                 }}
               >
                 {stat.value}
@@ -84,7 +84,7 @@ export function AboutSection() {
                 className="text-xs tracking-[0.2em] uppercase"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  color: 'rgba(245, 245, 245, 0.6)',
+                  color: 'rgba(var(--foreground-rgb), 0.62)',
                 }}
               >
                 {stat.label}
