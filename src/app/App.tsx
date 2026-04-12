@@ -8,17 +8,15 @@ import { ContactSection } from './components/contact-section';
 
 export default function App() {
   return (
-    <div 
+    <div
       className="relative min-h-screen overflow-x-hidden"
-      style={{ 
-        backgroundColor: '#0A0A0A',
-        color: '#F5F5F5',
+      style={{
+        backgroundColor: 'var(--background)',
+        color: 'var(--foreground)',
       }}
     >
-      {/* Grid Background */}
       <GridBackground />
 
-      {/* Main Content */}
       <main className="relative z-10">
         <HeroSection />
         <GameSection />
