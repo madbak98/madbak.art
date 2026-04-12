@@ -22,50 +22,50 @@ export function HeroSection() {
     offset: ['start start', 'end start'],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.58], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.58], [1, 0.92]);
-  const y = useTransform(scrollYProgress, [0, 0.58], [0, -72]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.56], [1, 0]);
+  const sectionScale = useTransform(scrollYProgress, [0, 0.56], [1, 0.94]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.56], [0, -76]);
 
   const titleRotateX = useSpring(
-    useTransform(scrollYProgress, [0, 0.35, 0.72], [0, 10, 22]),
-    { stiffness: 140, damping: 24, mass: 0.45 }
+    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, 12, 30]),
+    { stiffness: 150, damping: 24, mass: 0.42 }
   );
   const titleRotateY = useSpring(
-    useTransform(scrollYProgress, [0, 0.35, 0.72], [0, -3, -8]),
-    { stiffness: 140, damping: 24, mass: 0.45 }
+    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, -4, -10]),
+    { stiffness: 150, damping: 24, mass: 0.42 }
   );
   const titleLift = useSpring(
-    useTransform(scrollYProgress, [0, 0.35, 0.72], [0, -8, -18]),
-    { stiffness: 140, damping: 24, mass: 0.45 }
+    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, -10, -24]),
+    { stiffness: 150, damping: 24, mass: 0.42 }
   );
   const titleDepth = useSpring(
-    useTransform(scrollYProgress, [0, 0.35, 0.72], [0, 36, 108]),
-    { stiffness: 140, damping: 24, mass: 0.45 }
+    useTransform(scrollYProgress, [0, 0.34, 0.72], [0, 48, 138]),
+    { stiffness: 150, damping: 24, mass: 0.42 }
   );
   const titleScale = useSpring(
-    useTransform(scrollYProgress, [0, 0.35, 0.72], [1, 1.018, 1.06]),
-    { stiffness: 150, damping: 26, mass: 0.4 }
+    useTransform(scrollYProgress, [0, 0.34, 0.72], [1, 1.024, 1.075]),
+    { stiffness: 155, damping: 26, mass: 0.38 }
   );
 
   const pointerRotateX = useSpring(pointerRotateXTarget, {
-    stiffness: 170,
+    stiffness: 190,
     damping: 24,
-    mass: 0.38,
+    mass: 0.34,
   });
   const pointerRotateY = useSpring(pointerRotateYTarget, {
-    stiffness: 170,
+    stiffness: 190,
+    damping: 24,
+    mass: 0.34,
+  });
+  const pointerShiftX = useSpring(pointerShiftXTarget, {
+    stiffness: 160,
     damping: 24,
     mass: 0.38,
   });
-  const pointerShiftX = useSpring(pointerShiftXTarget, {
-    stiffness: 150,
-    damping: 24,
-    mass: 0.42,
-  });
   const pointerShiftY = useSpring(pointerShiftYTarget, {
-    stiffness: 150,
+    stiffness: 160,
     damping: 24,
-    mass: 0.42,
+    mass: 0.38,
   });
 
   const combinedRotateX = useTransform(
@@ -83,25 +83,29 @@ export function HeroSection() {
   const combinedDepth = useTransform(
     [titleDepth, pointerRotateX, pointerRotateY],
     ([scrollDepth, pointerX, pointerY]) =>
-      scrollDepth + Math.abs(pointerX) * 1.4 + Math.abs(pointerY) * 0.9
+      scrollDepth + Math.abs(pointerX) * 1.8 + Math.abs(pointerY) * 1.1
   );
 
-  const haloOpacity = useTransform(scrollYProgress, [0, 0.35, 0.72], [0.16, 0.28, 0.4]);
-  const haloScale = useTransform(scrollYProgress, [0, 0.35, 0.72], [1, 1.12, 1.26]);
-  const echoY = useTransform(scrollYProgress, [0, 0.35, 0.72], [0, 10, 18]);
-  const echoDepth = useTransform(scrollYProgress, [0, 0.35, 0.72], [-16, -40, -88]);
-  const haloShiftX = useTransform(pointerShiftX, (value) => value * 0.6);
-  const haloShiftY = useTransform(pointerShiftY, (value) => value * 0.32);
-  const echoShiftX = useTransform(pointerShiftX, (value) => value * 0.75);
-  const echoShiftY = useTransform(pointerShiftY, (value) => value * 0.5);
-  const combinedEchoY = useTransform(
-    [echoY, echoShiftY],
-    ([scrollEcho, pointerEcho]) => scrollEcho + pointerEcho
-  );
+  const backShiftX = useTransform(pointerShiftX, (value) => value * 0.9);
+  const backShiftY = useTransform(pointerShiftY, (value) => value * 0.58);
+  const midShiftX = useTransform(pointerShiftX, (value) => value * 0.42);
+  const midShiftY = useTransform(pointerShiftY, (value) => value * 0.24);
+  const subtitleShiftX = useTransform(pointerShiftX, (value) => value * 0.18);
+  const subtitleShiftY = useTransform(pointerShiftY, (value) => value * 0.12);
+  const glowShiftX = useTransform(pointerShiftX, (value) => value * 0.52);
+  const glowShiftY = useTransform(pointerShiftY, (value) => value * 0.28);
+
+  const backDepth = useTransform(scrollYProgress, [0, 0.34, 0.72], [-34, -76, -138]);
+  const midDepth = useTransform(scrollYProgress, [0, 0.34, 0.72], [-14, -34, -84]);
+  const glowDepth = useTransform(scrollYProgress, [0, 0.34, 0.72], [-48, -82, -144]);
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.34, 0.72], [0.16, 0.3, 0.45]);
+  const glowScale = useTransform(scrollYProgress, [0, 0.34, 0.72], [1, 1.14, 1.28]);
 
   const titleTransform = useMotionTemplate`translate3d(${pointerShiftX}px, ${combinedLift}px, ${combinedDepth}px) rotateX(${combinedRotateX}deg) rotateY(${combinedRotateY}deg) scale(${titleScale})`;
-  const haloTransform = useMotionTemplate`translate3d(${haloShiftX}px, ${haloShiftY}px, -120px) scale(${haloScale})`;
-  const echoTransform = useMotionTemplate`translate3d(${echoShiftX}px, ${combinedEchoY}px, ${echoDepth}px)`;
+  const backLayerTransform = useMotionTemplate`translate3d(${backShiftX}px, ${backShiftY}px, ${backDepth}px)`;
+  const midLayerTransform = useMotionTemplate`translate3d(${midShiftX}px, ${midShiftY}px, ${midDepth}px)`;
+  const glowTransform = useMotionTemplate`translate3d(${glowShiftX}px, ${glowShiftY}px, ${glowDepth}px) scale(${glowScale})`;
+  const subtitleTransform = useMotionTemplate`translate3d(${subtitleShiftX}px, ${subtitleShiftY}px, 0px)`;
 
   const resetPointerTilt = () => {
     pointerRotateXTarget.set(0);
@@ -117,10 +121,10 @@ export function HeroSection() {
     const normalizedX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
     const normalizedY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
 
-    pointerRotateXTarget.set(-normalizedY * 8);
-    pointerRotateYTarget.set(normalizedX * 12);
-    pointerShiftXTarget.set(normalizedX * 14);
-    pointerShiftYTarget.set(normalizedY * 8);
+    pointerRotateXTarget.set(-normalizedY * 9);
+    pointerRotateYTarget.set(normalizedX * 13);
+    pointerShiftXTarget.set(normalizedX * 16);
+    pointerShiftYTarget.set(normalizedY * 10);
   };
 
   return (
@@ -129,35 +133,24 @@ export function HeroSection() {
       className="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
       onMouseMove={handleMouseMove}
       onMouseLeave={resetPointerTilt}
-      style={{ backgroundColor: '#020202' }}
     >
-      <div className="absolute inset-0 bg-black" />
-
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 38%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.014) 24%, rgba(0,0,0,0) 56%)',
+            'radial-gradient(circle at 50% 34%, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.014) 26%, rgba(0,0,0,0) 58%), linear-gradient(180deg, rgba(10,10,10,0.22) 0%, rgba(10,10,10,0) 22%, rgba(10,10,10,0) 62%, rgba(10,10,10,0.34) 100%)',
         }}
       />
 
       <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 58%, rgba(230,37,37,0.08) 0%, rgba(230,37,37,0.015) 22%, rgba(0,0,0,0) 52%)',
-        }}
-      />
-
-      <div
-        className="absolute inset-x-0 bottom-0 top-[48%]"
+        className="absolute inset-x-0 bottom-0 top-[44%]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px)
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
           `,
-          backgroundSize: '64px 64px',
-          opacity: 0.16,
+          backgroundSize: '50px 50px',
+          opacity: 0.18,
           maskImage: 'linear-gradient(to top, black 0%, black 36%, transparent 100%)',
           WebkitMaskImage:
             'linear-gradient(to top, black 0%, black 36%, transparent 100%)',
@@ -168,7 +161,15 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           background:
-            'repeating-linear-gradient(180deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 4px)',
+            'radial-gradient(circle at 50% 62%, rgba(230,37,37,0.08) 0%, rgba(230,37,37,0.014) 24%, rgba(0,0,0,0) 56%)',
+        }}
+      />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'repeating-linear-gradient(180deg, rgba(255,255,255,0.016) 0px, rgba(255,255,255,0.016) 1px, transparent 1px, transparent 4px)',
           opacity: 0.05,
           mixBlendMode: 'soft-light',
         }}
@@ -178,7 +179,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           boxShadow:
-            'inset 0 0 180px rgba(0,0,0,0.92), inset 0 -120px 180px rgba(0,0,0,0.72)',
+            'inset 0 0 180px rgba(0,0,0,0.84), inset 0 -120px 160px rgba(0,0,0,0.68)',
         }}
       />
 
@@ -187,33 +188,13 @@ export function HeroSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10 flex w-full max-w-6xl justify-center"
-        style={{ opacity, scale, y }}
+        style={{ opacity: sectionOpacity, scale: sectionScale, y: sectionY }}
       >
         <div className="relative inline-flex flex-col items-center text-center">
-          <motion.span
-            initial={{ opacity: 0, y: -10, rotate: -6 }}
-            animate={{ opacity: 1, y: 0, rotate: -6 }}
-            transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
-            className="absolute right-[2%] top-[10%] z-20 whitespace-nowrap rounded-sm border border-red-500/30 px-2 py-1 sm:right-0"
-            style={{
-              transform: 'translateX(18%) rotate(-6deg)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'clamp(0.58rem, 0.8vw, 0.74rem)',
-              letterSpacing: '0.24em',
-              textTransform: 'uppercase',
-              color: '#E62525',
-              background: 'rgba(230,37,37,0.06)',
-              boxShadow: '0 0 18px rgba(230,37,37,0.12)',
-              pointerEvents: 'none',
-            }}
-          >
-            [ LILOSAMA ]
-          </motion.span>
-
           <div
             className="relative"
             style={{
-              perspective: '1800px',
+              perspective: '2100px',
               transformStyle: 'preserve-3d',
             }}
           >
@@ -227,13 +208,13 @@ export function HeroSection() {
             >
               <motion.div
                 aria-hidden="true"
-                className="absolute inset-[-8%] rounded-full"
+                className="absolute inset-[-10%] rounded-full"
                 style={{
-                  transform: haloTransform,
-                  opacity: haloOpacity,
+                  transform: glowTransform,
+                  opacity: glowOpacity,
                   background:
-                    'radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.09) 40%, rgba(255,255,255,0) 74%)',
-                  filter: 'blur(26px)',
+                    'radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 42%, rgba(255,255,255,0) 76%)',
+                  filter: 'blur(34px)',
                   pointerEvents: 'none',
                 }}
               />
@@ -242,15 +223,34 @@ export function HeroSection() {
                 aria-hidden="true"
                 className="absolute inset-0 select-none whitespace-nowrap"
                 style={{
-                  transform: echoTransform,
+                  transform: backLayerTransform,
                   transformStyle: 'preserve-3d',
                   fontFamily: 'var(--font-heading)',
-                  fontSize: 'clamp(4.7rem, 16vw, 11.5rem)',
+                  fontSize: 'clamp(4.8rem, 16vw, 11.6rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.08em',
+                  lineHeight: 0.88,
+                  color: 'rgba(0,0,0,0.72)',
+                  textShadow: '0 20px 34px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none',
+                }}
+              >
+                MADBAK
+              </motion.span>
+
+              <motion.span
+                aria-hidden="true"
+                className="absolute inset-0 select-none whitespace-nowrap"
+                style={{
+                  transform: midLayerTransform,
+                  transformStyle: 'preserve-3d',
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: 'clamp(4.8rem, 16vw, 11.6rem)',
                   fontWeight: 800,
                   letterSpacing: '-0.08em',
                   lineHeight: 0.88,
                   color: 'rgba(255,255,255,0.12)',
-                  textShadow: '0 18px 40px rgba(0,0,0,0.54)',
+                  textShadow: '0 18px 40px rgba(0,0,0,0.48)',
                   pointerEvents: 'none',
                 }}
               >
@@ -261,17 +261,17 @@ export function HeroSection() {
                 className="relative whitespace-nowrap"
                 style={{
                   fontFamily: 'var(--font-heading)',
-                  fontSize: 'clamp(4.7rem, 16vw, 11.5rem)',
+                  fontSize: 'clamp(4.8rem, 16vw, 11.6rem)',
                   fontWeight: 800,
                   letterSpacing: '-0.08em',
                   lineHeight: 0.88,
-                  color: '#F7F7F7',
+                  color: '#F6F6F6',
                   background:
-                    'linear-gradient(180deg, #ffffff 0%, #f6f6f6 54%, #d9d9d9 100%)',
+                    'linear-gradient(180deg, #ffffff 0%, #f5f5f5 56%, #dadada 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   textShadow:
-                    '0 0 24px rgba(255,255,255,0.08), 0 18px 42px rgba(0,0,0,0.64)',
+                    '0 0 24px rgba(255,255,255,0.08), 0 18px 42px rgba(0,0,0,0.62)',
                 }}
               >
                 MADBAK
@@ -282,11 +282,12 @@ export function HeroSection() {
           <motion.p
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.3, ease: 'easeOut' }}
+            transition={{ duration: 0.75, delay: 0.28, ease: 'easeOut' }}
             className="mt-4 whitespace-nowrap sm:mt-5"
             style={{
+              transform: subtitleTransform,
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.82rem, 1.5vw, 1.08rem)',
+              fontSize: 'clamp(0.82rem, 1.45vw, 1.04rem)',
               fontWeight: 400,
               letterSpacing: '0.52em',
               textTransform: 'uppercase',
