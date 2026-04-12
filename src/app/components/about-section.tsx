@@ -22,7 +22,7 @@ export function AboutSection() {
         <div className="mb-6">
           <span
             className="text-xs tracking-[0.3em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
           >
             [001] ABOUT
           </span>
@@ -63,6 +63,39 @@ export function AboutSection() {
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="border-l-2 pl-4"
+              style={{ borderColor: 'var(--accent-green)' }}
+            >
+              <div
+                className="text-4xl mb-2"
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: 800,
+                  color: 'var(--main-element)',
+                }}
+              >
+                {stat.value}
+              </div>
+                <div
+                className="text-xs tracking-[0.2em] uppercase"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  color: 'rgba(var(--foreground-rgb), 0.62)',
+                }}
+              >
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    </section>
+  );
+}              key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
