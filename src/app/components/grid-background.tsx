@@ -5,8 +5,8 @@ export function GridBackground() {
         className="absolute inset-0"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+            linear-gradient(var(--grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-color) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
         }}
@@ -14,7 +14,8 @@ export function GridBackground() {
       <div 
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(circle at 50% 50%, transparent 0%, #0A0A0A 100%)',
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(var(--background-rgb), 0) 0%, rgba(var(--background-rgb), 0.92) 100%)',
         }}
       />
     </div>
