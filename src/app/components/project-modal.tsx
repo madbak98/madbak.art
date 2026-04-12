@@ -21,7 +21,7 @@ export default function ProjectModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.8)',
+        background: 'rgba(var(--foreground-rgb), 0.42)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -32,8 +32,8 @@ export default function ProjectModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: '#111',
-          color: '#fff',
+          background: 'var(--background)',
+          color: 'var(--foreground)',
           width: '100%',
           maxWidth: '1100px',
           maxHeight: '90vh',
@@ -41,6 +41,8 @@ export default function ProjectModal({
           borderRadius: '16px',
           padding: '24px',
           position: 'relative',
+          boxShadow: '0 24px 60px rgba(var(--foreground-rgb), 0.18)',
+          border: '1px solid rgba(var(--foreground-rgb), 0.14)',
         }}
       >
         <button
@@ -50,8 +52,8 @@ export default function ProjectModal({
             top: '16px',
             right: '16px',
             background: 'transparent',
-            border: '1px solid #444',
-            color: '#fff',
+            border: '1px solid rgba(var(--foreground-rgb), 0.28)',
+            color: 'var(--foreground)',
             borderRadius: '8px',
             padding: '8px 12px',
             cursor: 'pointer',
@@ -63,6 +65,29 @@ export default function ProjectModal({
         <h2>{project.title}</h2>
         <p>{project.category}</p>
 
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '16px',
+          }}
+        >
+          {project.images.map((img, index) => (
+            <img
+              key={index}
+              src={img}
+              alt={`${project.title} ${index + 1}`}
+              style={{
+                width: '100%',
+                borderRadius: '12px',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
         <div
           style={{
             display: 'grid',
