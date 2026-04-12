@@ -85,7 +85,8 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
       <motion.div 
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to top, #0A0A0A 0%, transparent 40%)',
+          background:
+            'linear-gradient(to top, rgba(var(--foreground-rgb), 0.9) 0%, transparent 40%)',
         }}
         animate={{
           opacity: isHovered ? 1 : 0.7,
@@ -99,8 +100,8 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
         <motion.div
           className="self-start px-3 py-1"
           style={{
-            backgroundColor: 'rgba(230, 37, 37, 0.2)',
-            border: '1px solid #E62525',
+            backgroundColor: 'rgba(var(--main-element-rgb), 0.22)',
+            border: '1px solid var(--accent-red)',
           }}
           animate={{
             opacity: isHovered ? 1 : 0,
@@ -110,7 +111,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
         >
           <span 
             className="text-xs tracking-[0.15em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
           >
             {nft.platform}
           </span>
@@ -125,7 +126,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
               fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
               fontWeight: 800,
               letterSpacing: '-0.01em',
-              color: '#F5F5F5',
+              color: 'var(--background)',
             }}
           >
             {nft.title}
@@ -134,7 +135,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
             className="text-xs tracking-[0.15em] uppercase"
             style={{ 
               fontFamily: 'var(--font-body)',
-              color: 'rgba(245, 245, 245, 0.7)',
+              color: 'rgba(var(--background-rgb), 0.82)',
             }}
           >
             Supply: {nft.supply}
@@ -145,7 +146,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
       {/* Red border on hover */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
-        style={{ border: '2px solid #E62525' }}
+        style={{ border: '2px solid var(--accent-red)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
         transition={{ duration: 0.3 }}
@@ -178,7 +179,7 @@ export function NFTSection() {
           <div className="mb-6">
             <span 
               className="text-xs tracking-[0.3em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', color: '#E62525' }}
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-red)' }}
             >
               [003] NFT COLLECTIONS
             </span>
@@ -189,7 +190,7 @@ export function NFTSection() {
               fontSize: 'clamp(2.5rem, 8vw, 5rem)',
               fontWeight: 800,
               letterSpacing: '-0.02em',
-              color: '#F5F5F5',
+              color: 'var(--foreground)',
             }}
           >
             ON-CHAIN<br />ART
@@ -198,7 +199,7 @@ export function NFTSection() {
             className="mt-6 max-w-2xl text-sm tracking-[0.15em] uppercase"
             style={{ 
               fontFamily: 'var(--font-body)',
-              color: 'rgba(245, 245, 245, 0.6)',
+              color: 'rgba(var(--foreground-rgb), 0.7)',
             }}
           >
             Explore my NFT collections living on the blockchain. 
@@ -232,10 +233,10 @@ export function NFTSection() {
               fontSize: '0.875rem',
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
-              borderColor: '#E62525',
-              color: '#F5F5F5',
+              borderColor: 'var(--accent-red)',
+              color: 'var(--foreground)',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E62525'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--main-element)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             View on Foundation
