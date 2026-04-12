@@ -165,6 +165,7 @@ export function NFTSection() {
 
   return (
     <section 
+      id="nft"
       ref={ref}
       className="relative min-h-screen py-32 px-4"
     >
