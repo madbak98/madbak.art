@@ -295,10 +295,12 @@ export function HeroSection() {
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.14, ease: 'easeOut' }}
-        className="fixed left-1/2 top-4 z-40 flex w-[min(94vw,44rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2 py-2 backdrop-blur-xl sm:gap-2 sm:px-3"
+        className="fixed left-1/2 top-4 z-40 flex w-[min(94vw,44rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-1.5 rounded-full px-2 py-2 backdrop-blur-xl sm:gap-2 sm:px-3"
         style={{
           boxShadow:
-            '0 18px 40px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.08)',
+            '0 18px 40px rgba(var(--foreground-rgb), 0.14), inset 0 1px 0 rgba(var(--background-rgb), 0.42)',
+          border: '1px solid rgba(var(--foreground-rgb), 0.14)',
+          background: 'rgba(var(--background-rgb), 0.68)',
         }}
       >
         {NAV_ITEMS.map((item) => (
@@ -306,12 +308,22 @@ export function HeroSection() {
             key={item.target}
             type="button"
             onClick={() => scrollToSection(item.target)}
-            className="rounded-full border border-transparent px-3 py-2 text-[0.62rem] transition-all duration-300 hover:border-white/10 hover:bg-white/5 sm:px-4 sm:text-[0.7rem]"
+            className="rounded-full px-3 py-2 text-[0.62rem] transition-all duration-300 sm:px-4 sm:text-[0.7rem]"
             style={{
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.24em',
               textTransform: 'uppercase',
-              color: '#F5F5F5',
+              color: 'var(--foreground)',
+              border: '1px solid transparent',
+              background: 'transparent',
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.borderColor = 'rgba(var(--foreground-rgb), 0.14)';
+              event.currentTarget.style.background = 'rgba(var(--main-element-rgb), 0.16)';
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.borderColor = 'transparent';
+              event.currentTarget.style.background = 'transparent';
             }}
           >
             {item.label}
@@ -323,7 +335,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.014) 24%, rgba(0,0,0,0) 56%), linear-gradient(180deg, rgba(8,8,8,0.18) 0%, rgba(8,8,8,0) 22%, rgba(8,8,8,0) 62%, rgba(8,8,8,0.34) 100%)',
+            'radial-gradient(circle at 50% 30%, rgba(var(--background-rgb), 0.42) 0%, rgba(var(--main-element-rgb), 0.14) 24%, rgba(var(--background-rgb), 0) 56%), linear-gradient(180deg, rgba(var(--background-rgb), 0.08) 0%, rgba(var(--background-rgb), 0) 22%, rgba(var(--background-rgb), 0) 62%, rgba(var(--foreground-rgb), 0.12) 100%)',
         }}
       />
 
@@ -331,8 +343,8 @@ export function HeroSection() {
         className="absolute inset-x-0 bottom-0 top-[42%]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+            linear-gradient(rgba(var(--foreground-rgb), 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(var(--foreground-rgb), 0.08) 1px, transparent 1px)
           `,
           backgroundSize: '52px 52px',
           opacity: 0.18,
@@ -346,7 +358,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 22% 24%, rgba(230,37,37,0.11) 0%, rgba(230,37,37,0.02) 20%, rgba(0,0,0,0) 50%), radial-gradient(circle at 76% 66%, rgba(230,37,37,0.08) 0%, rgba(230,37,37,0.015) 22%, rgba(0,0,0,0) 54%)',
+            'radial-gradient(circle at 22% 24%, rgba(var(--secondary-element-rgb), 0.16) 0%, rgba(var(--secondary-element-rgb), 0.04) 20%, rgba(var(--background-rgb), 0) 50%), radial-gradient(circle at 76% 66%, rgba(var(--main-element-rgb), 0.12) 0%, rgba(var(--main-element-rgb), 0.03) 22%, rgba(var(--background-rgb), 0) 54%)',
         }}
       />
 
@@ -354,7 +366,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           background:
-            'repeating-linear-gradient(180deg, rgba(255,255,255,0.016) 0px, rgba(255,255,255,0.016) 1px, transparent 1px, transparent 4px)',
+            'repeating-linear-gradient(180deg, rgba(var(--foreground-rgb), 0.028) 0px, rgba(var(--foreground-rgb), 0.028) 1px, transparent 1px, transparent 4px)',
           opacity: 0.05,
           mixBlendMode: 'soft-light',
         }}
@@ -364,7 +376,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           boxShadow:
-            'inset 0 0 180px rgba(0,0,0,0.84), inset 0 -120px 160px rgba(0,0,0,0.7)',
+            'inset 0 0 180px rgba(var(--background-rgb), 0.12), inset 0 -120px 160px rgba(var(--foreground-rgb), 0.12)',
         }}
       />
 
@@ -377,12 +389,14 @@ export function HeroSection() {
         }}
       >
         <div
-          className="rounded-[10px] border border-white/12 bg-black/45 px-3 py-3 sm:px-4"
+          className="rounded-[10px] px-3 py-3 sm:px-4"
           style={{
             boxShadow:
-              '0 18px 34px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.08)',
+              '0 18px 34px rgba(var(--foreground-rgb), 0.14), inset 0 1px 0 rgba(var(--background-rgb), 0.44)',
             backdropFilter: 'blur(18px)',
             WebkitBackdropFilter: 'blur(18px)',
+            border: '1px solid rgba(var(--foreground-rgb), 0.14)',
+            background: 'rgba(var(--background-rgb), 0.64)',
           }}
         >
           <span
@@ -390,8 +404,8 @@ export function HeroSection() {
               fontFamily: 'var(--font-mono)',
               fontSize: 'clamp(0.95rem, 1.7vw, 1.25rem)',
               letterSpacing: '0.26em',
-              color: '#F5F5F5',
-              textShadow: '0 0 18px rgba(255,255,255,0.18)',
+              color: 'var(--foreground)',
+              textShadow: '0 0 18px rgba(var(--main-element-rgb), 0.24)',
             }}
           >
             :)
@@ -409,16 +423,23 @@ export function HeroSection() {
       >
         <div className="relative h-20 w-20 md:h-24 md:w-24">
           <div
-            className="absolute inset-0 rounded-full border border-white/12"
+            className="absolute inset-0 rounded-full"
             style={{
               background:
-                'radial-gradient(circle at 34% 32%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.06) 26%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.28) 100%)',
+                'radial-gradient(circle at 34% 32%, rgba(var(--background-rgb), 0.38) 0%, rgba(var(--main-element-rgb), 0.24) 26%, rgba(var(--secondary-element-rgb), 0.14) 50%, rgba(var(--foreground-rgb), 0.2) 100%)',
               boxShadow:
-                '0 20px 40px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.22)',
+                '0 20px 40px rgba(var(--foreground-rgb), 0.16), inset 0 1px 0 rgba(var(--background-rgb), 0.44)',
+              border: '1px solid rgba(var(--foreground-rgb), 0.12)',
             }}
           />
-          <div className="absolute inset-[12%] rounded-full border border-white/10" />
-          <div className="absolute inset-y-1/2 left-[20%] right-[20%] h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
+          <div className="absolute inset-[12%] rounded-full" style={{ border: '1px solid rgba(var(--foreground-rgb), 0.12)' }} />
+          <div
+            className="absolute inset-y-1/2 left-[20%] right-[20%] h-px -translate-y-1/2"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, rgba(var(--secondary-element-rgb), 0.55), transparent)',
+            }}
+          />
         </div>
       </motion.div>
 
@@ -431,12 +452,14 @@ export function HeroSection() {
         }}
       >
         <div
-          className="w-28 rounded-[26px] border border-white/12 bg-black/40 p-4"
+          className="w-28 rounded-[26px] p-4"
           style={{
             boxShadow:
-              '0 18px 38px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08)',
+              '0 18px 38px rgba(var(--foreground-rgb), 0.14), inset 0 1px 0 rgba(var(--background-rgb), 0.44)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(var(--foreground-rgb), 0.12)',
+            background: 'rgba(var(--background-rgb), 0.58)',
           }}
         >
           <div
@@ -444,15 +467,28 @@ export function HeroSection() {
             style={{
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.28em',
-              color: '#E62525',
+              color: 'var(--accent-red)',
             }}
           >
             FRAME
           </div>
-          <div className="rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
-            <div className="mb-2 h-1.5 w-10 rounded-full bg-white/15" />
-            <div className="mb-2 h-10 rounded-[14px] border border-white/10 bg-gradient-to-br from-white/8 to-transparent" />
-            <div className="h-1.5 w-16 rounded-full bg-red-500/20" />
+          <div
+            className="rounded-[18px] p-3"
+            style={{
+              border: '1px solid rgba(var(--foreground-rgb), 0.1)',
+              background: 'rgba(var(--main-element-rgb), 0.16)',
+            }}
+          >
+            <div className="mb-2 h-1.5 w-10 rounded-full" style={{ background: 'rgba(var(--foreground-rgb), 0.18)' }} />
+            <div
+              className="mb-2 h-10 rounded-[14px]"
+              style={{
+                border: '1px solid rgba(var(--foreground-rgb), 0.1)',
+                background:
+                  'linear-gradient(135deg, rgba(var(--background-rgb), 0.26), transparent)',
+              }}
+            />
+            <div className="h-1.5 w-16 rounded-full" style={{ background: 'rgba(var(--secondary-element-rgb), 0.3)' }} />
           </div>
         </div>
       </motion.div>
@@ -466,10 +502,10 @@ export function HeroSection() {
         }}
       >
         <div className="relative h-24 w-24 md:h-28 md:w-28">
-          <div className="absolute inset-0 rotate-[10deg] border border-white/12" />
-          <div className="absolute inset-3 rotate-[10deg] border border-red-500/30" />
-          <div className="absolute inset-6 rotate-[10deg] border border-white/7" />
-          <div className="absolute -inset-3 rotate-[10deg] border border-white/6" />
+          <div className="absolute inset-0 rotate-[10deg]" style={{ border: '1px solid rgba(var(--foreground-rgb), 0.16)' }} />
+          <div className="absolute inset-3 rotate-[10deg]" style={{ border: '1px solid rgba(var(--secondary-element-rgb), 0.42)' }} />
+          <div className="absolute inset-6 rotate-[10deg]" style={{ border: '1px solid rgba(var(--foreground-rgb), 0.1)' }} />
+          <div className="absolute -inset-3 rotate-[10deg]" style={{ border: '1px solid rgba(var(--foreground-rgb), 0.06)' }} />
         </div>
       </motion.div>
 
@@ -482,10 +518,12 @@ export function HeroSection() {
         }}
       >
         <div
-          className="rounded-full border border-white/10 bg-black/35 px-4 py-2"
+          className="rounded-full px-4 py-2"
           style={{
             boxShadow:
-              '0 18px 38px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08)',
+              '0 18px 38px rgba(var(--foreground-rgb), 0.14), inset 0 1px 0 rgba(var(--background-rgb), 0.4)',
+            border: '1px solid rgba(var(--foreground-rgb), 0.12)',
+            background: 'rgba(var(--background-rgb), 0.56)',
           }}
         >
           <span
@@ -493,7 +531,7 @@ export function HeroSection() {
               fontFamily: 'var(--font-mono)',
               fontSize: '0.72rem',
               letterSpacing: '0.3em',
-              color: 'rgba(245,245,245,0.72)',
+              color: 'rgba(var(--foreground-rgb), 0.76)',
             }}
           >
             ALT/3D
@@ -531,7 +569,7 @@ export function HeroSection() {
                   transform: glowTransform,
                   opacity: glowOpacity,
                   background:
-                    'radial-gradient(circle, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.09) 42%, rgba(255,255,255,0) 76%)',
+                    'radial-gradient(circle, rgba(var(--main-element-rgb), 0.34) 0%, rgba(var(--secondary-element-rgb), 0.16) 42%, rgba(var(--background-rgb), 0) 76%)',
                   filter: 'blur(36px)',
                   pointerEvents: 'none',
                 }}
@@ -548,8 +586,8 @@ export function HeroSection() {
                   fontWeight: 800,
                   letterSpacing: '-0.075em',
                   lineHeight: 0.88,
-                  color: 'rgba(0,0,0,0.72)',
-                  textShadow: '0 20px 34px rgba(0,0,0,0.5)',
+                  color: 'rgba(var(--foreground-rgb), 0.34)',
+                  textShadow: '0 20px 34px rgba(var(--foreground-rgb), 0.2)',
                   paddingLeft: '0.03em',
                   paddingRight: '0.11em',
                   pointerEvents: 'none',
@@ -569,8 +607,8 @@ export function HeroSection() {
                   fontWeight: 800,
                   letterSpacing: '-0.075em',
                   lineHeight: 0.88,
-                  color: 'rgba(255,255,255,0.14)',
-                  textShadow: '0 18px 40px rgba(0,0,0,0.48)',
+                  color: 'rgba(var(--main-element-rgb), 0.3)',
+                  textShadow: '0 18px 40px rgba(var(--foreground-rgb), 0.14)',
                   paddingLeft: '0.03em',
                   paddingRight: '0.11em',
                   pointerEvents: 'none',
@@ -587,16 +625,16 @@ export function HeroSection() {
                   fontWeight: 800,
                   letterSpacing: '-0.075em',
                   lineHeight: 0.88,
-                  color: '#F6F6F6',
+                  color: 'var(--foreground)',
                   paddingLeft: '0.03em',
                   paddingRight: '0.11em',
                   background:
-                    'linear-gradient(180deg, #ffffff 0%, #f6f6f6 56%, #d7d7d7 100%)',
+                    'linear-gradient(180deg, var(--foreground) 0%, var(--secondary-element) 56%, var(--main-element) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  WebkitTextStroke: '0.45px rgba(255,255,255,0.08)',
+                  WebkitTextStroke: '0.45px rgba(var(--foreground-rgb), 0.08)',
                   textShadow:
-                    '0 0 24px rgba(255,255,255,0.08), 0 18px 42px rgba(0,0,0,0.62)',
+                    '0 0 24px rgba(var(--main-element-rgb), 0.14), 0 18px 42px rgba(var(--foreground-rgb), 0.2)',
                 }}
               >
                 MADBAK
@@ -619,9 +657,9 @@ export function HeroSection() {
                 fontWeight: 400,
                 letterSpacing: '0.52em',
                 textTransform: 'uppercase',
-                color: '#E62525',
+                color: 'var(--accent-red)',
                 paddingLeft: '0.52em',
-                textShadow: '0 8px 22px rgba(230,37,37,0.18)',
+                textShadow: '0 8px 22px rgba(var(--secondary-element-rgb), 0.18)',
               }}
             >
               DESIGNER
@@ -635,9 +673,9 @@ export function HeroSection() {
                 fontWeight: 400,
                 letterSpacing: '0.52em',
                 textTransform: 'uppercase',
-                color: '#E62525',
+                color: 'var(--accent-red)',
                 paddingLeft: '0.52em',
-                textShadow: '0 8px 22px rgba(230,37,37,0.18)',
+                textShadow: '0 8px 22px rgba(var(--secondary-element-rgb), 0.18)',
               }}
             >
               &amp; DEVELOPER
