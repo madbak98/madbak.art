@@ -123,6 +123,12 @@ type BuildingWindow = {
   maxOpacity: number;
 };
 
+type LeaderboardEntry = {
+  username: string;
+  kills: number;
+  timestamp: number;
+};
+
 const WORLD_W = 900;
 const WORLD_H = 520;
 
@@ -134,8 +140,31 @@ const PLAYER_SPEED = 3;
 const BULLET_SPEED = 7.5;
 const ENEMY_SPEED = 0.82;
 const FIRE_COOLDOWN = 260;
+const ENEMY_RESPAWN_DELAY = 1800;
+const LEADERBOARD_LIMIT = 10;
+const LEADERBOARD_STORAGE_KEY = 'madbak-city-run-top10';
+const USERNAME_STORAGE_KEY = 'madbak-city-run-username';
 
-const START_POS: Vec = { x: 240, y: 438 };
+const START_POS: Vec = { x: 240, y: 344 };
+
+const ENEMY_SPAWN_POINTS: Vec[] = [
+  { x: 240, y: 18 },
+  { x: 240, y: 92 },
+  { x: 240, y: 246 },
+  { x: 240, y: 428 },
+  { x: 642, y: 18 },
+  { x: 642, y: 92 },
+  { x: 642, y: 246 },
+  { x: 642, y: 428 },
+  { x: 90, y: 170 },
+  { x: 360, y: 170 },
+  { x: 520, y: 170 },
+  { x: 780, y: 170 },
+  { x: 90, y: 344 },
+  { x: 360, y: 344 },
+  { x: 520, y: 344 },
+  { x: 780, y: 344 },
+];
 
 const destinations: Destination[] = [
   { id: 'about', label: 'ABOUT', x: 56, y: 56, w: 120, h: 68 },
@@ -325,20 +354,16 @@ const artAccents: ArtAccent[] = [
   },
 ];
 
-const INITIAL_ENEMIES: Enemy[] = [
-  { id: 1, x: 770, y: 246, hp: 2 },
-  { id: 2, x: 444, y: 120, hp: 2 },
-  { id: 3, x: 570, y: 408, hp: 2 },
-  { id: 4, x: 350, y: 246, hp: 2 },
-  { id: 5, x: 182, y: 350, hp: 2 },
-  { id: 6, x: 705, y: 350, hp: 2 },
-  { id: 7, x: 140, y: 120, hp: 2 },
-  { id: 8, x: 460, y: 260, hp: 2 },
-  { id: 9, x: 820, y: 100, hp: 2 },
-  { id: 10, x: 300, y: 440, hp: 2 },
-  { id: 11, x: 650, y: 220, hp: 2 },
-  { id: 12, x: 200, y: 240, hp: 2 },
-];
+function createInitialEnemies() {
+  return ENEMY_SPAWN_POINTS.slice(0, 12).map((spawn, index) => ({
+    id: index + 1,
+    x: spawn.x,
+    y: spawn.y,
+    hp: 2,
+  }));
+}
+
+const INITIAL_ENEMIES: Enemy[] = createInitialEnemies();
 
 function rectsOverlap(
   a: { x: number; y: number; w: number; h: number },
@@ -353,6 +378,157 @@ function distance(a: Vec, b: Vec) {
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
+}
+
+function sortLeaderboard(entries: LeaderboardEntry[]) {
+  return [...entries]
+    .sort((a, b) => {
+      if (b.kills !== a.kills) return b.kills - a.kills;
+      return a.timestamp - b.timestamp;
+    })
+    .slice(0, LEADERBOARD_LIMIT);
+}
+
+function isEnemyRectBlocked(
+  rect: { x: number; y: number; w: number; h: number },
+  enemies: Enemy[],
+  ignoreEnemyId?: number
+) {
+  const blockedByBuilding = buildings.some((building) => rectsOverlap(rect, building));
+  const blockedByTrap = traps.some((trap) => rectsOverlap(rect, trap));
+  const blockedByEnemy = enemies.some((enemy) => {
+    if (enemy.id === ignoreEnemyId) return false;
+
+    return rectsOverlap(rect, {
+      x: enemy.x,
+      y: enemy.y,
+      w: ENEMY_SIZE,
+      h: ENEMY_SIZE,
+    });
+  });
+
+  return blockedByBuilding || blockedByTrap || blockedByEnemy;
+}
+
+function canSpawnEnemyAt(spawn: Vec, enemies: Enemy[], player: Vec) {
+  const enemyRect = { x: spawn.x, y: spawn.y, w: ENEMY_SIZE, h: ENEMY_SIZE };
+
+  if (isEnemyRectBlocked(enemyRect, enemies)) return false;
+
+  if (
+    destinations.some((destination) =>
+      rectsOverlap(enemyRect, {
+        x: destination.x,
+        y: destination.y,
+        w: destination.w,
+        h: destination.h,
+      })
+    )
+  ) {
+    return false;
+  }
+
+  const playerRect = { x: player.x, y: player.y, w: PLAYER_SIZE, h: PLAYER_SIZE };
+  if (rectsOverlap(enemyRect, playerRect)) return false;
+
+  const playerCenter = {
+    x: player.x + PLAYER_SIZE / 2,
+    y: player.y + PLAYER_SIZE / 2,
+  };
+  const spawnCenter = {
+    x: spawn.x + ENEMY_SIZE / 2,
+    y: spawn.y + ENEMY_SIZE / 2,
+  };
+
+  return distance(playerCenter, spawnCenter) > 132;
+}
+
+function getEnemyNextPosition(enemy: Enemy, enemies: Enemy[], player: Vec) {
+  const playerCenter = {
+    x: player.x + PLAYER_SIZE / 2,
+    y: player.y + PLAYER_SIZE / 2,
+  };
+  const enemyCenter = {
+    x: enemy.x + ENEMY_SIZE / 2,
+    y: enemy.y + ENEMY_SIZE / 2,
+  };
+  const angle = Math.atan2(playerCenter.y - enemyCenter.y, playerCenter.x - enemyCenter.x);
+  const forwardX = Math.cos(angle);
+  const forwardY = Math.sin(angle);
+  const sidestepDirection = enemy.id % 2 === 0 ? 1 : -1;
+
+  const rawCandidates = [
+    {
+      x: enemy.x + forwardX * ENEMY_SPEED,
+      y: enemy.y + forwardY * ENEMY_SPEED,
+    },
+    {
+      x: enemy.x + forwardX * ENEMY_SPEED,
+      y: enemy.y,
+    },
+    {
+      x: enemy.x,
+      y: enemy.y + forwardY * ENEMY_SPEED,
+    },
+    {
+      x: enemy.x + forwardY * ENEMY_SPEED * sidestepDirection,
+      y: enemy.y - forwardX * ENEMY_SPEED * sidestepDirection,
+    },
+    {
+      x: enemy.x - forwardY * ENEMY_SPEED * sidestepDirection,
+      y: enemy.y + forwardX * ENEMY_SPEED * sidestepDirection,
+    },
+    {
+      x:
+        enemy.x +
+        forwardX * ENEMY_SPEED * 0.72 +
+        forwardY * ENEMY_SPEED * sidestepDirection,
+      y:
+        enemy.y +
+        forwardY * ENEMY_SPEED * 0.72 -
+        forwardX * ENEMY_SPEED * sidestepDirection,
+    },
+    {
+      x:
+        enemy.x +
+        forwardX * ENEMY_SPEED * 0.72 -
+        forwardY * ENEMY_SPEED * sidestepDirection,
+      y:
+        enemy.y +
+        forwardY * ENEMY_SPEED * 0.72 +
+        forwardX * ENEMY_SPEED * sidestepDirection,
+    },
+  ];
+
+  for (const candidate of rawCandidates) {
+    const nextX = clamp(candidate.x, 0, WORLD_W - ENEMY_SIZE);
+    const nextY = clamp(candidate.y, 0, WORLD_H - ENEMY_SIZE);
+    const nextRect = { x: nextX, y: nextY, w: ENEMY_SIZE, h: ENEMY_SIZE };
+
+    if (!isEnemyRectBlocked(nextRect, enemies, enemy.id)) {
+      return { x: nextX, y: nextY };
+    }
+  }
+
+  return { x: enemy.x, y: enemy.y };
+}
+
+function hasClearShot(from: Vec, to: Vec) {
+  const totalDist = distance(from, to);
+  const steps = Math.max(1, Math.ceil(totalDist / 8));
+
+  for (let step = 1; step < steps; step += 1) {
+    const progress = step / steps;
+    const x = from.x + (to.x - from.x) * progress;
+    const y = from.y + (to.y - from.y) * progress;
+    const probe = { x: x - 2, y: y - 2, w: 4, h: 4 };
+
+    if (buildings.some((building) => rectsOverlap(probe, building))) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function getBuildingWindows(building: Building, seed: number): BuildingWindow[] {
@@ -528,18 +704,26 @@ export function GameSection() {
   const [player, setPlayer] = useState<Vec>(START_POS);
   const [facing, setFacing] = useState(0);
   const [bullets, setBullets] = useState<Bullet[]>([]);
-  const [enemies, setEnemies] = useState<Enemy[]>(INITIAL_ENEMIES);
+  const [enemies, setEnemies] = useState<Enemy[]>(() => createInitialEnemies());
   const [message, setMessage] = useState('Reach ABOUT / WORK / CONTACT');
+  const [kills, setKills] = useState(0);
+  const [username, setUsername] = useState('');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [storageLoaded, setStorageLoaded] = useState(false);
 
   const keysRef = useRef<Set<string>>(new Set());
   const touchMoveRef = useRef<Set<string>>(new Set());
   const bulletIdRef = useRef(1);
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Vec>(START_POS);
-  const centerTargetRef = useRef<{ x: number; y: number } | null>(null);
+  const combatTargetRef = useRef<{ x: number; y: number } | null>(null);
   const lastFireRef = useRef(0);
   const startedRef = useRef(false);
   const gameOverRef = useRef(false);
+  const facingRef = useRef(0);
+  const enemyIdRef = useRef(INITIAL_ENEMIES.length + 1);
+  const respawnTimeoutsRef = useRef<number[]>([]);
+  const submittedScoreRef = useRef(false);
 
   useEffect(() => {
     playerRef.current = player;
@@ -552,6 +736,57 @@ export function GameSection() {
   useEffect(() => {
     gameOverRef.current = gameOver;
   }, [gameOver]);
+
+  useEffect(() => {
+    facingRef.current = facing;
+  }, [facing]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const storedUsername = window.localStorage.getItem(USERNAME_STORAGE_KEY);
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+
+      const rawLeaderboard = window.localStorage.getItem(LEADERBOARD_STORAGE_KEY);
+      if (rawLeaderboard) {
+        const parsed = JSON.parse(rawLeaderboard);
+        if (Array.isArray(parsed)) {
+          const safeEntries = parsed
+            .filter((entry): entry is LeaderboardEntry => {
+              return (
+                typeof entry?.username === 'string' &&
+                typeof entry?.kills === 'number' &&
+                typeof entry?.timestamp === 'number'
+              );
+            })
+            .map((entry) => ({
+              username: entry.username.slice(0, 18),
+              kills: Math.max(0, Math.floor(entry.kills)),
+              timestamp: entry.timestamp,
+            }));
+
+          setLeaderboard(sortLeaderboard(safeEntries));
+        }
+      }
+    } catch {
+      setLeaderboard([]);
+    } finally {
+      setStorageLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!storageLoaded || typeof window === 'undefined') return;
+    window.localStorage.setItem(USERNAME_STORAGE_KEY, username);
+  }, [username, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded || typeof window === 'undefined') return;
+    window.localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(leaderboard));
+  }, [leaderboard, storageLoaded]);
 
   useEffect(() => {
     const onResize = () => {
@@ -577,6 +812,94 @@ export function GameSection() {
 
   const scale = renderWidth / WORLD_W;
   const renderHeight = WORLD_H * scale;
+  const normalizedUsername = username.trim().slice(0, 18);
+
+  const clearRespawnTimers = () => {
+    respawnTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    respawnTimeoutsRef.current = [];
+  };
+
+  useEffect(() => {
+    if (gameOver) {
+      clearRespawnTimers();
+    }
+  }, [gameOver]);
+
+  const spawnEnemy = () => {
+    setEnemies((prevEnemies) => {
+      const playerPosition = playerRef.current;
+      const playerCenter = {
+        x: playerPosition.x + PLAYER_SIZE / 2,
+        y: playerPosition.y + PLAYER_SIZE / 2,
+      };
+
+      const spawnCandidates = [...ENEMY_SPAWN_POINTS].sort((a, b) => {
+        const aCenter = { x: a.x + ENEMY_SIZE / 2, y: a.y + ENEMY_SIZE / 2 };
+        const bCenter = { x: b.x + ENEMY_SIZE / 2, y: b.y + ENEMY_SIZE / 2 };
+        return distance(playerCenter, bCenter) - distance(playerCenter, aCenter);
+      });
+
+      const safeSpawn =
+        spawnCandidates.find((spawn) => canSpawnEnemyAt(spawn, prevEnemies, playerPosition)) ??
+        spawnCandidates.find((spawn) => {
+          const relaxedRect = { x: spawn.x, y: spawn.y, w: ENEMY_SIZE, h: ENEMY_SIZE };
+
+          if (isEnemyRectBlocked(relaxedRect, prevEnemies)) return false;
+
+          return !rectsOverlap(relaxedRect, {
+            x: playerPosition.x,
+            y: playerPosition.y,
+            w: PLAYER_SIZE,
+            h: PLAYER_SIZE,
+          });
+        });
+
+      if (!safeSpawn) return prevEnemies;
+
+      return [
+        ...prevEnemies,
+        {
+          id: enemyIdRef.current++,
+          x: safeSpawn.x,
+          y: safeSpawn.y,
+          hp: 2,
+        },
+      ];
+    });
+  };
+
+  const scheduleEnemyRespawns = (count: number) => {
+    for (let respawnIndex = 0; respawnIndex < count; respawnIndex += 1) {
+      const timeoutId = window.setTimeout(() => {
+        respawnTimeoutsRef.current = respawnTimeoutsRef.current.filter((id) => id !== timeoutId);
+
+        if (!startedRef.current || gameOverRef.current) return;
+        spawnEnemy();
+      }, ENEMY_RESPAWN_DELAY + respawnIndex * 320);
+
+      respawnTimeoutsRef.current.push(timeoutId);
+    }
+  };
+
+  const resetRun = () => {
+    clearRespawnTimers();
+    setGameOver(false);
+    setStarted(true);
+    setPlayer(START_POS);
+    playerRef.current = START_POS;
+    setFacing(0);
+    facingRef.current = 0;
+    setBullets([]);
+    setEnemies(createInitialEnemies());
+    setMessage('Reach ABOUT / WORK / CONTACT');
+    setKills(0);
+    touchMoveRef.current.clear();
+    keysRef.current.clear();
+    lastFireRef.current = 0;
+    combatTargetRef.current = null;
+    enemyIdRef.current = INITIAL_ENEMIES.length + 1;
+    submittedScoreRef.current = false;
+  };
 
   const centerTarget = useMemo(() => {
     const nearest = destinations
@@ -597,8 +920,41 @@ export function GameSection() {
   }, [player]);
 
   useEffect(() => {
-    centerTargetRef.current = centerTarget;
-  }, [centerTarget]);
+    const origin = {
+      x: player.x + PLAYER_SIZE / 2,
+      y: player.y + PLAYER_SIZE / 2,
+    };
+
+    const nearestVisibleEnemy = enemies
+      .map((enemy) => {
+        const target = {
+          x: enemy.x + ENEMY_SIZE / 2,
+          y: enemy.y + ENEMY_SIZE / 2,
+        };
+
+        return {
+          ...target,
+          dist: distance(origin, target),
+        };
+      })
+      .filter((enemy) => hasClearShot(origin, { x: enemy.x, y: enemy.y }))
+      .sort((a, b) => a.dist - b.dist)[0];
+
+    if (nearestVisibleEnemy) {
+      combatTargetRef.current = {
+        x: nearestVisibleEnemy.x,
+        y: nearestVisibleEnemy.y,
+      };
+      return;
+    }
+
+    if (hasClearShot(origin, { x: centerTarget.x, y: centerTarget.y })) {
+      combatTargetRef.current = { x: centerTarget.x, y: centerTarget.y };
+      return;
+    }
+
+    combatTargetRef.current = null;
+  }, [centerTarget, enemies, player]);
 
   const shootToward = (tx: number, ty: number) => {
     if (!startedRef.current || gameOverRef.current) return;
@@ -611,6 +967,9 @@ export function GameSection() {
     const cx = p.x + PLAYER_SIZE / 2;
     const cy = p.y + PLAYER_SIZE / 2;
     const angle = Math.atan2(ty - cy, tx - cx);
+    const muzzleOffset = PLAYER_SIZE / 2 + 6;
+    const spawnX = cx + Math.cos(angle) * muzzleOffset;
+    const spawnY = cy + Math.sin(angle) * muzzleOffset;
 
     setFacing(angle);
 
@@ -618,8 +977,8 @@ export function GameSection() {
       ...prev,
       {
         id: bulletIdRef.current++,
-        x: cx,
-        y: cy,
+        x: spawnX,
+        y: spawnY,
         vx: Math.cos(angle) * BULLET_SPEED,
         vy: Math.sin(angle) * BULLET_SPEED,
       },
@@ -635,7 +994,8 @@ export function GameSection() {
   };
 
   const shootNearestTarget = () => {
-    shootToward(centerTarget.x, centerTarget.y);
+    const target = combatTargetRef.current ?? centerTarget;
+    shootToward(target.x, target.y);
   };
 
   useEffect(() => {
@@ -659,9 +1019,16 @@ export function GameSection() {
       keysRef.current.add(e.code);
 
       if (e.code === 'Space') {
-        const target = centerTargetRef.current;
+        const target = combatTargetRef.current;
         if (target) {
           shootToward(target.x, target.y);
+        } else {
+          const p = playerRef.current;
+          const angle = facingRef.current || 0;
+          shootToward(
+            p.x + PLAYER_SIZE / 2 + Math.cos(angle) * 220,
+            p.y + PLAYER_SIZE / 2 + Math.sin(angle) * 220
+          );
         }
       }
     };
@@ -676,6 +1043,12 @@ export function GameSection() {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearRespawnTimers();
     };
   }, []);
 
@@ -748,32 +1121,9 @@ export function GameSection() {
       );
 
       setEnemies((prev) =>
-        prev.map((enemy, index) => {
-          const p = playerRef.current;
-          const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
-
-          const nx = enemy.x + Math.cos(angle) * ENEMY_SPEED;
-          const ny = enemy.y + Math.sin(angle) * ENEMY_SPEED;
-
-          const nextRect = { x: nx, y: ny, w: ENEMY_SIZE, h: ENEMY_SIZE };
-
-          const blockedByBuilding = buildings.some((b) => rectsOverlap(nextRect, b));
-          const blockedByTrap = traps.some((t) => rectsOverlap(nextRect, t));
-          const blockedByEnemy = prev.some((other, otherIndex) => {
-            if (otherIndex === index) return false;
-            return rectsOverlap(nextRect, {
-              x: other.x,
-              y: other.y,
-              w: ENEMY_SIZE,
-              h: ENEMY_SIZE,
-            });
-          });
-
-          if (blockedByBuilding || blockedByTrap || blockedByEnemy) {
-            return enemy;
-          }
-
-          return { ...enemy, x: nx, y: ny };
+        prev.map((enemy) => {
+          const nextPosition = getEnemyNextPosition(enemy, prev, playerRef.current);
+          return { ...enemy, x: nextPosition.x, y: nextPosition.y };
         })
       );
 
@@ -788,38 +1138,45 @@ export function GameSection() {
   }, [started, gameOver]);
 
   useEffect(() => {
-    if (!started || gameOver || bullets.length === 0) return;
+    if (!started || gameOver || bullets.length === 0 || enemies.length === 0) return;
 
     const bulletsToRemove = new Set<number>();
+    const nextEnemies = enemies.map((enemy) => ({ ...enemy }));
+    let defeatedEnemies = 0;
 
-    setEnemies((prevEnemies) => {
-      const nextEnemies = prevEnemies.map((enemy) => ({ ...enemy }));
+    for (const bullet of bullets) {
+      const hitIndex = nextEnemies.findIndex((enemy) => {
+        return (
+          distance(
+            { x: bullet.x, y: bullet.y },
+            { x: enemy.x + ENEMY_SIZE / 2, y: enemy.y + ENEMY_SIZE / 2 }
+          ) < 14
+        );
+      });
 
-      for (const bullet of bullets) {
-        const hitIndex = nextEnemies.findIndex((enemy) => {
-          return (
-            distance(
-              { x: bullet.x, y: bullet.y },
-              { x: enemy.x + ENEMY_SIZE / 2, y: enemy.y + ENEMY_SIZE / 2 }
-            ) < 14
-          );
-        });
+      if (hitIndex !== -1) {
+        nextEnemies[hitIndex].hp -= 1;
+        bulletsToRemove.add(bullet.id);
 
-        if (hitIndex !== -1) {
-          nextEnemies[hitIndex].hp -= 1;
-          bulletsToRemove.add(bullet.id);
+        if (nextEnemies[hitIndex].hp <= 0) {
+          defeatedEnemies += 1;
         }
       }
+    }
 
-      return nextEnemies.filter((enemy) => enemy.hp > 0);
-    });
+    if (defeatedEnemies > 0) {
+      setKills((prevKills) => prevKills + defeatedEnemies);
+      scheduleEnemyRespawns(defeatedEnemies);
+      setMessage(defeatedEnemies > 1 ? 'Multiple targets down' : 'Target down');
+    }
 
     if (bulletsToRemove.size > 0) {
       setBullets((prevBullets) =>
         prevBullets.filter((bullet) => !bulletsToRemove.has(bullet.id))
       );
+      setEnemies(nextEnemies.filter((enemy) => enemy.hp > 0));
     }
-  }, [bullets, started, gameOver]);
+  }, [bullets, enemies, started, gameOver]);
 
   useEffect(() => {
     if (!started || gameOver) return;
@@ -868,18 +1225,24 @@ export function GameSection() {
     }
   }, [player, enemies, started, gameOver]);
 
+  useEffect(() => {
+    if (!gameOver || submittedScoreRef.current || kills <= 0) return;
+
+    submittedScoreRef.current = true;
+    setLeaderboard((prevEntries) =>
+      sortLeaderboard([
+        ...prevEntries,
+        {
+          username: normalizedUsername || 'GUEST',
+          kills,
+          timestamp: Date.now(),
+        },
+      ])
+    );
+  }, [gameOver, kills, normalizedUsername]);
+
   const restart = () => {
-    setGameOver(false);
-    setStarted(true);
-    setPlayer(START_POS);
-    playerRef.current = START_POS;
-    setFacing(0);
-    setBullets([]);
-    setEnemies(INITIAL_ENEMIES);
-    setMessage('Reach ABOUT / WORK / CONTACT');
-    touchMoveRef.current.clear();
-    keysRef.current.clear();
-    lastFireRef.current = 0;
+    resetRun();
   };
 
   const setTouchMove = (key: string, active: boolean) => {
@@ -1410,11 +1773,23 @@ export function GameSection() {
               >
                 Enemies: {enemies.length}
               </div>
+              <div
+                className="mt-1"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.16em',
+                  color: 'rgba(245,226,205,0.7)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Kills: {kills}
+              </div>
             </div>
 
             {!started && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/72 backdrop-blur-[2px]">
-                <div className="text-center px-6">
+                <div className="w-full max-w-[420px] text-center px-6">
                   <div
                     style={{
                       fontFamily: 'var(--font-heading)',
@@ -1447,20 +1822,41 @@ export function GameSection() {
                   >
                     Phone / iPad: touch controls
                   </p>
+                  <div className="mb-5">
+                    <label
+                      htmlFor="city-run-username"
+                      className="mb-2 block uppercase"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        color: 'rgba(245,245,245,0.52)',
+                        fontSize: '10px',
+                        letterSpacing: '0.18em',
+                      }}
+                    >
+                      choose your username for top 10
+                    </label>
+                    <input
+                      id="city-run-username"
+                      value={username}
+                      maxLength={18}
+                      onChange={(event) => setUsername(event.target.value.slice(0, 18))}
+                      placeholder="MADBAK"
+                      className="w-full"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.14)',
+                        color: '#F5F5F5',
+                        padding: '12px 14px',
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
                   <button
-                    onClick={() => {
-                      setStarted(true);
-                      setGameOver(false);
-                      setPlayer(START_POS);
-                      playerRef.current = START_POS;
-                      setFacing(0);
-                      setBullets([]);
-                      setEnemies(INITIAL_ENEMIES);
-                      setMessage('Reach ABOUT / WORK / CONTACT');
-                      touchMoveRef.current.clear();
-                      keysRef.current.clear();
-                      lastFireRef.current = 0;
-                    }}
+                    disabled={!normalizedUsername}
+                    onClick={resetRun}
                     style={{
                       fontFamily: 'var(--font-body)',
                       fontSize: '0.85rem',
@@ -1468,8 +1864,9 @@ export function GameSection() {
                       textTransform: 'uppercase',
                       border: '2px solid #ff4a4a',
                       color: '#F5F5F5',
-                      background: 'transparent',
-                      cursor: 'pointer',
+                      background: normalizedUsername ? 'transparent' : 'rgba(255,255,255,0.06)',
+                      cursor: normalizedUsername ? 'pointer' : 'not-allowed',
+                      opacity: normalizedUsername ? 1 : 0.58,
                       padding: '12px 26px',
                     }}
                   >
@@ -1503,6 +1900,18 @@ export function GameSection() {
                       fontFamily: 'var(--font-mono)',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
+                      color: 'rgba(255,74,74,0.82)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {normalizedUsername || 'Guest'} • {kills} Kills
+                  </div>
+                  <div
+                    className="mt-3"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '10px',
+                      letterSpacing: '0.18em',
                       color: 'rgba(245,245,245,0.52)',
                       textTransform: 'uppercase',
                     }}
@@ -1512,6 +1921,115 @@ export function GameSection() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        <div
+          className={`mt-5 grid gap-4 ${
+            isPhone || isTablet ? 'grid-cols-1' : 'grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]'
+          }`}
+        >
+          <div
+            className="px-4 py-4"
+            style={{
+              border: '1px solid rgba(255,255,255,0.12)',
+              background:
+                'linear-gradient(180deg, rgba(18,18,18,0.82) 0%, rgba(10,10,10,0.72) 100%)',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: '#ff4a4a',
+              }}
+            >
+              Current Run
+            </div>
+            <div
+              className="mt-2"
+              style={{
+                fontFamily: 'var(--font-heading)',
+                fontSize: 'clamp(1.2rem, 2.2vw, 1.8rem)',
+                color: '#F5F5F5',
+              }}
+            >
+              {normalizedUsername || 'Choose a username'}
+            </div>
+            <div
+              className="mt-3 grid grid-cols-2 gap-3"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(245,245,245,0.62)',
+              }}
+            >
+              <div>Kills: {kills}</div>
+              <div>Live enemies: {enemies.length}</div>
+              <div>Respawn: {started && !gameOver ? 'active' : 'standby'}</div>
+              <div>Top list: local top 10</div>
+            </div>
+          </div>
+
+          <div
+            className="px-4 py-4"
+            style={{
+              border: '1px solid rgba(255,255,255,0.12)',
+              background:
+                'linear-gradient(180deg, rgba(18,18,18,0.82) 0%, rgba(10,10,10,0.72) 100%)',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: '#ff4a4a',
+              }}
+            >
+              Top 10 Hunters
+            </div>
+            <div className="mt-3 space-y-2">
+              {leaderboard.length > 0 ? (
+                leaderboard.map((entry, index) => (
+                  <div
+                    key={`${entry.username}-${entry.timestamp}-${index}`}
+                    className="flex items-center justify-between gap-3"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '10px',
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: index < 3 ? '#F5F5F5' : 'rgba(245,245,245,0.68)',
+                    }}
+                  >
+                    <span>
+                      {String(index + 1).padStart(2, '0')} • {entry.username}
+                    </span>
+                    <span style={{ color: index < 3 ? '#ff4a4a' : 'rgba(255,74,74,0.78)' }}>
+                      {entry.kills}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '10px',
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(245,245,245,0.48)',
+                  }}
+                >
+                  No scores yet. Start a run and take down beasts.
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
