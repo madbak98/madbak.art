@@ -2,33 +2,40 @@
 
 :root {
   --font-size: 16px;
-  --background: #0A0A0A;
-  --foreground: #F5F5F5;
-  --accent-red: #E62525;
-  --grid-color: rgba(255, 255, 255, 0.05);
+  --background: #C4CBA6;
+  --background-rgb: 196, 203, 166;
+  --foreground: #6F7758;
+  --foreground-rgb: 111, 119, 88;
+  --main-element: #A3AD84;
+  --main-element-rgb: 163, 173, 132;
+  --secondary-element: #8A936D;
+  --secondary-element-rgb: 138, 147, 109;
+  --accent-red: #8A936D;
+  --grid-color: rgba(111, 119, 88, 0.12);
   
   /* Typography */
   --font-heading: 'Montserrat', sans-serif;
+  --font-hero: 'UnifrakturMaguntia', 'Times New Roman', serif;
   --font-body: 'Orbitron', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
-  --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
+  --card: #A3AD84;
+  --card-foreground: #6F7758;
+  --popover: #C4CBA6;
+  --popover-foreground: #6F7758;
+  --primary: #8A936D;
+  --primary-foreground: #C4CBA6;
+  --secondary: #A3AD84;
+  --secondary-foreground: #6F7758;
+  --muted: #d7ddbc;
+  --muted-foreground: #8A936D;
+  --accent: #A3AD84;
+  --accent-foreground: #6F7758;
+  --destructive: #8A936D;
+  --destructive-foreground: #C4CBA6;
+  --border: rgba(111, 119, 88, 0.14);
   --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  --input-background: #d7ddbc;
+  --switch-background: #aeb88d;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: oklch(0.708 0 0);
@@ -38,14 +45,14 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #d7ddbc;
+  --sidebar-foreground: #6F7758;
+  --sidebar-primary: #8A936D;
+  --sidebar-primary-foreground: #C4CBA6;
+  --sidebar-accent: #A3AD84;
+  --sidebar-accent-foreground: #6F7758;
+  --sidebar-border: rgba(111, 119, 88, 0.14);
+  --sidebar-ring: #8A936D;
 }
 
 .dark {
