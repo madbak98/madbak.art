@@ -88,26 +88,3 @@ export default function ProjectModal({
     </div>
   );
 }
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '16px',
-          }}
-        >
-          {project.images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`${project.title} ${index + 1}`}
-              style={{
-                width: '100%',
-                borderRadius: '12px',
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
