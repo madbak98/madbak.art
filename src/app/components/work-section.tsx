@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'motion/react';
-import { useRef, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
+import { useRef, useState } from 'react';
 import ProjectModal from './project-modal';
 
 const projects = [
@@ -87,6 +87,88 @@ const projects = [
 
 type Project = (typeof projects)[0];
 
+function FeaturedProject({
+  project,
+  onOpen,
+}: {
+  project: Project;
+  onOpen: (project: Project) => void;
+}) {
+  return (
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      viewport={{ once: true, margin: '-120px' }}
+      onClick={() => onOpen(project)}
+      className="group block w-full text-left"
+    >
+      <div className="overflow-hidden border" style={{ borderColor: 'rgba(var(--foreground-rgb), 0.12)' }}>
+        <div className="relative aspect-[16/9] overflow-hidden">
+          <motion.div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${project.image})` }}
+            whileHover={{ scale: 1.03 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(var(--background-rgb), 0.06) 0%, rgba(var(--background-rgb), 0.18) 34%, rgba(var(--background-rgb), 0.84) 100%)',
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 grid gap-5 p-6 lg:grid-cols-12 lg:items-end lg:p-8">
+            <div className="lg:col-span-8">
+              <p
+                className="mb-3 text-[0.72rem]"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.26em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent-green)',
+                }}
+              >
+                {project.category} / {project.year}
+              </p>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: 'clamp(3.3rem, 7vw, 6.5rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.06em',
+                  lineHeight: 0.82,
+                  textTransform: 'uppercase',
+                  color: 'var(--main-element)',
+                }}
+              >
+                {project.title}
+              </h3>
+            </div>
+            <div className="lg:col-span-4 lg:text-right">
+              <span
+                className="inline-flex items-center gap-3 border-t pt-3"
+                style={{
+                  borderColor: 'rgba(var(--foreground-rgb), 0.12)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.72rem',
+                  letterSpacing: '0.24em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(var(--foreground-rgb), 0.78)',
+                }}
+              >
+                View project
+                <ExternalLink size={14} />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.button>
+  );
+}
+
 function ProjectCard({
   project,
   index,
@@ -96,114 +178,83 @@ function ProjectCard({
   index: number;
   onOpen: (project: Project) => void;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 60 }}
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 34 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: index * 0.1 }}
-      viewport={{ once: true, margin: '-100px' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative group cursor-pointer overflow-hidden"
-      style={{ aspectRatio: '3/4' }}
+      transition={{ duration: 0.65, delay: index * 0.06, ease: 'easeOut' }}
+      viewport={{ once: true, margin: '-80px' }}
+      onClick={() => onOpen(project)}
+      className="group block w-full text-left"
     >
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${project.image})`,
-        }}
-        animate={{
-          scale: isHovered ? 1.1 : 1,
-        }}
-        transition={{ duration: 0.6 }}
-      />
-
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(to top, rgba(var(--foreground-rgb), 0.92) 0%, transparent 50%, rgba(var(--foreground-rgb), 0.48) 100%)',
-        }}
-      />
-
-      <div className="absolute inset-0 p-6 flex flex-col justify-between">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <span
-            className="text-xs tracking-[0.2em] uppercase"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
-          >
-            {project.year}
-          </span>
-        </motion.div>
-
-        <div>
+      <div className="overflow-hidden border" style={{ borderColor: 'rgba(var(--foreground-rgb), 0.1)' }}>
+        <div className="relative aspect-[4/5] overflow-hidden">
           <motion.div
-            animate={{ y: isHovered ? -10 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3
-              className="mb-2"
-              style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
-                fontWeight: 800,
-                letterSpacing: '-0.01em',
-                color: 'var(--background)',
-              }}
-            >
-              {project.title}
-            </h3>
-            <p
-              className="text-xs tracking-[0.15em] uppercase mb-4"
-              style={{
-                fontFamily: 'var(--font-body)',
-                color: 'rgba(var(--background-rgb), 0.78)',
-              }}
-            >
-              {project.category}
-            </p>
-          </motion.div>
-
-          <motion.button
-            type="button"
-            onClick={() => onOpen(project)}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="flex items-center gap-2"
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${project.image})` }}
+            whileHover={{ scale: 1.04 }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+          />
+          <div
+            className="absolute inset-0"
             style={{
-              color: 'var(--main-element)',
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
+              background:
+                'linear-gradient(180deg, rgba(var(--background-rgb), 0.04) 0%, rgba(var(--background-rgb), 0.1) 40%, rgba(var(--background-rgb), 0.82) 100%)',
+            }}
+          />
+        </div>
+
+        <div className="grid gap-5 border-t p-5" style={{ borderColor: 'rgba(var(--foreground-rgb), 0.1)' }}>
+          <div className="flex items-start justify-between gap-5">
+            <div>
+              <p
+                className="mb-3 text-[0.68rem]"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.24em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent-green)',
+                }}
+              >
+                {project.year}
+              </p>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: 'clamp(2.1rem, 5vw, 3rem)',
+                  fontWeight: 700,
+                  letterSpacing: '-0.05em',
+                  lineHeight: 0.86,
+                  textTransform: 'uppercase',
+                  color: 'var(--main-element)',
+                }}
+              >
+                {project.title}
+              </h3>
+            </div>
+            <ExternalLink
+              size={16}
+              style={{ color: 'rgba(var(--foreground-rgb), 0.42)', flexShrink: 0 }}
+            />
+          </div>
+
+          <div
+            className="border-t pt-3"
+            style={{
+              borderColor: 'rgba(var(--foreground-rgb), 0.08)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.66rem',
+              letterSpacing: '0.24em',
+              textTransform: 'uppercase',
+              color: 'rgba(var(--foreground-rgb), 0.56)',
             }}
           >
-            <span
-              className="text-xs tracking-[0.15em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              View Project
-            </span>
-            <ExternalLink size={14} />
-          </motion.button>
+            {project.category}
+          </div>
         </div>
       </div>
-
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ border: '2px solid var(--accent-green)' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-      />
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -217,7 +268,8 @@ export function WorkSection() {
     offset: ['start end', 'end start'],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.5]);
+  const opacity = useTransform(scrollYProgress, [0, 0.16, 0.84, 1], [0, 1, 1, 0.45]);
+  const y = useTransform(scrollYProgress, [0, 0.16, 0.84, 1], [80, 0, 0, -60]);
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
@@ -229,47 +281,82 @@ export function WorkSection() {
     setSelectedProject(null);
   };
 
+  const [featuredProject, ...secondaryProjects] = projects;
+
   return (
     <section
       id="work"
       ref={ref}
-      className="relative min-h-screen py-32 px-4"
+      className="relative min-h-screen px-6 py-28 sm:px-10 lg:px-14"
     >
       <motion.div
-        style={{ opacity }}
-        className="max-w-7xl mx-auto z-10"
+        className="relative z-10 mx-auto max-w-7xl"
+        style={{ opacity, y }}
       >
-        <div className="mb-20">
-          <div className="mb-6">
-            <span
-              className="text-xs tracking-[0.3em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}
+        <div className="mb-16 grid gap-10 border-t pt-8 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <div
+              className="mb-7 inline-flex items-center gap-4"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.7rem',
+                letterSpacing: '0.28em',
+                textTransform: 'uppercase',
+                color: 'var(--accent-green)',
+              }}
             >
-              [002] SELECTED WORK
-            </span>
+              <span
+                className="h-px w-12"
+                style={{ background: 'rgba(var(--secondary-element-rgb), 0.9)' }}
+              />
+              [002] Selected work
+            </div>
+
+            <h2
+              style={{
+                fontFamily: 'var(--font-heading)',
+                fontSize: 'clamp(4.4rem, 11vw, 9rem)',
+                fontWeight: 800,
+                letterSpacing: '-0.07em',
+                lineHeight: 0.8,
+                textTransform: 'uppercase',
+                color: 'var(--main-element)',
+              }}
+            >
+              Portfolio
+            </h2>
           </div>
-          <h2
-            style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: 'clamp(2.5rem, 8vw, 5rem)',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              color: 'var(--foreground)',
-            }}
-          >
-            PORTFOLIO
-          </h2>
+
+          <div className="lg:col-span-4 lg:col-start-9 lg:self-end">
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '1.02rem',
+                fontWeight: 300,
+                letterSpacing: '0.06em',
+                lineHeight: 1.7,
+                color: 'rgba(var(--foreground-rgb), 0.58)',
+              }}
+            >
+              A tightly curated selection of design worlds, visual campaigns and
+              presentation-led projects. Strong imagery first, language second.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              index={index}
-              onOpen={openProject}
-            />
-          ))}
+        <div className="grid gap-8">
+          <FeaturedProject project={featuredProject} onOpen={openProject} />
+
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {secondaryProjects.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                index={index}
+                onOpen={openProject}
+              />
+            ))}
+          </div>
         </div>
       </motion.div>
 
