@@ -41,7 +41,6 @@ type ModelErrorBoundaryState = {
   hasError: boolean;
 };
 
-// Add more GLB entries here after placing them in public/models.
 const HERO_MODELS: HeroModelConfig[] = [
   {
     id: 'sam',
@@ -151,9 +150,13 @@ function HeroModel({
       progress * Math.PI * 2 * (config.rotationMultiplier ?? 1) +
       (config.rotationOffset ?? 0);
     const targetRotationX =
-      -0.14 + py * config.tiltX + Math.sin(elapsed * 0.44 + (config.idlePhase ?? 0)) * 0.03;
+      -0.14 +
+      py * config.tiltX +
+      Math.sin(elapsed * 0.44 + (config.idlePhase ?? 0)) * 0.03;
     const targetRotationZ =
-      0.06 - px * config.tiltZ + Math.cos(elapsed * 0.36 + (config.idlePhase ?? 0)) * 0.03;
+      0.06 -
+      px * config.tiltZ +
+      Math.cos(elapsed * 0.36 + (config.idlePhase ?? 0)) * 0.03;
 
     groupRef.current.position.x = MathUtils.damp(
       groupRef.current.position.x,
@@ -168,7 +171,12 @@ function HeroModel({
       delta
     );
 
-    const nextScale = MathUtils.damp(groupRef.current.scale.x, targetScale, 5.2, delta);
+    const nextScale = MathUtils.damp(
+      groupRef.current.scale.x,
+      targetScale,
+      5.2,
+      delta
+    );
     groupRef.current.scale.setScalar(nextScale);
 
     groupRef.current.rotation.y = MathUtils.damp(
@@ -218,18 +226,18 @@ export function Hero3D({ scrollProgress, pointerX, pointerY }: Hero3DProps) {
           intensity={2.2}
           color="#ffffff"
         />
-        <Suspense fallback={null}>
-          {HERO_MODELS.map((model) => (
-            <ModelErrorBoundary key={model.id}>
+        {HERO_MODELS.map((model) => (
+          <ModelErrorBoundary key={model.id}>
+            <Suspense fallback={null}>
               <HeroModel
                 config={model}
                 scrollProgress={scrollProgress}
                 pointerX={pointerX}
                 pointerY={pointerY}
               />
-            </ModelErrorBoundary>
-          ))}
-        </Suspense>
+            </Suspense>
+          </ModelErrorBoundary>
+        ))}
       </Canvas>
 
       <div
