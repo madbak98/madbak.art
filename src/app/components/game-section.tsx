@@ -1,40 +1,28 @@
-'use client';
 
-import { motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+  const isLandscapeMobile = isPhone && viewportWidth > viewportHeight;
 
-type Vec = { x: number; y: number };
+  const renderWidth = isLandscapeMobile
+    ? Math.min(viewportWidth - 24, 500)
+    ? Math.min(viewportWidth - 16, 560)
+    : isPhone
+      ? Math.min(viewportWidth - 18, 392)
+      ? Math.min(viewportWidth - 12, 430)
+      : isTablet
+        ? Math.min(viewportWidth - 40, 840)
+        : 940;
+        ? Math.min(viewportWidth - 28, 980)
+        : Math.min(viewportWidth - 72, 1080);
 
-type Destination = {
-  id: 'about' | 'work' | 'contact';
-  label: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-type Building = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-type Trap = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-type Enemy = {
-  id: number;
-  x: number;
-  y: number;
-  hp: number;
-};
-
+  const scale = renderWidth / WORLD_W;
+  const renderHeight = WORLD_H * scale;
+        isLandscapeMobile ? 'py-8' : 'py-20'
+      }`}
+    >
+      <div className="w-full max-w-7xl z-10">
+      <div className="w-full max-w-[78rem] z-10">
+        <div className="mb-8 text-center">
+          <div className="mb-3">
+            <span
 type Bullet = {
   id: number;
   x: number;
