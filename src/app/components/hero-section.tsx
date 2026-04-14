@@ -87,7 +87,7 @@ export function HeroSection() {
             key={item.target}
             type="button"
             onClick={() => scrollToSection(item.target)}
-            className="border px-3 py-2 text-[0.62rem] transition-colors duration-300 sm:px-4 sm:text-[0.7rem]"
+            className="border px-3 py-2 transition-colors duration-300 sm:px-4"
             style={{
               borderColor: 'transparent',
               background: 'transparent',
@@ -95,6 +95,8 @@ export function HeroSection() {
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.24em',
               textTransform: 'uppercase',
+              fontSize: item.label === 'MINI GAME' ? '0.8rem' : '0.72rem',
+              paddingInline: item.label === 'MINI GAME' ? '1.15rem' : undefined,
             }}
             onMouseEnter={(event) => {
               event.currentTarget.style.borderColor =
@@ -309,7 +311,7 @@ export function HeroSection() {
                 color: 'rgba(var(--foreground-rgb), 0.64)',
               }}
             >
-              Graphic design, motion and digital presentation systems.
+              Graphic design, video editing and web programming.
             </p>
           </div>
         </motion.div>
