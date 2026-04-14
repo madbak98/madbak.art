@@ -1428,7 +1428,7 @@ export function GameSection() {
               lineHeight: 1,
             }}
           >
-            MAKE IT COUNT
+            MAKE IT COUNT!
           </h2>
 
           <p
@@ -1622,8 +1622,8 @@ export function GameSection() {
                     height: road.orientation === 'horizontal' ? 2 : road.h,
                     backgroundImage:
                       road.orientation === 'horizontal'
-                        ? 'repeating-linear-gradient(90deg, rgba(242,220,193,0.38) 0 18px, transparent 18px 42px)'
-                        : 'repeating-linear-gradient(180deg, rgba(242,220,193,0.38) 0 18px, transparent 18px 42px)',
+                        ? 'repeating-linear-gradient(90deg, rgba(var(--foreground-rgb), 0.3) 0 18px, transparent 18px 42px)'
+                        : 'repeating-linear-gradient(180deg, rgba(var(--foreground-rgb), 0.3) 0 18px, transparent 18px 42px)',
                     opacity: 0.56,
                   }}
                 />
@@ -1644,7 +1644,7 @@ export function GameSection() {
                     bottom: road.orientation === 'horizontal' ? 8 : 0,
                     width: road.orientation === 'horizontal' ? road.w : 1,
                     height: road.orientation === 'horizontal' ? 1 : road.h,
-                    background: 'rgba(201,182,163,0.06)',
+                    background: 'rgba(var(--foreground-rgb), 0.06)',
                   }}
                 />
               </div>
@@ -1691,8 +1691,8 @@ export function GameSection() {
                       width: crosswalk.orientation === 'horizontal' ? 6 : crosswalk.w,
                       height: crosswalk.orientation === 'horizontal' ? crosswalk.h : 5,
                       borderRadius: '999px',
-                      background: 'rgba(245,226,205,0.38)',
-                      boxShadow: '0 0 8px rgba(245,226,205,0.05)',
+                      background: 'rgba(var(--foreground-rgb), 0.38)',
+                      boxShadow: '0 0 8px rgba(var(--foreground-rgb), 0.08)',
                     }}
                   />
                 ))}
@@ -1747,7 +1747,7 @@ export function GameSection() {
                     top: 8,
                     width: 2,
                     height: 16,
-                    background: 'rgba(245,226,205,0.12)',
+                    background: 'rgba(var(--foreground-rgb), 0.12)',
                   }}
                 />
                 <motion.div
@@ -1945,8 +1945,17 @@ export function GameSection() {
             ))}
 
             {traps.map((t, i) => (
-              <div
+              <motion.div
                 key={i}
+                animate={{
+                  opacity: [0.82, 1, 0.88],
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{
+                  duration: 1.8 + i * 0.2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
                 style={{
                   position: 'absolute',
                   left: t.x,
@@ -1955,12 +1964,38 @@ export function GameSection() {
                   height: t.h,
                   background:
                     t.w > t.h
-                      ? 'linear-gradient(90deg, rgba(var(--secondary-element-rgb), 0.08), rgba(var(--secondary-element-rgb), 0.52), rgba(var(--secondary-element-rgb), 0.08))'
-                      : 'linear-gradient(180deg, rgba(var(--secondary-element-rgb), 0.08), rgba(var(--secondary-element-rgb), 0.52), rgba(var(--secondary-element-rgb), 0.08))',
-                  border: '1px solid rgba(var(--secondary-element-rgb), 0.8)',
-                  boxShadow: '0 0 10px rgba(var(--secondary-element-rgb), 0.24)',
+                      ? 'linear-gradient(90deg, rgba(var(--foreground-rgb), 0.18), rgba(var(--accent-green-rgb), 0.86), rgba(var(--foreground-rgb), 0.18))'
+                      : 'linear-gradient(180deg, rgba(var(--foreground-rgb), 0.18), rgba(var(--accent-green-rgb), 0.86), rgba(var(--foreground-rgb), 0.18))',
+                  border: '1px solid rgba(var(--accent-green-rgb), 0.95)',
+                  boxShadow:
+                    '0 0 0 1px rgba(var(--background-rgb), 0.24), 0 0 16px rgba(var(--accent-green-rgb), 0.34)',
+                  overflow: 'hidden',
                 }}
-              />
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundImage:
+                      t.w > t.h
+                        ? 'repeating-linear-gradient(90deg, rgba(var(--background-rgb), 0.06) 0 8px, rgba(var(--foreground-rgb), 0.3) 8px 12px, rgba(var(--background-rgb), 0.06) 12px 20px)'
+                        : 'repeating-linear-gradient(180deg, rgba(var(--background-rgb), 0.06) 0 8px, rgba(var(--foreground-rgb), 0.3) 8px 12px, rgba(var(--background-rgb), 0.06) 12px 20px)',
+                    opacity: 0.72,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: t.w > t.h ? 0 : '50%',
+                    top: t.w > t.h ? '50%' : 0,
+                    width: t.w > t.h ? '100%' : 2,
+                    height: t.w > t.h ? 2 : '100%',
+                    transform: t.w > t.h ? 'translateY(-50%)' : 'translateX(-50%)',
+                    background: 'rgba(var(--background-rgb), 0.56)',
+                    boxShadow: '0 0 10px rgba(var(--background-rgb), 0.24)',
+                  }}
+                />
+              </motion.div>
             ))}
 
             {bullets.map((b) => (
