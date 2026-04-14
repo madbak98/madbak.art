@@ -1,28 +1,40 @@
+'use client';
 
-  const isLandscapeMobile = isPhone && viewportWidth > viewportHeight;
+import { motion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-  const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 24, 500)
-    ? Math.min(viewportWidth - 16, 560)
-    : isPhone
-      ? Math.min(viewportWidth - 18, 392)
-      ? Math.min(viewportWidth - 12, 430)
-      : isTablet
-        ? Math.min(viewportWidth - 40, 840)
-        : 940;
-        ? Math.min(viewportWidth - 28, 980)
-        : Math.min(viewportWidth - 72, 1080);
+type Vec = { x: number; y: number };
 
-  const scale = renderWidth / WORLD_W;
-  const renderHeight = WORLD_H * scale;
-        isLandscapeMobile ? 'py-8' : 'py-20'
-      }`}
-    >
-      <div className="w-full max-w-7xl z-10">
-      <div className="w-full max-w-[78rem] z-10">
-        <div className="mb-8 text-center">
-          <div className="mb-3">
-            <span
+type Destination = {
+  id: 'about' | 'work' | 'contact';
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type Building = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type Trap = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type Enemy = {
+  id: number;
+  x: number;
+  y: number;
+  hp: number;
+};
+
 type Bullet = {
   id: number;
   x: number;
@@ -229,23 +241,23 @@ const crosswalks: Crosswalk[] = [
 ];
 
 const streetLights: StreetLight[] = [
-  { id: 'light-1', x: 70, y: 150, color: 'rgba(var(--background-rgb), 0.78)', duration: 2.2, delay: 0.2 },
-  { id: 'light-2', x: 190, y: 150, color: 'rgba(var(--main-element-rgb), 0.82)', duration: 2.8, delay: 0.4 },
-  { id: 'light-3', x: 352, y: 150, color: 'rgba(var(--secondary-element-rgb), 0.78)', duration: 2.6, delay: 0.6 },
-  { id: 'light-4', x: 512, y: 150, color: 'rgba(var(--foreground-rgb), 0.64)', duration: 2.5, delay: 0.9 },
-  { id: 'light-5', x: 742, y: 150, color: 'rgba(var(--background-rgb), 0.76)', duration: 2.3, delay: 1.1 },
-  { id: 'light-6', x: 830, y: 150, color: 'rgba(var(--secondary-element-rgb), 0.86)', duration: 3, delay: 1.4 },
-  { id: 'light-7', x: 92, y: 388, color: 'rgba(var(--foreground-rgb), 0.62)', duration: 2.4, delay: 0.5 },
-  { id: 'light-8', x: 260, y: 388, color: 'rgba(var(--secondary-element-rgb), 0.8)', duration: 2.7, delay: 0.7 },
-  { id: 'light-9', x: 438, y: 388, color: 'rgba(var(--main-element-rgb), 0.82)', duration: 2.9, delay: 1.1 },
-  { id: 'light-10', x: 604, y: 388, color: 'rgba(var(--background-rgb), 0.78)', duration: 2.4, delay: 1.5 },
-  { id: 'light-11', x: 786, y: 388, color: 'rgba(var(--secondary-element-rgb), 0.86)', duration: 3.1, delay: 1.8 },
-  { id: 'light-12', x: 226, y: 78, color: 'rgba(var(--main-element-rgb), 0.82)', duration: 2.8, delay: 0.3 },
-  { id: 'light-13', x: 226, y: 274, color: 'rgba(var(--secondary-element-rgb), 0.8)', duration: 2.5, delay: 0.8 },
-  { id: 'light-14', x: 226, y: 460, color: 'rgba(var(--secondary-element-rgb), 0.86)', duration: 3, delay: 1.3 },
-  { id: 'light-15', x: 674, y: 102, color: 'rgba(var(--background-rgb), 0.76)', duration: 2.4, delay: 0.5 },
-  { id: 'light-16', x: 674, y: 246, color: 'rgba(var(--foreground-rgb), 0.62)', duration: 2.7, delay: 1.1 },
-  { id: 'light-17', x: 674, y: 434, color: 'rgba(var(--secondary-element-rgb), 0.86)', duration: 3.2, delay: 1.6 },
+  { id: 'light-1', x: 70, y: 150, color: 'rgba(255, 208, 140, 0.8)', duration: 2.2, delay: 0.2 },
+  { id: 'light-2', x: 190, y: 150, color: 'rgba(255, 238, 212, 0.82)', duration: 2.8, delay: 0.4 },
+  { id: 'light-3', x: 352, y: 150, color: 'rgba(201, 31, 46, 0.72)', duration: 2.6, delay: 0.6 },
+  { id: 'light-4', x: 512, y: 150, color: 'rgba(255, 228, 188, 0.66)', duration: 2.5, delay: 0.9 },
+  { id: 'light-5', x: 742, y: 150, color: 'rgba(255, 204, 122, 0.78)', duration: 2.3, delay: 1.1 },
+  { id: 'light-6', x: 830, y: 150, color: 'rgba(201, 31, 46, 0.82)', duration: 3, delay: 1.4 },
+  { id: 'light-7', x: 92, y: 388, color: 'rgba(255, 236, 210, 0.62)', duration: 2.4, delay: 0.5 },
+  { id: 'light-8', x: 260, y: 388, color: 'rgba(201, 31, 46, 0.78)', duration: 2.7, delay: 0.7 },
+  { id: 'light-9', x: 438, y: 388, color: 'rgba(255, 226, 176, 0.82)', duration: 2.9, delay: 1.1 },
+  { id: 'light-10', x: 604, y: 388, color: 'rgba(255, 201, 124, 0.76)', duration: 2.4, delay: 1.5 },
+  { id: 'light-11', x: 786, y: 388, color: 'rgba(201, 31, 46, 0.84)', duration: 3.1, delay: 1.8 },
+  { id: 'light-12', x: 226, y: 78, color: 'rgba(255, 232, 206, 0.8)', duration: 2.8, delay: 0.3 },
+  { id: 'light-13', x: 226, y: 274, color: 'rgba(201, 31, 46, 0.76)', duration: 2.5, delay: 0.8 },
+  { id: 'light-14', x: 226, y: 460, color: 'rgba(255, 202, 128, 0.84)', duration: 3, delay: 1.3 },
+  { id: 'light-15', x: 674, y: 102, color: 'rgba(255, 206, 138, 0.76)', duration: 2.4, delay: 0.5 },
+  { id: 'light-16', x: 674, y: 246, color: 'rgba(255, 236, 214, 0.62)', duration: 2.7, delay: 1.1 },
+  { id: 'light-17', x: 674, y: 434, color: 'rgba(201, 31, 46, 0.84)', duration: 3.2, delay: 1.6 },
 ];
 
 const lightTrails: LightTrail[] = [
@@ -260,7 +272,7 @@ const lightTrails: LightTrail[] = [
     to: WORLD_W + 120,
     duration: 6.8,
     delay: 0.6,
-    color: 'rgba(var(--main-element-rgb), 0.68)',
+    color: 'rgba(255, 241, 216, 0.68)',
   },
   {
     id: 'trail-h-2',
@@ -273,7 +285,7 @@ const lightTrails: LightTrail[] = [
     to: -(WORLD_W + 160),
     duration: 5.9,
     delay: 1.8,
-    color: 'rgba(var(--secondary-element-rgb), 0.72)',
+    color: 'rgba(201, 31, 46, 0.72)',
   },
   {
     id: 'trail-h-3',
@@ -286,7 +298,7 @@ const lightTrails: LightTrail[] = [
     to: WORLD_W + 150,
     duration: 7.2,
     delay: 0.2,
-    color: 'rgba(var(--background-rgb), 0.7)',
+    color: 'rgba(255, 196, 106, 0.62)',
   },
   {
     id: 'trail-v-1',
@@ -299,7 +311,7 @@ const lightTrails: LightTrail[] = [
     to: WORLD_H + 120,
     duration: 6.4,
     delay: 1,
-    color: 'rgba(var(--foreground-rgb), 0.56)',
+    color: 'rgba(255, 230, 198, 0.5)',
   },
   {
     id: 'trail-v-2',
@@ -312,7 +324,7 @@ const lightTrails: LightTrail[] = [
     to: -(WORLD_H + 160),
     duration: 7.4,
     delay: 1.6,
-    color: 'rgba(var(--secondary-element-rgb), 0.66)',
+    color: 'rgba(201, 31, 46, 0.66)',
   },
 ];
 
@@ -408,10 +420,10 @@ const asphaltPatches: AsphaltPatch[] = [
 ];
 
 const ambientGlows: AmbientGlow[] = [
-  { id: 'glow-1', x: 34, y: -24, size: 240, color: 'rgba(var(--secondary-element-rgb), 0.12)', duration: 6.2, delay: 0 },
-  { id: 'glow-2', x: 328, y: 18, size: 220, color: 'rgba(var(--background-rgb), 0.12)', duration: 7.4, delay: 1.1 },
-  { id: 'glow-3', x: 652, y: 286, size: 260, color: 'rgba(var(--main-element-rgb), 0.11)', duration: 8.1, delay: 0.6 },
-  { id: 'glow-4', x: 182, y: 336, size: 210, color: 'rgba(var(--foreground-rgb), 0.08)', duration: 6.8, delay: 1.8 },
+  { id: 'glow-1', x: 34, y: -24, size: 240, color: 'rgba(201, 31, 46, 0.08)', duration: 6.2, delay: 0 },
+  { id: 'glow-2', x: 328, y: 18, size: 220, color: 'rgba(255, 188, 104, 0.08)', duration: 7.4, delay: 1.1 },
+  { id: 'glow-3', x: 652, y: 286, size: 260, color: 'rgba(255, 226, 184, 0.08)', duration: 8.1, delay: 0.6 },
+  { id: 'glow-4', x: 182, y: 336, size: 210, color: 'rgba(88, 96, 108, 0.12)', duration: 6.8, delay: 1.8 },
 ];
 
 const artAccents: ArtAccent[] = [
@@ -423,7 +435,7 @@ const artAccents: ArtAccent[] = [
     h: 56,
     rotate: -9,
     radius: '22px',
-    color: 'linear-gradient(135deg, rgba(var(--secondary-element-rgb), 0.16), rgba(var(--background-rgb), 0.05))',
+    color: 'linear-gradient(135deg, rgba(201, 31, 46, 0.12), rgba(9, 9, 10, 0.04))',
     blur: 0,
     duration: 8,
     delay: 0.3,
@@ -436,7 +448,7 @@ const artAccents: ArtAccent[] = [
     h: 92,
     rotate: 18,
     radius: '999px',
-    color: 'radial-gradient(circle, rgba(var(--background-rgb), 0.16), rgba(var(--background-rgb), 0))',
+    color: 'radial-gradient(circle, rgba(255, 206, 124, 0.1), rgba(9, 9, 10, 0))',
     blur: 0,
     duration: 10,
     delay: 1.4,
@@ -449,7 +461,7 @@ const artAccents: ArtAccent[] = [
     h: 42,
     rotate: -5,
     radius: '999px',
-    color: 'linear-gradient(90deg, rgba(var(--foreground-rgb), 0.08), rgba(var(--secondary-element-rgb), 0.16), rgba(var(--background-rgb), 0))',
+    color: 'linear-gradient(90deg, rgba(86, 92, 102, 0.12), rgba(255, 202, 118, 0.12), rgba(9, 9, 10, 0))',
     blur: 0,
     duration: 9.2,
     delay: 0.8,
@@ -650,12 +662,12 @@ function getBuildingWindows(building: Building, seed: number): BuildingWindow[] 
     const row = Math.floor(index / cols);
     const pattern = (seed * 11 + row * 7 + col * 13) % 8;
     const lit = pattern !== 0 && pattern !== 5;
-    const color =
-      pattern === 2
-        ? 'rgba(var(--foreground-rgb), 0.68)'
-        : pattern === 3
-          ? 'rgba(var(--secondary-element-rgb), 0.84)'
-          : 'rgba(var(--background-rgb), 0.86)';
+      const color =
+        pattern === 2
+          ? 'rgba(255, 232, 198, 0.74)'
+          : pattern === 3
+            ? 'rgba(255, 186, 92, 0.84)'
+            : 'rgba(255, 245, 226, 0.86)';
 
     return {
       id: `${seed}-${row}-${col}`,
@@ -905,12 +917,12 @@ export function GameSection() {
   const isLandscapeMobile = isPhone && viewportWidth > viewportHeight;
 
   const renderWidth = isLandscapeMobile
-    ? Math.min(viewportWidth - 32, 420)
+    ? Math.min(viewportWidth - 16, 560)
     : isPhone
-      ? Math.min(viewportWidth - 24, 360)
+      ? Math.min(viewportWidth - 12, 430)
       : isTablet
-        ? Math.min(viewportWidth - 48, 760)
-        : 820;
+        ? Math.min(viewportWidth - 28, 980)
+        : Math.min(viewportWidth - 72, 1080);
 
   const scale = renderWidth / WORLD_W;
   const renderHeight = WORLD_H * scale;
@@ -1394,7 +1406,7 @@ export function GameSection() {
         isLandscapeMobile ? 'py-8' : 'py-20'
       }`}
     >
-      <div className="w-full max-w-6xl z-10">
+      <div className="w-full max-w-[78rem] z-10">
         <div className="mb-8 text-center">
           <div className="mb-3">
             <span
@@ -1445,10 +1457,11 @@ export function GameSection() {
               width: `${WORLD_W}px`,
               height: `${WORLD_H}px`,
               transform: `scale(${scale})`,
-              border: '2px solid rgba(var(--secondary-element-rgb), 0.45)',
+              border: '1px solid rgba(var(--foreground-rgb), 0.14)',
               background:
-                'linear-gradient(180deg, rgba(var(--background-rgb), 0.94) 0%, rgba(var(--main-element-rgb), 0.92) 100%)',
-              boxShadow: '0 0 38px rgba(var(--foreground-rgb), 0.12)',
+                'linear-gradient(180deg, rgba(8, 8, 9, 0.98) 0%, rgba(18, 19, 22, 0.97) 48%, rgba(11, 12, 14, 0.99) 100%)',
+              boxShadow:
+                '0 28px 56px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(var(--foreground-rgb), 0.05)',
               cursor: isPhone || isTablet ? 'default' : 'crosshair',
               touchAction: 'none',
             }}
@@ -1457,7 +1470,7 @@ export function GameSection() {
               className="absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(circle at 18% 12%, rgba(var(--secondary-element-rgb), 0.18), transparent 30%), radial-gradient(circle at 82% 18%, rgba(var(--background-rgb), 0.16), transparent 28%), linear-gradient(180deg, rgba(var(--main-element-rgb), 0.86) 0%, rgba(var(--background-rgb), 0.92) 100%)',
+                  'radial-gradient(circle at 16% 10%, rgba(201, 31, 46, 0.1), transparent 28%), radial-gradient(circle at 82% 18%, rgba(255, 194, 112, 0.09), transparent 26%), linear-gradient(180deg, rgba(28, 29, 33, 0.96) 0%, rgba(13, 14, 16, 0.98) 100%)',
               }}
             />
 
@@ -1533,11 +1546,11 @@ export function GameSection() {
               className="absolute inset-0"
               style={{
                 backgroundImage: `
-                  repeating-linear-gradient(90deg, rgba(var(--foreground-rgb), 0.04) 0 1px, transparent 1px 118px),
-                  repeating-linear-gradient(180deg, rgba(var(--foreground-rgb), 0.03) 0 1px, transparent 1px 86px),
-                  linear-gradient(120deg, rgba(var(--background-rgb), 0.08), transparent 26%, transparent 74%, rgba(var(--secondary-element-rgb), 0.08))
+                  repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 118px),
+                  repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 86px),
+                  linear-gradient(120deg, rgba(255,255,255,0.02), transparent 26%, transparent 74%, rgba(201,31,46,0.04))
                 `,
-                opacity: 0.55,
+                opacity: 0.44,
               }}
             />
 
@@ -1552,11 +1565,11 @@ export function GameSection() {
                   height: road.h,
                   background:
                     road.orientation === 'horizontal'
-                      ? 'linear-gradient(180deg, rgba(var(--foreground-rgb), 0.78) 0%, rgba(var(--secondary-element-rgb), 0.88) 44%, rgba(var(--secondary-element-rgb), 0.94) 50%, rgba(var(--secondary-element-rgb), 0.88) 56%, rgba(var(--foreground-rgb), 0.78) 100%)'
-                      : 'linear-gradient(90deg, rgba(var(--foreground-rgb), 0.78) 0%, rgba(var(--secondary-element-rgb), 0.88) 44%, rgba(var(--secondary-element-rgb), 0.94) 50%, rgba(var(--secondary-element-rgb), 0.88) 56%, rgba(var(--foreground-rgb), 0.78) 100%)',
-                  border: '1px solid rgba(var(--background-rgb), 0.12)',
+                      ? 'linear-gradient(180deg, rgba(66, 69, 74, 0.96) 0%, rgba(39, 41, 46, 0.98) 44%, rgba(32, 34, 39, 0.98) 50%, rgba(39, 41, 46, 0.98) 56%, rgba(66, 69, 74, 0.96) 100%)'
+                      : 'linear-gradient(90deg, rgba(66, 69, 74, 0.96) 0%, rgba(39, 41, 46, 0.98) 44%, rgba(32, 34, 39, 0.98) 50%, rgba(39, 41, 46, 0.98) 56%, rgba(66, 69, 74, 0.96) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
                   boxShadow:
-                    'inset 0 0 26px rgba(var(--foreground-rgb), 0.16), inset 0 0 0 1px rgba(var(--background-rgb), 0.03)',
+                    'inset 0 0 26px rgba(0, 0, 0, 0.34), inset 0 0 0 1px rgba(255, 255, 255, 0.02)',
                 }}
               >
                 <div
@@ -1564,9 +1577,9 @@ export function GameSection() {
                   style={{
                     backgroundImage:
                       road.orientation === 'horizontal'
-                        ? 'repeating-linear-gradient(90deg, rgba(var(--background-rgb), 0.08) 0 2px, transparent 2px 46px), repeating-linear-gradient(180deg, rgba(var(--foreground-rgb), 0.12) 0 1px, transparent 1px 6px)'
-                        : 'repeating-linear-gradient(180deg, rgba(var(--background-rgb), 0.08) 0 2px, transparent 2px 46px), repeating-linear-gradient(90deg, rgba(var(--foreground-rgb), 0.12) 0 1px, transparent 1px 6px)',
-                    opacity: 0.22,
+                        ? 'repeating-linear-gradient(90deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 46px), repeating-linear-gradient(180deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 6px)'
+                        : 'repeating-linear-gradient(180deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 46px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 6px)',
+                    opacity: 0.34,
                     mixBlendMode: 'soft-light',
                   }}
                 />
@@ -1575,8 +1588,8 @@ export function GameSection() {
                   style={{
                     background:
                       road.orientation === 'horizontal'
-                        ? 'linear-gradient(180deg, rgba(var(--main-element-rgb), 0.14), transparent 24%, transparent 76%, rgba(var(--background-rgb), 0.08))'
-                        : 'linear-gradient(90deg, rgba(var(--main-element-rgb), 0.14), transparent 24%, transparent 76%, rgba(var(--background-rgb), 0.08))',
+                        ? 'linear-gradient(180deg, rgba(255,255,255,0.06), transparent 24%, transparent 76%, rgba(0,0,0,0.12))'
+                        : 'linear-gradient(90deg, rgba(255,255,255,0.06), transparent 24%, transparent 76%, rgba(0,0,0,0.12))',
                   }}
                 />
                 <div
@@ -1586,7 +1599,7 @@ export function GameSection() {
                     top: road.orientation === 'horizontal' ? 0 : 0,
                     width: road.orientation === 'horizontal' ? road.w : 2,
                     height: road.orientation === 'horizontal' ? 2 : road.h,
-                    background: 'rgba(var(--background-rgb), 0.16)',
+                    background: 'rgba(255, 255, 255, 0.05)',
                     opacity: 0.54,
                   }}
                 />
@@ -1597,7 +1610,7 @@ export function GameSection() {
                     bottom: road.orientation === 'horizontal' ? 0 : 0,
                     width: road.orientation === 'horizontal' ? road.w : 2,
                     height: road.orientation === 'horizontal' ? 2 : road.h,
-                    background: 'rgba(var(--foreground-rgb), 0.22)',
+                    background: 'rgba(255, 255, 255, 0.12)',
                     opacity: 0.72,
                   }}
                 />
@@ -1610,9 +1623,9 @@ export function GameSection() {
                     height: road.orientation === 'horizontal' ? 2 : road.h,
                     backgroundImage:
                       road.orientation === 'horizontal'
-                        ? 'repeating-linear-gradient(90deg, rgba(var(--foreground-rgb), 0.3) 0 18px, transparent 18px 42px)'
-                        : 'repeating-linear-gradient(180deg, rgba(var(--foreground-rgb), 0.3) 0 18px, transparent 18px 42px)',
-                    opacity: 0.56,
+                        ? 'repeating-linear-gradient(90deg, rgba(244,239,232,0.34) 0 18px, transparent 18px 42px)'
+                        : 'repeating-linear-gradient(180deg, rgba(244,239,232,0.34) 0 18px, transparent 18px 42px)',
+                    opacity: 0.42,
                   }}
                 />
                 <div
@@ -1622,7 +1635,7 @@ export function GameSection() {
                     top: road.orientation === 'horizontal' ? 8 : 0,
                     width: road.orientation === 'horizontal' ? road.w : 1,
                     height: road.orientation === 'horizontal' ? 1 : road.h,
-                    background: 'rgba(var(--background-rgb), 0.08)',
+                    background: 'rgba(255, 255, 255, 0.03)',
                   }}
                 />
                 <div
@@ -1632,7 +1645,7 @@ export function GameSection() {
                     bottom: road.orientation === 'horizontal' ? 8 : 0,
                     width: road.orientation === 'horizontal' ? road.w : 1,
                     height: road.orientation === 'horizontal' ? 1 : road.h,
-                    background: 'rgba(var(--foreground-rgb), 0.06)',
+                    background: 'rgba(255, 255, 255, 0.025)',
                   }}
                 />
               </div>
@@ -1669,7 +1682,7 @@ export function GameSection() {
                   height: crosswalk.h,
                   flexDirection:
                     crosswalk.orientation === 'horizontal' ? 'row' : 'column',
-                  opacity: 0.44,
+                  opacity: 0.76,
                 }}
               >
                 {Array.from({ length: crosswalk.stripes }, (_, stripeIndex) => (
@@ -1679,8 +1692,8 @@ export function GameSection() {
                       width: crosswalk.orientation === 'horizontal' ? 6 : crosswalk.w,
                       height: crosswalk.orientation === 'horizontal' ? crosswalk.h : 5,
                       borderRadius: '999px',
-                      background: 'rgba(var(--foreground-rgb), 0.38)',
-                      boxShadow: '0 0 8px rgba(var(--foreground-rgb), 0.08)',
+                      background: 'rgba(244, 239, 232, 0.72)',
+                      boxShadow: '0 0 10px rgba(244, 239, 232, 0.12)',
                     }}
                   />
                 ))}
@@ -1767,8 +1780,8 @@ export function GameSection() {
               const doorWidth = compactBuilding ? 10 : 14;
               const doorHeight = lowRise ? 10 : 18;
               const roofTone = compactBuilding
-                ? 'linear-gradient(90deg, rgba(var(--secondary-element-rgb), 0.28), rgba(var(--background-rgb), 0.12))'
-                : 'linear-gradient(90deg, rgba(var(--secondary-element-rgb), 0.2), rgba(var(--background-rgb), 0.12), rgba(var(--main-element-rgb), 0.16))';
+                ? 'linear-gradient(90deg, rgba(255, 196, 118, 0.14), rgba(9, 9, 10, 0.12))'
+                : 'linear-gradient(90deg, rgba(255, 196, 118, 0.12), rgba(9, 9, 10, 0.12), rgba(255, 255, 255, 0.05))';
 
               return (
                 <div
@@ -1781,11 +1794,11 @@ export function GameSection() {
                     height: b.h,
                     background:
                       compactBuilding
-                        ? 'linear-gradient(180deg, rgba(var(--foreground-rgb), 0.72) 0%, rgba(var(--secondary-element-rgb), 0.9) 100%)'
-                        : 'linear-gradient(180deg, rgba(var(--foreground-rgb), 0.68) 0%, rgba(var(--secondary-element-rgb), 0.88) 100%)',
-                    border: '1px solid rgba(var(--background-rgb), 0.14)',
+                        ? 'linear-gradient(180deg, rgba(88, 92, 98, 0.9) 0%, rgba(40, 43, 48, 0.98) 100%)'
+                        : 'linear-gradient(180deg, rgba(82, 86, 92, 0.92) 0%, rgba(33, 35, 40, 0.98) 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(var(--background-rgb), 0.06), 0 14px 24px rgba(var(--foreground-rgb), 0.12), 0 2px 0 rgba(var(--foreground-rgb), 0.1)',
+                      'inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 14px 24px rgba(0, 0, 0, 0.28), 0 2px 0 rgba(255, 255, 255, 0.04)',
                     overflow: 'hidden',
                   }}
                 >
@@ -1793,7 +1806,7 @@ export function GameSection() {
                     style={{
                       position: 'absolute',
                       inset: 8,
-                      border: '1px solid rgba(var(--background-rgb), 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.04)',
                     }}
                   />
                   <div
@@ -1816,8 +1829,8 @@ export function GameSection() {
                           width: doorWidth,
                           height: doorHeight,
                           borderRadius: '8px 8px 2px 2px',
-                          background: 'rgba(var(--foreground-rgb), 0.42)',
-                          border: '1px solid rgba(var(--background-rgb), 0.12)',
+                          background: 'rgba(28, 30, 34, 0.92)',
+                          border: '1px solid rgba(255, 255, 255, 0.05)',
                         }}
                       />
                       <div
@@ -1828,7 +1841,7 @@ export function GameSection() {
                           width: doorWidth * 2,
                           height: 8,
                           borderRadius: '999px',
-                          background: 'rgba(var(--background-rgb), 0.14)',
+                          background: 'rgba(0, 0, 0, 0.2)',
                           filter: 'blur(8px)',
                           opacity: 0.7,
                         }}
@@ -1885,9 +1898,9 @@ export function GameSection() {
                   top: d.y - 10,
                   width: d.w + 20,
                   height: d.h + 20,
-                  border: '1px solid rgba(var(--background-rgb), 0.16)',
-                  background: 'rgba(var(--background-rgb), 0.08)',
-                  boxShadow: '0 14px 28px rgba(var(--foreground-rgb), 0.14)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  background: 'rgba(10, 10, 10, 0.38)',
+                  boxShadow: '0 14px 28px rgba(0, 0, 0, 0.24)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1897,7 +1910,7 @@ export function GameSection() {
                   style={{
                     position: 'absolute',
                     inset: 6,
-                    border: '1px solid rgba(var(--background-rgb), 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
                     pointerEvents: 'none',
                   }}
                 />
@@ -1908,9 +1921,9 @@ export function GameSection() {
                     top: 10,
                     width: d.w,
                     height: d.h,
-                    border: '1px solid rgba(var(--secondary-element-rgb), 0.82)',
-                    background: 'rgba(var(--secondary-element-rgb), 0.1)',
-                    boxShadow: '0 0 16px rgba(var(--secondary-element-rgb), 0.2)',
+                    border: '1px solid rgba(244, 239, 232, 0.28)',
+                    background: 'rgba(244, 239, 232, 0.04)',
+                    boxShadow: '0 0 16px rgba(244, 239, 232, 0.08)',
                   }}
                 />
                 <div
@@ -1952,11 +1965,11 @@ export function GameSection() {
                   height: t.h,
                   background:
                     t.w > t.h
-                      ? 'linear-gradient(90deg, rgba(var(--foreground-rgb), 0.18), rgba(var(--accent-green-rgb), 0.86), rgba(var(--foreground-rgb), 0.18))'
-                      : 'linear-gradient(180deg, rgba(var(--foreground-rgb), 0.18), rgba(var(--accent-green-rgb), 0.86), rgba(var(--foreground-rgb), 0.18))',
-                  border: '1px solid rgba(var(--accent-green-rgb), 0.95)',
+                      ? 'linear-gradient(90deg, rgba(22, 22, 22, 0.18), rgba(255, 173, 58, 0.96), rgba(22, 22, 22, 0.18))'
+                      : 'linear-gradient(180deg, rgba(22, 22, 22, 0.18), rgba(255, 173, 58, 0.96), rgba(22, 22, 22, 0.18))',
+                  border: '1px solid rgba(255, 173, 58, 0.96)',
                   boxShadow:
-                    '0 0 0 1px rgba(var(--background-rgb), 0.24), 0 0 16px rgba(var(--accent-green-rgb), 0.34)',
+                    '0 0 0 1px rgba(0, 0, 0, 0.24), 0 0 16px rgba(255, 173, 58, 0.24)',
                   overflow: 'hidden',
                 }}
               >
@@ -1966,8 +1979,8 @@ export function GameSection() {
                     inset: 0,
                     backgroundImage:
                       t.w > t.h
-                        ? 'repeating-linear-gradient(90deg, rgba(var(--background-rgb), 0.06) 0 8px, rgba(var(--foreground-rgb), 0.3) 8px 12px, rgba(var(--background-rgb), 0.06) 12px 20px)'
-                        : 'repeating-linear-gradient(180deg, rgba(var(--background-rgb), 0.06) 0 8px, rgba(var(--foreground-rgb), 0.3) 8px 12px, rgba(var(--background-rgb), 0.06) 12px 20px)',
+                          ? 'repeating-linear-gradient(90deg, rgba(20,20,20,0.06) 0 8px, rgba(36,36,36,0.42) 8px 12px, rgba(20,20,20,0.06) 12px 20px)'
+                          : 'repeating-linear-gradient(180deg, rgba(20,20,20,0.06) 0 8px, rgba(36,36,36,0.42) 8px 12px, rgba(20,20,20,0.06) 12px 20px)',
                     opacity: 0.72,
                   }}
                 />
@@ -1979,8 +1992,8 @@ export function GameSection() {
                     width: t.w > t.h ? '100%' : 2,
                     height: t.w > t.h ? 2 : '100%',
                     transform: t.w > t.h ? 'translateY(-50%)' : 'translateX(-50%)',
-                    background: 'rgba(var(--background-rgb), 0.56)',
-                    boxShadow: '0 0 10px rgba(var(--background-rgb), 0.24)',
+                    background: 'rgba(26, 20, 10, 0.48)',
+                    boxShadow: '0 0 10px rgba(0, 0, 0, 0.24)',
                   }}
                 />
               </motion.div>
@@ -2067,7 +2080,7 @@ export function GameSection() {
             {!started && (
               <div
                 className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]"
-                style={{ background: 'rgba(var(--foreground-rgb), 0.4)' }}
+                style={{ background: 'rgba(6, 6, 7, 0.66)' }}
               >
                 <div className="w-full max-w-[420px] text-center px-6">
                   <div
@@ -2075,7 +2088,7 @@ export function GameSection() {
                       fontFamily: 'var(--font-heading)',
                       fontSize: 'clamp(1.4rem, 4vw, 2.2rem)',
                       fontWeight: 800,
-                      color: 'var(--background)',
+                      color: 'var(--foreground)',
                     }}
                   >
                     ENTER THE CITY
@@ -2084,7 +2097,7 @@ export function GameSection() {
                     className="mb-3 uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: 'rgba(var(--background-rgb), 0.78)',
+                      color: 'rgba(var(--foreground-rgb), 0.74)',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
@@ -2095,7 +2108,7 @@ export function GameSection() {
                     className="mb-6 uppercase"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      color: 'rgba(var(--background-rgb), 0.58)',
+                      color: 'rgba(var(--foreground-rgb), 0.56)',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
                     }}
@@ -2108,7 +2121,7 @@ export function GameSection() {
                       className="mb-2 block uppercase"
                       style={{
                         fontFamily: 'var(--font-mono)',
-                        color: 'rgba(var(--background-rgb), 0.68)',
+                        color: 'rgba(var(--foreground-rgb), 0.68)',
                         fontSize: '10px',
                         letterSpacing: '0.18em',
                       }}
@@ -2125,8 +2138,8 @@ export function GameSection() {
                       className="w-full"
                       style={{
                         fontFamily: 'var(--font-mono)',
-                        background: 'rgba(var(--background-rgb), 0.16)',
-                        border: '1px solid rgba(var(--foreground-rgb), 0.16)',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                         color: 'var(--foreground)',
                         padding: '12px 14px',
                         letterSpacing: '0.12em',
@@ -2145,7 +2158,7 @@ export function GameSection() {
                       textTransform: 'uppercase',
                       border: '2px solid var(--accent-green)',
                       color: 'var(--foreground)',
-                      background: normalizedUsername ? 'transparent' : 'rgba(var(--background-rgb), 0.18)',
+                      background: normalizedUsername ? 'transparent' : 'rgba(255, 255, 255, 0.04)',
                       cursor: normalizedUsername ? 'pointer' : 'not-allowed',
                       opacity: normalizedUsername ? 1 : 0.58,
                       padding: '12px 26px',
@@ -2161,14 +2174,14 @@ export function GameSection() {
               <div
                 onClick={restart}
                 className="absolute inset-0 flex items-center justify-center"
-                style={{ background: 'rgba(var(--foreground-rgb), 0.56)', cursor: 'pointer' }}
+                style={{ background: 'rgba(6, 6, 7, 0.72)', cursor: 'pointer' }}
               >
                 <div className="text-center px-6">
                   <div
                     style={{
                       fontFamily: 'var(--font-heading)',
                       fontSize: 'clamp(2rem, 6vw, 3.4rem)',
-                      color: 'var(--background)',
+                      color: 'var(--foreground)',
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase',
                     }}
@@ -2181,7 +2194,7 @@ export function GameSection() {
                       fontFamily: 'var(--font-mono)',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
-                      color: 'rgba(var(--background-rgb), 0.78)',
+                      color: 'rgba(var(--foreground-rgb), 0.74)',
                       textTransform: 'uppercase',
                     }}
                   >
@@ -2193,7 +2206,7 @@ export function GameSection() {
                       fontFamily: 'var(--font-mono)',
                       fontSize: '10px',
                       letterSpacing: '0.18em',
-                      color: 'rgba(var(--background-rgb), 0.62)',
+                      color: 'rgba(var(--foreground-rgb), 0.56)',
                       textTransform: 'uppercase',
                     }}
                   >
@@ -2215,7 +2228,7 @@ export function GameSection() {
             style={{
               border: '1px solid rgba(var(--foreground-rgb), 0.14)',
               background:
-                'linear-gradient(180deg, rgba(var(--background-rgb), 0.68) 0%, rgba(var(--main-element-rgb), 0.58) 100%)',
+                'linear-gradient(180deg, rgba(11, 12, 14, 0.9) 0%, rgba(28, 30, 34, 0.88) 100%)',
             }}
           >
             <div
@@ -2261,7 +2274,7 @@ export function GameSection() {
             style={{
               border: '1px solid rgba(var(--foreground-rgb), 0.14)',
               background:
-                'linear-gradient(180deg, rgba(var(--background-rgb), 0.68) 0%, rgba(var(--main-element-rgb), 0.58) 100%)',
+                'linear-gradient(180deg, rgba(11, 12, 14, 0.9) 0%, rgba(28, 30, 34, 0.88) 100%)',
             }}
           >
             <div
