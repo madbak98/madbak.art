@@ -33,7 +33,6 @@ type HeroModelConfig = {
   idlePhase?: number;
 };
 
-// Add more GLB entries here after placing them in public/models.
 const HERO_MODELS: HeroModelConfig[] = [
   {
     id: 'sam',
