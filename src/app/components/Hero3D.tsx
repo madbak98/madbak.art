@@ -19,9 +19,9 @@ function HeroModel({ scrollProgress }: Hero3DProps) {
     const progress = scrollProgress.get();
     const elapsed = state.clock.getElapsedTime();
 
-    const baseX = viewport.width > 13 ? 4.15 : viewport.width > 10 ? 3.15 : 2.2;
-    const baseY = viewport.width > 13 ? 1.95 : viewport.width > 10 ? 1.55 : 1.12;
-    const baseScale = viewport.width > 13 ? 2.55 : viewport.width > 10 ? 2.15 : 1.45;
+    const baseX = viewport.width > 13 ? 3.15 : viewport.width > 10 ? 2.45 : 1.72;
+    const baseY = viewport.width > 13 ? 1.62 : viewport.width > 10 ? 1.28 : 0.98;
+    const baseScale = viewport.width > 13 ? 2.15 : viewport.width > 10 ? 1.78 : 1.26;
     const targetRotationY = progress * Math.PI * 2;
 
     groupRef.current.position.x = baseX;
@@ -58,7 +58,7 @@ export function Hero3D({ scrollProgress }: Hero3DProps) {
     <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden">
       <Canvas
         dpr={[1, 1.75]}
-        camera={{ position: [0, 0, 6.4], fov: 24 }}
+        camera={{ position: [0, 0, 7.1], fov: 26 }}
         gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       >
         <ambientLight intensity={1.12} />
