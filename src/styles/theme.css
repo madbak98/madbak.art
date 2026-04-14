@@ -2,41 +2,41 @@
 
 :root {
   --font-size: 16px;
-  --background: #C4CBA6;
-  --background-rgb: 196, 203, 166;
-  --foreground: #6F7758;
-  --foreground-rgb: 111, 119, 88;
-  --main-element: #A3AD84;
-  --main-element-rgb: 163, 173, 132;
-  --secondary-element: #8A936D;
-  --secondary-element-rgb: 138, 147, 109;
-  --accent-green: #4F5D3A;
-  --accent-green-rgb: 79, 93, 58;
-  --grid-color: rgba(111, 119, 88, 0.12);
+  --background: #0A0A0A;
+  --background-rgb: 10, 10, 10;
+  --foreground: #F5F5F5;
+  --foreground-rgb: 245, 245, 245;
+  --main-element: #F5F5F5;
+  --main-element-rgb: 245, 245, 245;
+  --secondary-element: #E62525;
+  --secondary-element-rgb: 230, 37, 37;
+  --accent-green: #E62525;
+  --accent-green-rgb: 230, 37, 37;
+  --grid-color: rgba(245, 245, 245, 0.07);
   
   /* Typography */
   --font-heading: 'Montserrat', sans-serif;
   --font-hero: 'UnifrakturMaguntia', 'Times New Roman', serif;
   --font-body: 'Orbitron', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
-  --card: #A3AD84;
-  --card-foreground: #6F7758;
-  --popover: #C4CBA6;
-  --popover-foreground: #6F7758;
-  --primary: #4F5D3A;
-  --primary-foreground: #C4CBA6;
-  --secondary: #A3AD84;
-  --secondary-foreground: #6F7758;
-  --muted: #d7ddbc;
-  --muted-foreground: #4F5D3A;
-  --accent: #A3AD84;
-  --accent-foreground: #6F7758;
-  --destructive: #4F5D3A;
-  --destructive-foreground: #C4CBA6;
-  --border: rgba(111, 119, 88, 0.14);
+  --card: #111111;
+  --card-foreground: #F5F5F5;
+  --popover: #0A0A0A;
+  --popover-foreground: #F5F5F5;
+  --primary: #F5F5F5;
+  --primary-foreground: #0A0A0A;
+  --secondary: #151515;
+  --secondary-foreground: #F5F5F5;
+  --muted: #151515;
+  --muted-foreground: #B6B6B6;
+  --accent: #E62525;
+  --accent-foreground: #F5F5F5;
+  --destructive: #E62525;
+  --destructive-foreground: #F5F5F5;
+  --border: rgba(245, 245, 245, 0.12);
   --input: transparent;
-  --input-background: #d7ddbc;
-  --switch-background: #aeb88d;
+  --input-background: #121212;
+  --switch-background: #262626;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: oklch(0.708 0 0);
@@ -46,14 +46,14 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: #d7ddbc;
-  --sidebar-foreground: #6F7758;
-  --sidebar-primary: #4F5D3A;
-  --sidebar-primary-foreground: #C4CBA6;
-  --sidebar-accent: #A3AD84;
-  --sidebar-accent-foreground: #6F7758;
-  --sidebar-border: rgba(111, 119, 88, 0.14);
-  --sidebar-ring: #4F5D3A;
+  --sidebar: #0D0D0D;
+  --sidebar-foreground: #F5F5F5;
+  --sidebar-primary: #E62525;
+  --sidebar-primary-foreground: #F5F5F5;
+  --sidebar-accent: #151515;
+  --sidebar-accent-foreground: #F5F5F5;
+  --sidebar-border: rgba(245, 245, 245, 0.12);
+  --sidebar-ring: #E62525;
 }
 
 .dark {
