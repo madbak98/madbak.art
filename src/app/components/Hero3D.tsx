@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Center, Clone, useGLTF } from '@react-three/drei';
 import type { MotionValue } from 'motion/react';
-import { Suspense, useRef } from 'react';
+import { Component, Suspense, useRef, type ReactNode } from 'react';
 import { MathUtils, type Group } from 'three';
 
 type Hero3DProps = {
@@ -33,13 +33,22 @@ type HeroModelConfig = {
   idlePhase?: number;
 };
 
+type ModelErrorBoundaryProps = {
+  children: ReactNode;
+};
+
+type ModelErrorBoundaryState = {
+  hasError: boolean;
+};
+
+// Add more GLB entries here after placing them in public/models.
 const HERO_MODELS: HeroModelConfig[] = [
   {
     id: 'sam',
     path: '/models/characters-sam.glb',
-    desktop: { x: 2.72, y: 1.54, scale: 1.38 },
-    tablet: { x: 2.18, y: 1.2, scale: 1.12 },
-    mobile: { x: 1.44, y: 0.92, scale: 0.92 },
+    desktop: { x: 2.34, y: 1.42, scale: 1.28 },
+    tablet: { x: 1.92, y: 1.12, scale: 1.04 },
+    mobile: { x: 1.3, y: 0.88, scale: 0.84 },
     pointerOffsetX: 0.34,
     pointerOffsetY: 0.18,
     tiltX: 0.08,
@@ -53,9 +62,9 @@ const HERO_MODELS: HeroModelConfig[] = [
   {
     id: 'matt',
     path: '/models/characters-matt.glb',
-    desktop: { x: 1.88, y: 2.18, scale: 0.86 },
-    tablet: { x: 1.54, y: 1.74, scale: 0.72 },
-    mobile: { x: 1.1, y: 1.32, scale: 0.56 },
+    desktop: { x: 1.5, y: 1.96, scale: 0.76 },
+    tablet: { x: 1.24, y: 1.58, scale: 0.64 },
+    mobile: { x: 0.98, y: 1.24, scale: 0.5 },
     pointerOffsetX: 0.24,
     pointerOffsetY: 0.14,
     tiltX: 0.06,
@@ -69,9 +78,9 @@ const HERO_MODELS: HeroModelConfig[] = [
   {
     id: 'block',
     path: '/models/block-character.glb',
-    desktop: { x: 3.78, y: 2.26, scale: 0.64 },
-    tablet: { x: 3.02, y: 1.82, scale: 0.52 },
-    mobile: { x: 2.02, y: 1.4, scale: 0.42 },
+    desktop: { x: 3.08, y: 2.02, scale: 0.56 },
+    tablet: { x: 2.48, y: 1.62, scale: 0.46 },
+    mobile: { x: 1.72, y: 1.28, scale: 0.38 },
     pointerOffsetX: 0.18,
     pointerOffsetY: 0.12,
     tiltX: 0.04,
@@ -83,6 +92,28 @@ const HERO_MODELS: HeroModelConfig[] = [
     idlePhase: 2.4,
   },
 ];
+
+class ModelErrorBoundary extends Component<
+  ModelErrorBoundaryProps,
+  ModelErrorBoundaryState
+> {
+  state: ModelErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps: ModelErrorBoundaryProps) {
+    if (prevProps.children !== this.props.children && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 function HeroModel({
   config,
@@ -189,13 +220,14 @@ export function Hero3D({ scrollProgress, pointerX, pointerY }: Hero3DProps) {
         />
         <Suspense fallback={null}>
           {HERO_MODELS.map((model) => (
-            <HeroModel
-              key={model.id}
-              config={model}
-              scrollProgress={scrollProgress}
-              pointerX={pointerX}
-              pointerY={pointerY}
-            />
+            <ModelErrorBoundary key={model.id}>
+              <HeroModel
+                config={model}
+                scrollProgress={scrollProgress}
+                pointerX={pointerX}
+                pointerY={pointerY}
+              />
+            </ModelErrorBoundary>
           ))}
         </Suspense>
       </Canvas>
@@ -204,7 +236,7 @@ export function Hero3D({ scrollProgress, pointerX, pointerY }: Hero3DProps) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(90deg, rgba(var(--background-rgb), 0.9) 0%, rgba(var(--background-rgb), 0.82) 26%, rgba(var(--background-rgb), 0.46) 56%, rgba(var(--background-rgb), 0.1) 100%)',
+            'linear-gradient(90deg, rgba(var(--background-rgb), 0.9) 0%, rgba(var(--background-rgb), 0.8) 24%, rgba(var(--background-rgb), 0.34) 54%, rgba(var(--background-rgb), 0.02) 100%)',
         }}
       />
     </div>
