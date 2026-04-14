@@ -6,11 +6,28 @@ function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill="none"
       aria-hidden="true"
       {...props}
     >
-      <path d="M18.244 2h3.064l-6.697 7.653L22.488 20h-6.17l-4.835-6.229L6.03 20H2.964l7.162-8.186L2.57 2h6.328l4.37 5.693L18.244 2Zm-1.076 16.252h1.698L7.976 3.656H6.154l11.014 14.596Z" />
+      <path
+        d="M5 4L18.2 20"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18.4 4L9.8 13.8"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.2 20L12 14.45"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -105,7 +122,14 @@ export function ContactSection() {
               onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(var(--foreground-rgb), 0.16)'}
             >
               <div className="flex items-center gap-3 mb-2">
-                <social.icon size={20} style={{ color: 'var(--accent-green)' }} />
+                <social.icon
+                  size={social.label === 'X' ? 18 : 20}
+                  style={{
+                    color: 'var(--accent-green)',
+                    display: 'block',
+                    strokeWidth: social.label === 'X' ? 1.9 : undefined,
+                  }}
+                />
                 <span 
                   className="text-sm tracking-[0.2em] uppercase"
                   style={{ 
