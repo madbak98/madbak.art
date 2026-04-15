@@ -103,7 +103,7 @@ export function AboutSection() {
                 }}
               >
                 .
-I don’t just design visuals — I build experiences.
+I’m Babak — creating under the name MADBAK. I don’t just design visuals — I build experiences.
 From graphic design to video editing and now web development, everything I do is about turning ideas into something alive.
 My style is bold, emotional, and detail-driven.
 I’m obsessed with motion, interaction, and the feeling a user gets when scrolling through a well-crafted piece.
