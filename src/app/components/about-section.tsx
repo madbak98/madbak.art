@@ -102,10 +102,12 @@ export function AboutSection() {
                   color: 'rgba(var(--foreground-rgb), 0.82)',
                 }}
               >
-                I approach design like direction: each image, frame and layout
-                should carry presence before it explains itself. My work lives
-                between graphic systems, motion language and cinematic visual
-                storytelling.
+                .
+I don’t just design visuals — I build experiences.
+From graphic design to video editing and now web development, everything I do is about turning ideas into something alive.
+My style is bold, emotional, and detail-driven.
+I’m obsessed with motion, interaction, and the feeling a user gets when scrolling through a well-crafted piece.
+
               </p>
 
               <p
@@ -117,10 +119,9 @@ export function AboutSection() {
                   color: 'rgba(var(--foreground-rgb), 0.58)',
                 }}
               >
-                From character-driven worlds to visual campaigns and portfolio
-                systems, I build work that feels controlled, sharp and deeply
-                composed. The goal is never decoration. The goal is impact,
-                structure and a memorable atmosphere.
+                I’m currently pushing into modern web development — blending code with creativity to build immersive, scroll-based experiences that stand out.
+Not just clean. Not just aesthetic.
+Something that hits.
               </p>
 
               <div className="grid gap-4 pt-3 sm:grid-cols-3">
