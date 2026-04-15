@@ -6,28 +6,11 @@ function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill="none"
+      fill="currentColor"
       aria-hidden="true"
       {...props}
     >
-      <path
-        d="M5 4L18.2 20"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18.4 4L9.8 13.8"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M7.2 20L12 14.45"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
+      <path d="M18.9 2h3.68l-8.04 9.2L24 22h-7.41l-5.8-7.02L4.64 22H.95l8.6-9.83L0 2h7.6l5.25 6.37L18.9 2Zm-1.29 17.8h2.04L6.49 4.08H4.3L17.61 19.8Z" />
     </svg>
   );
 }
@@ -51,7 +34,7 @@ export function ContactSection() {
     <section
       id="contact"
       ref={ref}
-      className="relative min-h-screen flex items-center justify-center py-32 px-4"
+      className="relative flex min-h-[82vh] items-center justify-center px-6 py-20 sm:px-10 lg:px-14"
     >
       <motion.div 
         style={{ opacity, y }}
@@ -69,7 +52,8 @@ export function ContactSection() {
 
         {/* Heading */}
         <h2
-          className="mb-12"
+          className="heading-glitch mb-12"
+          data-text="LET'S CREATE TOGETHER"
           style={{ 
             fontFamily: 'var(--font-heading)',
             fontSize: 'clamp(2.5rem, 8vw, 5rem)',
@@ -122,14 +106,24 @@ export function ContactSection() {
               onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(var(--foreground-rgb), 0.16)'}
             >
               <div className="flex items-center gap-3 mb-2">
-                <social.icon
-                  size={social.label === 'X' ? 18 : 20}
-                  style={{
-                    color: 'var(--accent-green)',
-                    display: 'block',
-                    strokeWidth: social.label === 'X' ? 1.9 : undefined,
-                  }}
-                />
+                {social.label === 'X' ? (
+                  <XIcon
+                    width={18}
+                    height={18}
+                    style={{
+                      color: 'var(--accent-green)',
+                      display: 'block',
+                    }}
+                  />
+                ) : (
+                  <social.icon
+                    size={20}
+                    style={{
+                      color: 'var(--accent-green)',
+                      display: 'block',
+                    }}
+                  />
+                )}
                 <span 
                   className="text-sm tracking-[0.2em] uppercase"
                   style={{ 

@@ -99,6 +99,7 @@ function FeaturedProject({
       type="button"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5 }}
       transition={{ duration: 0.7, ease: 'easeOut' }}
       viewport={{ once: true, margin: '-120px' }}
       onClick={() => onOpen(project)}
@@ -109,7 +110,7 @@ function FeaturedProject({
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${project.image})` }}
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.045, rotate: 0.6 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           />
           <div
@@ -183,6 +184,7 @@ function ProjectCard({
       type="button"
       initial={{ opacity: 0, y: 34 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.65, delay: index * 0.06, ease: 'easeOut' }}
       viewport={{ once: true, margin: '-80px' }}
       onClick={() => onOpen(project)}
@@ -193,7 +195,7 @@ function ProjectCard({
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${project.image})` }}
-            whileHover={{ scale: 1.04 }}
+            whileHover={{ scale: 1.055, rotate: 0.75 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
           />
           <div
@@ -287,7 +289,7 @@ export function WorkSection() {
     <section
       id="work"
       ref={ref}
-      className="relative min-h-screen px-6 py-28 sm:px-10 lg:px-14"
+      className="relative min-h-[82vh] px-6 py-20 sm:px-10 lg:px-14"
     >
       <motion.div
         className="relative z-10 mx-auto max-w-7xl"
@@ -313,6 +315,8 @@ export function WorkSection() {
             </div>
 
             <h2
+              className="heading-glitch"
+              data-text="Portfolio"
               style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: 'clamp(4.4rem, 11vw, 9rem)',
