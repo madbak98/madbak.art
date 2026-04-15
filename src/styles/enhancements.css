@@ -1,0 +1,131 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(244, 239, 232, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 239, 232, 0.02) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.18;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 0.6px, transparent 0.6px);
+  background-size: 3px 3px;
+  opacity: 0.05;
+  mix-blend-mode: soft-light;
+}
+
+.heading-glitch {
+  position: relative;
+}
+
+.heading-glitch::before,
+.heading-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.heading-glitch::before {
+  color: rgba(201, 31, 46, 0.22);
+  transform: translate(0, 0);
+  animation: headingGlitchA 14s steps(2, end) infinite;
+}
+
+.heading-glitch::after {
+  color: rgba(244, 239, 232, 0.16);
+  transform: translate(0, 0);
+  animation: headingGlitchB 16s steps(2, end) infinite;
+}
+
+@keyframes headingGlitchA {
+  0%,
+  95%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  96% {
+    opacity: 1;
+    transform: translate(1px, -1px);
+    clip-path: inset(18% 0 56% 0);
+  }
+  97% {
+    opacity: 0.55;
+    transform: translate(-1px, 1px);
+    clip-path: inset(65% 0 8% 0);
+  }
+}
+
+@keyframes headingGlitchB {
+  0%,
+  94%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  95% {
+    opacity: 0.45;
+    transform: translate(-1px, 1px);
+    clip-path: inset(38% 0 42% 0);
+  }
+  96% {
+    opacity: 0.3;
+    transform: translate(1px, -1px);
+    clip-path: inset(12% 0 70% 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .heading-glitch::before,
+  .heading-glitch::after {
+    animation: none;
+  }
+}
+
+.intro-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 0.6px, transparent 0.6px);
+  background-size: 3px 3px;
+  opacity: 0.08;
+  mix-blend-mode: soft-light;
+  animation: introGrainDrift 1.2s steps(2, end) infinite;
+}
+
+@keyframes introGrainDrift {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.06;
+  }
+  50% {
+    transform: translate3d(-1px, 1px, 0);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate3d(1px, -1px, 0);
+    opacity: 0.07;
+  }
+}

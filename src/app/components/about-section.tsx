@@ -23,7 +23,7 @@ export function AboutSection() {
     <section
       id="about"
       ref={ref}
-      className="relative min-h-screen px-6 py-28 sm:px-10 lg:px-14"
+      className="relative min-h-[82vh] px-6 py-20 sm:px-10 lg:px-14"
     >
       <motion.div
         aria-hidden="true"
@@ -70,6 +70,8 @@ export function AboutSection() {
             </div>
 
             <h2
+              className="heading-glitch"
+              data-text="Designed Presence"
               style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: 'clamp(4.5rem, 10vw, 8.5rem)',

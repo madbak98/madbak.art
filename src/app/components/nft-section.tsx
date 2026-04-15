@@ -77,6 +77,7 @@ function NFTCard({ nft, index }: { nft: typeof nftCollections[0]; index: number 
         }}
         animate={{ 
           scale: isHovered ? 1.15 : 1,
+          rotate: isHovered ? -1.2 : 0,
         }}
         transition={{ duration: 0.8 }}
       />
@@ -168,7 +169,7 @@ export function NFTSection() {
     <section 
       id="nft"
       ref={ref}
-      className="relative min-h-screen py-32 px-4"
+      className="relative min-h-[82vh] px-6 py-20 sm:px-10 lg:px-14"
     >
       <motion.div 
         style={{ opacity }}
@@ -185,6 +186,8 @@ export function NFTSection() {
             </span>
           </div>
           <h2
+          className="heading-glitch"
+          data-text="ON-CHAIN ART"
             style={{ 
               fontFamily: 'var(--font-heading)',
               fontSize: 'clamp(2.5rem, 8vw, 5rem)',

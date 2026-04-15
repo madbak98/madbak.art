@@ -18,7 +18,6 @@ export function HeroSection() {
     damping: 24,
     mass: 0.52,
   });
-
   const pointerY = useSpring(pointerYTarget, {
     stiffness: 180,
     damping: 24,
@@ -51,7 +50,7 @@ export function HeroSection() {
   };
 
   return (
-    <section ref={ref} id="hero" className="relative min-h-[170vh]">
+    <section ref={ref} id="hero" className="relative min-h-[112vh]">
       <div
         className="sticky top-0 flex min-h-screen items-end overflow-hidden px-6 pb-10 pt-28 sm:px-10 lg:px-14"
         onMouseMove={handleMouseMove}
@@ -182,11 +181,14 @@ export function HeroSection() {
                   opacity: 0.3,
                   transform: 'translate3d(1.2rem, 1.2rem, 0)',
                 }}
+
               >
                 MADBAK
               </motion.span>
 
               <motion.h1
+                className="heading-glitch"
+                data-text="MADBAK"
                 initial={{ opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' }}
                 animate={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }}
                 transition={{
