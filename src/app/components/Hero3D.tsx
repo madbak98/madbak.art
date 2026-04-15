@@ -8,7 +8,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { MathUtils, type Group } from 'three';
+import { Box3, MathUtils, Vector3, type Group } from 'three';
 
 type Hero3DProps = {
   scrollProgress: MotionValue<number>;
@@ -32,6 +32,11 @@ type BaseNodeConfig = {
   swayAmplitudeX?: number;
   swaySpeedX?: number;
   swayTiltZ?: number;
+  orbitalRadiusX?: number;
+  orbitalRadiusY?: number;
+  orbitalSpeed?: number;
+  orbitalPhase?: number;
+  pointerDepth?: number;
   pointerOffsetX: number;
   pointerOffsetY: number;
   tiltX: number;
@@ -73,29 +78,6 @@ type ModelErrorBoundaryState = {
 
 const HERO_NODES: HeroNodeConfig[] = [
   {
-    id: 'sam',
-    kind: 'glb',
-    path: '/models/characters-sam.glb',
-    desktop: { x: 2.05, y: 1.14, scale: 1.14 },
-    tablet: { x: 1.74, y: 0.92, scale: 0.95 },
-    mobile: { x: 1.2, y: 0.72, scale: 0.78 },
-    autoSpinSpeed: 0.85,
-    swayAmplitudeX: 0.22,
-    swaySpeedX: 1.2,
-    swayTiltZ: 0.07,
-    pointerOffsetX: 0.36,
-    pointerOffsetY: 0.18,
-    tiltX: 0.08,
-    tiltZ: 0.12,
-    floatAmplitude: 0.08,
-    floatSpeed: 1.02,
-    rotationMultiplier: 1,
-    rotationOffset: 0.24,
-    idlePhase: 0,
-    baseRotationX: -0.12,
-    baseRotationZ: 0.06,
-  },
-  {
     id: 'matt',
     kind: 'glb',
     path: '/models/characters-matt.glb',
@@ -114,6 +96,84 @@ const HERO_NODES: HeroNodeConfig[] = [
     idlePhase: 1.2,
     baseRotationX: -0.1,
     baseRotationZ: -0.04,
+  },
+  {
+    id: 'pixellabs-potion-main',
+    kind: 'glb',
+    path: '/models/pixellabs-potion-3707.glb',
+    minViewportWidth: 8.2,
+    desktop: { x: 4.9, y: 1.68, scale: 0.44 },
+    tablet: { x: 3.4, y: 1.28, scale: 0.34 },
+    mobile: { x: 2.42, y: 1.02, scale: 0.26 },
+    autoSpinSpeed: 0.55,
+    pointerOffsetX: 0.28,
+    pointerOffsetY: 0.2,
+    pointerDepth: 0.24,
+    tiltX: 0.08,
+    tiltZ: 0.1,
+    floatAmplitude: 0.14,
+    floatSpeed: 1.08,
+    orbitalRadiusX: 0.24,
+    orbitalRadiusY: 0.11,
+    orbitalSpeed: 0.84,
+    orbitalPhase: 0.6,
+    rotationMultiplier: 0.92,
+    rotationOffset: 0.22,
+    idlePhase: 0.4,
+    baseRotationX: 0.2,
+    baseRotationZ: -0.16,
+  },
+  {
+    id: 'pixellabs-poison',
+    kind: 'glb',
+    path: '/models/pixellabs-poison-bottle-3548.glb',
+    minViewportWidth: 8.8,
+    desktop: { x: 6.2, y: 0.92, scale: 0.32 },
+    tablet: { x: 4.34, y: 0.74, scale: 0.24 },
+    mobile: { x: 3.02, y: 0.64, scale: 0.18 },
+    autoSpinSpeed: 0.48,
+    pointerOffsetX: 0.22,
+    pointerOffsetY: 0.14,
+    pointerDepth: 0.2,
+    tiltX: 0.07,
+    tiltZ: 0.08,
+    floatAmplitude: 0.12,
+    floatSpeed: 1.16,
+    orbitalRadiusX: 0.16,
+    orbitalRadiusY: 0.09,
+    orbitalSpeed: 0.96,
+    orbitalPhase: 1.9,
+    rotationMultiplier: 1.06,
+    rotationOffset: 1.2,
+    idlePhase: 1.3,
+    baseRotationX: -0.1,
+    baseRotationZ: 0.3,
+  },
+  {
+    id: 'pixellabs-skull',
+    kind: 'glb',
+    path: '/models/pixellabs-skull-potion-3558.glb',
+    minViewportWidth: 9.2,
+    desktop: { x: 3.88, y: 2.66, scale: 0.36 },
+    tablet: { x: 2.7, y: 2.06, scale: 0.28 },
+    mobile: { x: 2.12, y: 1.5, scale: 0.22 },
+    autoSpinSpeed: 0.62,
+    pointerOffsetX: 0.2,
+    pointerOffsetY: 0.15,
+    pointerDepth: 0.22,
+    tiltX: 0.07,
+    tiltZ: 0.09,
+    floatAmplitude: 0.13,
+    floatSpeed: 1.04,
+    orbitalRadiusX: 0.18,
+    orbitalRadiusY: 0.12,
+    orbitalSpeed: 1.02,
+    orbitalPhase: 2.6,
+    rotationMultiplier: 1.22,
+    rotationOffset: -0.8,
+    idlePhase: 2.2,
+    baseRotationX: 0.14,
+    baseRotationZ: 0.12,
   },
   {
     id: 'block',
@@ -234,13 +294,13 @@ function useNodeMotion(
   pointerX: MotionValue<number>,
   pointerY: MotionValue<number>
 ) {
-  const { viewport } = useThree();
+  const { viewport, size } = useThree();
 
   useFrame((state, delta) => {
     if (!ref.current) return;
 
     const meetsViewportWidth =
-      config.minViewportWidth === undefined || viewport.width >= config.minViewportWidth;
+      config.minViewportWidth === undefined || size.width >= config.minViewportWidth;
     ref.current.visible = meetsViewportWidth;
     if (!meetsViewportWidth) return;
 
@@ -248,41 +308,62 @@ function useNodeMotion(
     const px = pointerX.get();
     const py = pointerY.get();
     const elapsed = state.clock.getElapsedTime();
+    const pointerStrength = viewport.width > 11 ? 1.9 : 1.45;
+    const floatStrength = viewport.width > 11 ? 1.85 : 1.5;
+    const depthStrength = viewport.width > 11 ? 1.8 : 1.35;
 
     const base =
-      viewport.width > 13
+      size.width >= 1280
         ? config.desktop
-        : viewport.width > 10
+        : size.width >= 880
           ? config.tablet
           : config.mobile;
 
+    const orbitX =
+      Math.cos(elapsed * (config.orbitalSpeed ?? 0) + (config.orbitalPhase ?? 0)) *
+      (config.orbitalRadiusX ?? 0);
+    const orbitY =
+      Math.sin(elapsed * (config.orbitalSpeed ?? 0) + (config.orbitalPhase ?? 0)) *
+      (config.orbitalRadiusY ?? 0);
     const swayX =
       Math.sin(elapsed * (config.swaySpeedX ?? 0) + (config.idlePhase ?? 0)) *
       (config.swayAmplitudeX ?? 0);
-    const targetX = base.x + px * config.pointerOffsetX + swayX;
+    const targetX =
+      base.x + px * config.pointerOffsetX * pointerStrength + swayX + orbitX;
     const targetY =
       base.y +
-      py * config.pointerOffsetY +
+      py * config.pointerOffsetY * pointerStrength +
+      orbitY +
       Math.sin(elapsed * config.floatSpeed + (config.idlePhase ?? 0)) *
-        config.floatAmplitude;
-    const targetScale = base.scale;
+        config.floatAmplitude *
+        floatStrength;
+    const targetZ =
+      px * (config.pointerDepth ?? 0) * depthStrength +
+      py * (config.pointerDepth ?? 0) * 0.42 * depthStrength +
+      Math.sin(elapsed * ((config.orbitalSpeed ?? 0) * 0.9) + (config.orbitalPhase ?? 0)) *
+        ((config.orbitalRadiusX ?? 0) * 0.35);
+    const targetScale =
+      base.scale *
+      (1 +
+        Math.sin(elapsed * (config.floatSpeed * 0.62) + (config.idlePhase ?? 0)) * 0.05);
     const targetRotationY =
       progress * Math.PI * 2 * (config.rotationMultiplier ?? 1) +
       elapsed * (config.autoSpinSpeed ?? 0) +
       (config.rotationOffset ?? 0);
     const targetRotationX =
       (config.baseRotationX ?? 0) +
-      py * config.tiltX +
+      py * config.tiltX * 1.35 +
       Math.sin(elapsed * 0.48 + (config.idlePhase ?? 0)) * 0.03;
     const targetRotationZ =
       (config.baseRotationZ ?? 0) -
-      px * config.tiltZ +
+      px * config.tiltZ * 1.4 +
       Math.sin(elapsed * (config.swaySpeedX ?? 0) + (config.idlePhase ?? 0)) *
         (config.swayTiltZ ?? 0) +
       Math.cos(elapsed * 0.34 + (config.idlePhase ?? 0)) * 0.03;
 
-    ref.current.position.x = MathUtils.damp(ref.current.position.x, targetX, 5.4, delta);
-    ref.current.position.y = MathUtils.damp(ref.current.position.y, targetY, 5.4, delta);
+    ref.current.position.x = MathUtils.damp(ref.current.position.x, targetX, 3.9, delta);
+    ref.current.position.y = MathUtils.damp(ref.current.position.y, targetY, 3.9, delta);
+    ref.current.position.z = MathUtils.damp(ref.current.position.z, targetZ, 3.9, delta);
 
     const nextScale = MathUtils.damp(ref.current.scale.x, targetScale, 5, delta);
     ref.current.scale.setScalar(nextScale);
@@ -290,19 +371,19 @@ function useNodeMotion(
     ref.current.rotation.x = MathUtils.damp(
       ref.current.rotation.x,
       targetRotationX,
-      5.1,
+      4.3,
       delta
     );
     ref.current.rotation.y = MathUtils.damp(
       ref.current.rotation.y,
       targetRotationY,
-      5.8,
+      4.7,
       delta
     );
     ref.current.rotation.z = MathUtils.damp(
       ref.current.rotation.z,
       targetRotationZ,
-      5.1,
+      4.3,
       delta
     );
   });
@@ -316,7 +397,20 @@ function HeroGlbNode({
 }: Hero3DProps & { config: GlbNodeConfig }) {
   const ref = useRef<Group>(null);
   const { scene } = useGLTF(config.path);
-  const clone = useMemo(() => scene.clone(), [scene]);
+  const clone = useMemo(() => {
+    const prepared = scene.clone(true);
+    const box = new Box3().setFromObject(prepared);
+    const size3 = new Vector3();
+    box.getSize(size3);
+    const maxAxis = Math.max(size3.x, size3.y, size3.z);
+
+    // Normalize arbitrary GLB export scales so every model remains visible.
+    if (Number.isFinite(maxAxis) && maxAxis > 0) {
+      prepared.scale.multiplyScalar(1 / maxAxis);
+    }
+
+    return prepared;
+  }, [scene]);
 
   useNodeMotion(ref, config, scrollProgress, pointerX, pointerY);
 
@@ -367,7 +461,7 @@ export function Hero3D({ scrollProgress, pointerX, pointerY }: Hero3DProps) {
     <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden">
       <Canvas
         dpr={[1, 1.8]}
-        camera={{ position: [0, 0, 7.4], fov: 26 }}
+        camera={{ position: [0, 0, 6.9], fov: 29 }}
         gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       >
         <ambientLight intensity={1.04} />
@@ -404,7 +498,7 @@ export function Hero3D({ scrollProgress, pointerX, pointerY }: Hero3DProps) {
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(90deg, rgba(var(--background-rgb), 0.9) 0%, rgba(var(--background-rgb), 0.78) 24%, rgba(var(--background-rgb), 0.28) 54%, rgba(var(--background-rgb), 0.01) 100%)',
+            'linear-gradient(90deg, rgba(var(--background-rgb), 0.82) 0%, rgba(var(--background-rgb), 0.64) 24%, rgba(var(--background-rgb), 0.18) 54%, rgba(var(--background-rgb), 0.01) 100%)',
         }}
       />
     </div>

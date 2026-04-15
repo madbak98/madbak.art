@@ -31,7 +31,7 @@ declare module 'react' {
   }
 }
 
-const INTRO_DURATION_MS = 1900;
+const INTRO_DURATION_MS = 2800;
 
 function IntroWordmark3D({ progress }: { progress: number }) {
   const groupRef = useRef<Group>(null);
@@ -40,8 +40,8 @@ function IntroWordmark3D({ progress }: { progress: number }) {
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
-    const reveal = MathUtils.smoothstep(progress, 0.25, 0.55);
-    const spin = MathUtils.smoothstep(progress, 0.32, 0.9);
+    const reveal = MathUtils.smoothstep(progress, 0.28, 0.62);
+    const spin = MathUtils.smoothstep(progress, 0.38, 0.9);
     const finalPush = MathUtils.smoothstep(progress, 0.9, 1);
 
     const targetOpacity = reveal;
@@ -119,21 +119,33 @@ export function LoadingIntro() {
   }, []);
 
   const loadingOpacity = useMemo(
-    () => 1 - MathUtils.smoothstep(progress, 0.24, 0.38),
+    () => 1 - MathUtils.smoothstep(progress, 0.26, 0.44),
     [progress]
   );
   const subtitleOpacity = useMemo(
-    () => MathUtils.smoothstep(progress, 0.58, 0.9),
+    () => MathUtils.smoothstep(progress, 0.68, 0.94),
     [progress]
   );
   const sceneOpacity = useMemo(
-    () => MathUtils.smoothstep(progress, 0.28, 0.52),
+    () => MathUtils.smoothstep(progress, 0.34, 0.62),
     [progress]
   );
+  const pulseOpacity = useMemo(
+    () => 0.22 + MathUtils.smoothstep(progress, 0, 1) * 0.22,
+    [progress]
+  );
+  const progressLabel = useMemo(() => `${Math.round(progress * 100)}%`, [progress]);
+  const stageLabel = useMemo(() => {
+    if (progress < 0.34) return 'Boot Sequence';
+    if (progress < 0.68) return 'Rendering Identity';
+    if (progress < 0.92) return 'Composing Atmosphere';
+    return 'Entering Portfolio';
+  }, [progress]);
 
   return (
     <motion.div className="fixed inset-0 z-[140] flex items-center justify-center bg-[#0a0a0a]">
       <div className="intro-grain pointer-events-none absolute inset-0" />
+      <div className="intro-scanlines pointer-events-none absolute inset-0" />
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -143,6 +155,16 @@ export function LoadingIntro() {
       />
 
       <div className="relative z-10 mx-auto h-full w-[min(92vw,72rem)]">
+        <motion.div
+          className="absolute left-1/2 top-[48%] h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full border"
+          animate={{ opacity: [pulseOpacity * 0.55, pulseOpacity, pulseOpacity * 0.55], scale: [0.97, 1.02, 0.97] }}
+          transition={{ duration: 2.1, ease: 'easeInOut', repeat: Infinity }}
+          style={{
+            borderColor: 'rgba(244,239,232,0.08)',
+            boxShadow: '0 0 120px rgba(201,31,46,0.11)',
+          }}
+        />
+
         <motion.div
           className="absolute inset-0"
           animate={{ opacity: sceneOpacity }}
@@ -173,6 +195,21 @@ export function LoadingIntro() {
         </motion.div>
 
         <motion.div
+          className="absolute left-1/2 top-[30%] -translate-x-1/2 -translate-y-1/2 text-center"
+          animate={{ opacity: sceneOpacity, y: sceneOpacity > 0.5 ? 0 : 6 }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          style={{
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            fontSize: '0.64rem',
+            color: 'rgba(244,239,232,0.42)',
+          }}
+        >
+          {stageLabel}
+        </motion.div>
+
+        <motion.div
           className="absolute left-1/2 top-[61%] -translate-x-1/2 -translate-y-1/2 text-center"
           animate={{ opacity: subtitleOpacity, y: subtitleOpacity > 0.5 ? 0 : 10 }}
           transition={{ duration: 0.42, ease: 'easeInOut' }}
@@ -185,6 +222,52 @@ export function LoadingIntro() {
           }}
         >
           Creative Developer / Designer
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-[14%] left-1/2 w-[min(76vw,24rem)] -translate-x-1/2"
+          animate={{ opacity: subtitleOpacity }}
+          transition={{ duration: 0.35, ease: 'easeInOut' }}
+        >
+          <div
+            className="h-px w-full overflow-hidden"
+            style={{ background: 'rgba(244,239,232,0.12)' }}
+          >
+            <motion.div
+              className="h-full"
+              animate={{ width: `${progress * 100}%` }}
+              transition={{ duration: 0.08, ease: 'linear' }}
+              style={{
+                background:
+                  'linear-gradient(90deg, rgba(201,31,46,0.55) 0%, rgba(244,239,232,0.82) 100%)',
+              }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.58rem',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(244,239,232,0.45)',
+              }}
+            >
+              Loading
+            </span>
+            <span
+              className="tabular-nums"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.58rem',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(244,239,232,0.55)',
+              }}
+            >
+              {progressLabel}
+            </span>
+          </div>
         </motion.div>
       </div>
     </motion.div>

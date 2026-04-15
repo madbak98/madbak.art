@@ -22,7 +22,7 @@ export default function App() {
 
   useEffect(() => {
     if (introDone) return;
-    const hardUnlock = window.setTimeout(() => setIntroDone(true), 2300);
+    const hardUnlock = window.setTimeout(() => setIntroDone(true), 3200);
     return () => window.clearTimeout(hardUnlock);
   }, [introDone]);
 
